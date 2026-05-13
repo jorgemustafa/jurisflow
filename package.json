@@ -1,0 +1,29 @@
+{
+  "name": "jurisflow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run dev -w @jurisflow/api",
+    "dev:web": "npm run dev -w @jurisflow/web",
+    "format": "prettier --write .",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "prettier": "^3.4.2",
+    "prisma": "^6.14.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
+  }
+}

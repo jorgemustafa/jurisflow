@@ -1,0 +1,23 @@
+{
+  "name": "@jurisflow/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b && vite build --config vite.config.mjs --configLoader native",
+    "dev": "vite --config vite.config.mjs --configLoader native",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@jurisflow/shared": "0.1.0",
+    "@tanstack/react-query": "^5.66.0",
+    "lucide-react": "^0.475.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3"
+  }
+}

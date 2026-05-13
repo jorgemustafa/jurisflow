@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  document  String?  @unique
+  email     String?
+  phone     String?
+  cases     Case[]
+  payments  Payment[]
+  documents Document[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Case {
+  id          String     @id @default(uuid())
+  clientId    String
+  title       String
+  cnjNumber   String?    @unique
+  status      CaseStatus @default(ACTIVE)
+  description String?
+  client      Client     @relation(fields: [clientId], references: [id])
+  documents   Document[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  clientId    String
+  description String
+  amountCents Int
+  dueDate     DateTime
+  paidAt      DateTime?
+  status      PaymentStatus @default(PENDING)
+  client      Client        @relation(fields: [clientId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  clientId  String
+  caseId    String?
+  name      String
+  path      String
+  mimeType  String
+  client    Client   @relation(fields: [clientId], references: [id])
+  case      Case?    @relation(fields: [caseId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum CaseStatus {
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELED
+}
