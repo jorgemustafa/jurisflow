@@ -32,14 +32,23 @@ Secondary users:
 ### Clients
 
 - Register individuals and companies.
-- Store contact, document, address, and notes.
+- Client Management v1 is the first usable workflow.
+- Require only client type and name at creation.
+- Store optional document, contact, free-text address, and notes.
+- Validate CPF/CNPJ, email, and Brazilian phone when provided.
+- Save CPF/CNPJ and phone numbers normalized as digits only.
+- Keep clients active or inactive instead of physically deleting them.
 - Link clients to cases, payments, and documents.
+- Client is up to date with payment?
 
 ### Cases
 
 - Register legal cases and internal matters.
 - Track case status, CNJ number, area, responsible person, and relevant dates.
+- Values, value of each installment, number of installment, total value
 - Link documents, financial records, and client history.
+- A client can have multiple cases, but one case is linked to only one client
+- A case has statuses: resolved, in process, cancelled, etc
 
 ### Finance
 

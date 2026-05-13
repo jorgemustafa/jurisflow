@@ -22,9 +22,9 @@
 
 ### Phase 2 - Product Requirements
 
-- [ ] define first usable workflow
-- [ ] define client business rules
-- [ ] define case business rules
+- [x] define first usable workflow
+- [x] define client business rules
+- [x] define case business rules
 - [ ] define finance business rules
 - [ ] define document business rules
 - [ ] create domain glossary
@@ -33,6 +33,7 @@
 
 ### Phase 3 - Authentication
 
+- [ ] create minimal user model
 - [ ] backend JWT auth
 - [ ] password hashing
 - [ ] refresh token flow
@@ -47,10 +48,12 @@
 
 - [ ] create client endpoint
 - [ ] update client endpoint
-- [ ] delete client endpoint
+- [ ] client status endpoint
 - [ ] get client endpoint
 - [ ] client list endpoint
+- [ ] configure React Router client pages
 - [ ] client list page
+- [ ] client detail page
 - [ ] client form page
 - [ ] search/filter clients
 - [ ] client validation tests
