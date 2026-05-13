@@ -26,7 +26,7 @@ export function App() {
         <header>
           <span>Escritório jurídico</span>
           <h1>Operação centralizada</h1>
-          <p>Base inicial para substituir planilhas por fluxos de clientes, processos, financeiro e documentos.</p>
+          <p>Base inicial para centralizar fluxos de clientes, processos, financeiro e documentos.</p>
         </header>
 
         <div className="module-grid">

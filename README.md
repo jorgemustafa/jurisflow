@@ -25,8 +25,26 @@ docs/
 
 ```bash
 npm install
+npm run docker:up
 npm run prisma:generate
+npm run prisma:migrate
 npm run dev:api
 npm run dev:web
+npm run lint
+npm run typecheck
 npm test
+npm run build
 ```
+
+## Docker
+
+```bash
+npm run docker:up
+npm run docker:down
+```
+
+The Docker Compose environment starts:
+
+- `web` on `http://localhost:5173`
+- `api` on `http://localhost:3333`
+- `postgres` on `localhost:5432`

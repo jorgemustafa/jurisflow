@@ -6,6 +6,8 @@
 - API: Node.js, TypeScript, Fastify, Zod.
 - Database: PostgreSQL with Prisma.
 - Tests: Vitest for business rules and module behavior.
+- Local infrastructure: Docker Compose with web, API, and PostgreSQL services.
+- CI: GitHub Actions running install, Prisma generation, lint, typecheck, tests, and build.
 
 ## Backend Pattern
 
@@ -31,3 +33,9 @@ modules/<domain>/
 2. Cases
 3. Finance
 4. Documents
+
+## Local Docker Services
+
+- `web`: React/Vite development server exposed on port `5173`.
+- `api`: Fastify development server exposed on port `3333`.
+- `postgres`: PostgreSQL exposed on port `5432`.

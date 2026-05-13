@@ -1,0 +1,136 @@
+# Tasks
+
+## MVP Milestones
+
+### Phase 1 - Project Setup
+
+- [x] initialize monorepo
+- [x] create API app with Fastify
+- [x] create web app with React and Vite
+- [x] create shared package
+- [x] add initial Prisma schema
+- [x] add initial architecture docs
+- [x] configure TypeScript
+- [x] configure Vitest
+- [x] configure Docker for web, API, and PostgreSQL
+- [x] add PostgreSQL local setup via Docker Compose
+- [x] create initial database migration
+- [x] configure linting
+- [x] configure CI/CD
+
+---
+
+### Phase 2 - Product Requirements
+
+- [ ] define first usable workflow
+- [ ] define client business rules
+- [ ] define case business rules
+- [ ] define finance business rules
+- [ ] define document business rules
+- [ ] create domain glossary
+
+---
+
+### Phase 3 - Authentication
+
+- [ ] backend JWT auth
+- [ ] password hashing
+- [ ] refresh token flow
+- [ ] login page
+- [ ] forgot password
+- [ ] RBAC middleware
+- [ ] authenticated layout
+
+---
+
+### Phase 4 - Client Management
+
+- [ ] create client endpoint
+- [ ] update client endpoint
+- [ ] delete client endpoint
+- [ ] get client endpoint
+- [ ] client list endpoint
+- [ ] client list page
+- [ ] client form page
+- [ ] search/filter clients
+- [ ] client validation tests
+
+---
+
+### Phase 5 - Case Management
+
+- [ ] case creation
+- [ ] case update
+- [ ] case list page
+- [ ] link case to client
+- [ ] CNJ number validation
+- [ ] timeline events
+- [ ] document links
+- [ ] deadline alerts
+
+---
+
+### Phase 6 - Finance
+
+- [ ] create payment record
+- [ ] update payment status
+- [ ] list receivables
+- [ ] overdue payment detection
+- [ ] link payments to clients
+- [ ] link payments to cases
+- [ ] finance dashboard basics
+
+---
+
+### Phase 7 - Documents
+
+- [ ] define storage strategy
+- [ ] upload document
+- [ ] link document to client
+- [ ] link document to case
+- [ ] list documents by client
+- [ ] list documents by case
+- [ ] document metadata validation
+
+---
+
+## Technical Debt
+
+- [ ] improve workspace scripts after dev workflow stabilizes
+- [ ] review shared package usage before adding runtime contracts
+- [x] add lint rules after first modules are implemented
+- [x] decide Docker strategy for local development
+- [x] verify full Docker runtime
+- [ ] document local Node/npm setup quirks on Windows
+
+---
+
+## Bugs
+
+### High Priority
+
+- [ ] none reported
+
+### Medium Priority
+
+- [ ] none reported
+
+---
+
+## Future Features
+
+- [ ] AI case summarization
+- [ ] WhatsApp integration
+- [ ] e-signatures
+- [ ] automated deadline reminders
+- [ ] document template generation
+
+---
+
+## Current Focus
+
+Working on:
+
+- Phase 2 product requirements
+- first usable workflow definition
+- domain glossary
