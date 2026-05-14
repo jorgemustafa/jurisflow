@@ -9,6 +9,10 @@
 - Local infrastructure: Docker Compose with web, API, and PostgreSQL services.
 - CI: GitHub Actions running install, Prisma generation, lint, typecheck, tests, and build.
 
+## Frontend Pattern
+
+Follow `docs/frontend-patterns.md` for web folder structure, service boundaries, component splitting, exports, forms, and frontend testing expectations.
+
 ## Backend Pattern
 
 Use modules by business area.
