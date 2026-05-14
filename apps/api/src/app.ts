@@ -2,6 +2,8 @@ import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { casesRoutes } from "./modules/cases/cases.routes.js";
 import { clientsRoutes } from "./modules/clients/clients.routes.js";
+import { financeRoutes } from "./modules/finance/finance.routes.js";
+import { paymentsRoutes } from "./modules/payments/payments.routes.js";
 import { usersRoutes } from "./modules/users/users.routes.js";
 
 export function buildApp() {
@@ -15,6 +17,8 @@ export function buildApp() {
   app.register(clientsRoutes, { prefix: "/clients" });
   app.register(usersRoutes, { prefix: "/users" });
   app.register(casesRoutes, { prefix: "/cases" });
+  app.register(paymentsRoutes);
+  app.register(financeRoutes);
 
   return app;
 }

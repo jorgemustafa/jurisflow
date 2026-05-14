@@ -28,6 +28,7 @@ function caseRecord(overrides: Partial<CaseRecord> = {}): CaseRecord {
     description: null,
     openedAt: null,
     closedAt: null,
+    totalFeeAmountCents: null,
     createdAt: now,
     updatedAt: now,
     ...overrides

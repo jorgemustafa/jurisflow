@@ -35,6 +35,7 @@ type DbCase = {
   description: string | null;
   openedAt: Date | null;
   closedAt: Date | null;
+  totalFeeAmountCents: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -118,7 +119,7 @@ export const casesRepository = {
 
   async hasPendingFinance(caseId: string) {
     const count = await prisma.payment.count({
-      where: { caseId, status: { in: ["PENDING", "OVERDUE"] } }
+      where: { caseId, status: "PENDING" }
     });
     return count > 0;
   },

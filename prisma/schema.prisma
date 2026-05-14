@@ -57,6 +57,7 @@ model Case {
   description       String?
   openedAt          DateTime?
   closedAt          DateTime?
+  totalFeeAmountCents Int?
   client            Client     @relation(fields: [clientId], references: [id])
   responsibleUser   User?      @relation(fields: [responsibleUserId], references: [id])
   payments          Payment[]
@@ -73,18 +74,33 @@ model Case {
 }
 
 model Payment {
-  id          String        @id @default(uuid())
-  clientId    String
-  caseId      String?
-  description String
-  amountCents Int
-  dueDate     DateTime
-  paidAt      DateTime?
-  status      PaymentStatus @default(PENDING)
-  client      Client        @relation(fields: [clientId], references: [id])
-  case        Case?         @relation(fields: [caseId], references: [id])
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id                String        @id @default(uuid())
+  clientId          String
+  caseId            String?
+  paymentScheduleId String?
+  source            PaymentSource @default(MANUAL)
+  description       String
+  amountCents       Int
+  dueDate           DateTime
+  paidAt            DateTime?
+  paymentMethod     PaymentMethod?
+  status            PaymentStatus @default(PENDING)
+  installmentNumber Int           @default(1)
+  installmentTotal  Int           @default(1)
+  notes             String?
+  canceledAt        DateTime?
+  cancelReason      String?
+  client            Client        @relation(fields: [clientId], references: [id])
+  case              Case?         @relation(fields: [caseId], references: [id])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([clientId])
+  @@index([caseId])
+  @@index([paymentScheduleId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([paidAt])
 }
 
 model Document {
@@ -156,6 +172,20 @@ enum UserStatus {
 enum PaymentStatus {
   PENDING
   PAID
-  OVERDUE
   CANCELED
+}
+
+enum PaymentSource {
+  GENERATED
+  MANUAL
+}
+
+enum PaymentMethod {
+  PIX
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+  BOLETO
+  OTHER
 }

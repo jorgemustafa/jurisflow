@@ -25,6 +25,29 @@ export type ClientFormData = {
   notes: string;
 };
 
+export type FinancePaymentSummary = {
+  id: string;
+  clientName: string;
+  caseTitle: string | null;
+  description: string;
+  amountCents: number;
+  dueDate: string;
+  installmentNumber: number;
+  installmentTotal: number;
+};
+
+export type FinanceDashboard = {
+  month: string;
+  receivedInMonthCents: number;
+  dueInMonthCents: number;
+  totalToReceiveCents: number;
+  overdueAmountCents: number;
+  activeClients: number;
+  runningCases: number;
+  overduePayments: FinancePaymentSummary[];
+  upcomingPayments: FinancePaymentSummary[];
+};
+
 export class ApiError extends Error {
   fieldErrors: Record<string, string>;
 
@@ -87,4 +110,8 @@ export function updateClient(id: string, data: ClientFormData) {
 
 export function updateClientStatus(id: string, status: ClientStatus) {
   return request<Client>(`/clients/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
+export function getFinanceDashboard(month: string) {
+  return request<FinanceDashboard>(`/finance/dashboard${searchParams({ month })}`);
 }

@@ -17,6 +17,7 @@ export type CaseRecord = {
   description: string | null;
   openedAt: Date | null;
   closedAt: Date | null;
+  totalFeeAmountCents: number | null;
   createdAt: Date;
   updatedAt: Date;
 };

@@ -7,7 +7,9 @@ import {
   Client,
   ClientFormData,
   ClientStatus,
+  FinancePaymentSummary,
   createClient,
+  getFinanceDashboard,
   getClient,
   listClients,
   updateClient,
@@ -17,7 +19,7 @@ import {
 const modules = [
   { name: "Clientes", path: "/clients", icon: Users },
   { name: "Processos", path: "#", icon: BriefcaseBusiness },
-  { name: "Financeiro", path: "#", icon: CircleDollarSign },
+  { name: "Financeiro", path: "/finance", icon: CircleDollarSign },
   { name: "Documentos", path: "#", icon: FileText }
 ];
 
@@ -43,8 +45,17 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
 
+function formatMoney(cents: number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+}
+
 function fieldValue(value: string | null) {
   return value?.trim() ? value : "Não informado";
+}
+
+function currentMonth() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function Layout() {
@@ -76,9 +87,100 @@ function Layout() {
           <Route path="/clients/new" element={<ClientFormPage />} />
           <Route path="/clients/:id" element={<ClientDetailsPage />} />
           <Route path="/clients/:id/edit" element={<ClientFormPage />} />
+          <Route path="/finance" element={<FinancePage />} />
         </Routes>
       </section>
     </main>
+  );
+}
+
+function FinancePage() {
+  const [month, setMonth] = useState(currentMonth());
+  const dashboard = useQuery({
+    queryKey: ["finance-dashboard", month],
+    queryFn: () => getFinanceDashboard(month)
+  });
+
+  return (
+    <>
+      <header className="page-header row-header">
+        <div>
+          <span>Financeiro</span>
+          <h1>Dashboard financeiro</h1>
+        </div>
+        <input className="month-input" type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
+      </header>
+
+      {dashboard.isLoading ? <p>Carregando financeiro...</p> : null}
+      {dashboard.isError ? <p className="alert">Não foi possível carregar o dashboard financeiro.</p> : null}
+
+      {dashboard.data ? (
+        <>
+          <section className="metric-grid">
+            <Metric label="Recebido no mês" value={formatMoney(dashboard.data.receivedInMonthCents)} />
+            <Metric label="A vencer no mês" value={formatMoney(dashboard.data.dueInMonthCents)} />
+            <Metric label="A receber" value={formatMoney(dashboard.data.totalToReceiveCents)} />
+            <Metric label="Em atraso" value={formatMoney(dashboard.data.overdueAmountCents)} />
+            <Metric label="Clientes ativos" value={String(dashboard.data.activeClients)} />
+            <Metric label="Processos em andamento" value={String(dashboard.data.runningCases)} />
+          </section>
+
+          <PaymentSummaryList title="Pagamentos em atraso" payments={dashboard.data.overduePayments} empty="Nenhum pagamento em atraso." />
+          <PaymentSummaryList
+            title="Vencimentos do mês"
+            payments={dashboard.data.upcomingPayments}
+            empty="Nenhum vencimento pendente no mês selecionado."
+          />
+        </>
+      ) : null}
+    </>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <article className="metric-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </article>
+  );
+}
+
+function PaymentSummaryList({ title, payments, empty }: { title: string; payments: FinancePaymentSummary[]; empty: string }) {
+  return (
+    <section className="panel">
+      <h2>{title}</h2>
+      {payments.length === 0 ? (
+        <p className="empty-inline">{empty}</p>
+      ) : (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Processo</th>
+                <th>Parcela</th>
+                <th>Valor</th>
+                <th>Vencimento</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.map((payment) => (
+                <tr key={payment.id}>
+                  <td>{payment.clientName}</td>
+                  <td>{payment.caseTitle ?? "Não vinculado"}</td>
+                  <td>
+                    {payment.installmentNumber}/{payment.installmentTotal}
+                  </td>
+                  <td>{formatMoney(payment.amountCents)}</td>
+                  <td>{formatDate(payment.dueDate)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 

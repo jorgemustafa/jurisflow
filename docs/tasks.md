@@ -25,7 +25,7 @@
 - [x] define first usable workflow
 - [x] define client business rules
 - [x] define case business rules
-- [ ] define finance business rules
+- [x] define finance business rules
 - [ ] define document business rules
 - [ ] create domain glossary
 
@@ -75,13 +75,14 @@
 
 ### Phase 6 - Finance
 
-- [ ] create payment record
-- [ ] update payment status
-- [ ] list receivables
-- [ ] overdue payment detection
-- [ ] link payments to clients
-- [ ] link payments to cases
-- [ ] finance dashboard basics
+- [x] create payment record
+- [x] update payment status
+- [x] list receivables
+- [x] overdue payment detection
+- [x] link payments to clients
+- [x] link payments to cases
+- [x] finance dashboard basics
+- [x] generate case payment schedule
 
 ---
 
