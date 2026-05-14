@@ -9,39 +9,80 @@ datasource db {
 
 model Client {
   id        String   @id @default(uuid())
+  type      ClientType
+  status    ClientStatus @default(ACTIVE)
   name      String
-  document  String?  @unique
+  document  String?  @unique @db.VarChar(14)
   email     String?
-  phone     String?
+  phone     String?  @db.VarChar(11)
+  address   String?
+  notes     String?
   cases     Case[]
   payments  Payment[]
   documents Document[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([status, type])
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String?
+  role         UserRole   @default(LAWYER)
+  status       UserStatus @default(ACTIVE)
+  cases        Case[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Case {
-  id          String     @id @default(uuid())
-  clientId    String
-  title       String
-  cnjNumber   String?    @unique
-  status      CaseStatus @default(ACTIVE)
-  description String?
-  client      Client     @relation(fields: [clientId], references: [id])
-  documents   Document[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id                String     @id @default(uuid())
+  clientId          String
+  responsibleUserId String?
+  caseType          CaseType   @default(JUDICIAL)
+  title             String
+  cnjNumber         String?    @unique
+  status            CaseStatus @default(ACTIVE)
+  stage             CaseStage?
+  legalArea         LegalArea?
+  opposingParty     String?
+  court             String?
+  jurisdiction      String?
+  division          String?
+  description       String?
+  openedAt          DateTime?
+  closedAt          DateTime?
+  client            Client     @relation(fields: [clientId], references: [id])
+  responsibleUser   User?      @relation(fields: [responsibleUserId], references: [id])
+  payments          Payment[]
+  documents         Document[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@index([clientId])
+  @@index([responsibleUserId])
+  @@index([status])
+  @@index([caseType])
+  @@index([stage])
+  @@index([legalArea])
 }
 
 model Payment {
   id          String        @id @default(uuid())
   clientId    String
+  caseId      String?
   description String
   amountCents Int
   dueDate     DateTime
   paidAt      DateTime?
   status      PaymentStatus @default(PENDING)
   client      Client        @relation(fields: [clientId], references: [id])
+  case        Case?         @relation(fields: [caseId], references: [id])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -61,8 +102,55 @@ model Document {
 
 enum CaseStatus {
   ACTIVE
-  SUSPENDED
+  ON_HOLD
   CLOSED
+  CANCELED
+}
+
+enum ClientType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CaseType {
+  JUDICIAL
+  EXTRAJUDICIAL
+}
+
+enum CaseStage {
+  INITIAL
+  HEARING_SCHEDULED
+  WAITING_DECISION
+  APPEAL
+  ENFORCEMENT
+}
+
+enum LegalArea {
+  CIVIL
+  LABOR
+  FAMILY
+  CRIMINAL
+  TAX
+  CONSUMER
+  BUSINESS
+  SOCIAL_SECURITY
+  OTHER
+}
+
+enum UserRole {
+  ADMIN
+  LAWYER
+  ASSISTANT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
 }
 
 enum PaymentStatus {

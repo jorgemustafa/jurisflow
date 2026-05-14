@@ -33,7 +33,7 @@
 
 ### Phase 3 - Authentication
 
-- [ ] create minimal user model
+- [x] create minimal user model
 - [ ] backend JWT auth
 - [ ] password hashing
 - [ ] refresh token flow
@@ -46,27 +46,27 @@
 
 ### Phase 4 - Client Management
 
-- [ ] create client endpoint
-- [ ] update client endpoint
-- [ ] client status endpoint
-- [ ] get client endpoint
-- [ ] client list endpoint
-- [ ] configure React Router client pages
-- [ ] client list page
-- [ ] client detail page
-- [ ] client form page
-- [ ] search/filter clients
-- [ ] client validation tests
+- [x] create client endpoint
+- [x] update client endpoint
+- [x] client status endpoint
+- [x] get client endpoint
+- [x] client list endpoint
+- [x] configure React Router client pages
+- [x] client list page
+- [x] client detail page
+- [x] client form page
+- [x] search/filter clients
+- [x] client validation tests
 
 ---
 
 ### Phase 5 - Case Management
 
-- [ ] case creation
-- [ ] case update
+- [x] case creation
+- [x] case update
 - [ ] case list page
-- [ ] link case to client
-- [ ] CNJ number validation
+- [x] link case to client
+- [x] CNJ number validation
 - [ ] timeline events
 - [ ] document links
 - [ ] deadline alerts

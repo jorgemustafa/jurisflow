@@ -18,9 +18,16 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 .app-shell {
   display: grid;
-  grid-template-columns: 248px 1fr;
+  grid-template-columns: 248px minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -30,7 +37,7 @@ a {
   gap: 28px;
   padding: 28px 20px;
   color: #f8fafc;
-  background: #12202f;
+  background: #132235;
 }
 
 .sidebar strong {
@@ -52,33 +59,43 @@ a {
   color: #dce5ef;
 }
 
-.sidebar a:hover {
-  background: #1d3348;
+.sidebar a:hover,
+.sidebar a.active {
+  background: #21405d;
 }
 
 .workspace {
+  width: min(1180px, 100%);
   padding: 40px;
 }
 
-.workspace header {
+.page-header {
   max-width: 760px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
-.workspace span {
+.row-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: none;
+}
+
+.page-header span {
   color: #62748a;
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.workspace h1 {
+.page-header h1 {
   margin: 8px 0 12px;
-  font-size: 42px;
+  font-size: 38px;
   line-height: 1.1;
 }
 
-.workspace p {
+.page-header p {
   margin: 0;
   color: #52616f;
   line-height: 1.6;
@@ -91,7 +108,7 @@ a {
 }
 
 .module-card {
-  min-height: 176px;
+  min-height: 140px;
   padding: 20px;
   border: 1px solid #dde3ea;
   border-radius: 8px;
@@ -103,12 +120,175 @@ a {
 }
 
 .module-card h2 {
-  margin: 18px 0 8px;
+  margin: 18px 0 0;
   font-size: 18px;
 }
 
-.module-card p {
-  font-size: 14px;
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #cad3dd;
+  border-radius: 6px;
+  color: #1f2933;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.button.primary {
+  border-color: #0f766e;
+  color: #ffffff;
+  background: #0f766e;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 160px 180px;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #cad3dd;
+  border-radius: 6px;
+  color: #1f2933;
+  background: #ffffff;
+}
+
+input,
+select {
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+textarea {
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf1f5;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  color: #62748a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-link {
+  color: #0f5f59;
+  font-weight: 700;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge.active {
+  color: #0f5f3e;
+  background: #dff3e8;
+}
+
+.badge.inactive {
+  color: #7c2d12;
+  background: #ffedd5;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.detail-item {
+  min-height: 86px;
+  padding: 16px;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.detail-item span {
+  display: block;
+  margin-bottom: 8px;
+  color: #62748a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.detail-item strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.form {
+  display: grid;
+  max-width: 720px;
+  gap: 10px;
+}
+
+.form label {
+  display: grid;
+  gap: 7px;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.alert,
+.field-error {
+  margin: 0;
+  color: #b42318;
+}
+
+.empty {
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #ffffff;
 }
 
 @media (max-width: 900px) {
@@ -120,15 +300,18 @@ a {
     padding: 18px;
   }
 
-  .sidebar nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .sidebar nav,
+  .toolbar,
+  .details-grid,
+  .module-grid {
+    grid-template-columns: 1fr;
   }
 
   .workspace {
     padding: 28px 18px;
   }
 
-  .module-grid {
-    grid-template-columns: 1fr;
+  .row-header {
+    display: grid;
   }
 }

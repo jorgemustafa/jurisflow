@@ -1,6 +1,8 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
+import { casesRoutes } from "./modules/cases/cases.routes.js";
 import { clientsRoutes } from "./modules/clients/clients.routes.js";
+import { usersRoutes } from "./modules/users/users.routes.js";
 
 export function buildApp() {
   const app = Fastify({ logger: true });
@@ -11,6 +13,8 @@ export function buildApp() {
 
   app.get("/health", async () => ({ status: "ok" }));
   app.register(clientsRoutes, { prefix: "/clients" });
+  app.register(usersRoutes, { prefix: "/users" });
+  app.register(casesRoutes, { prefix: "/cases" });
 
   return app;
 }
