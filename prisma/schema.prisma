@@ -4,24 +4,23 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Client {
-  id        String   @id @default(uuid())
+  id        String       @id @default(uuid())
   type      ClientType
   status    ClientStatus @default(ACTIVE)
   name      String
-  document  String?  @unique @db.VarChar(14)
+  document  String?      @unique @db.VarChar(14)
   email     String?
-  phone     String?  @db.VarChar(11)
+  phone     String?      @db.VarChar(11)
   address   String?
   notes     String?
   cases     Case[]
   payments  Payment[]
   documents Document[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@index([status])
   @@index([type])
@@ -41,29 +40,29 @@ model User {
 }
 
 model Case {
-  id                String     @id @default(uuid())
-  clientId          String
-  responsibleUserId String?
-  caseType          CaseType   @default(JUDICIAL)
-  title             String
-  cnjNumber         String?    @unique
-  status            CaseStatus @default(ACTIVE)
-  stage             CaseStage?
-  legalArea         LegalArea?
-  opposingParty     String?
-  court             String?
-  jurisdiction      String?
-  division          String?
-  description       String?
-  openedAt          DateTime?
-  closedAt          DateTime?
+  id                  String     @id @default(uuid())
+  clientId            String
+  responsibleUserId   String?
+  caseType            CaseType   @default(JUDICIAL)
+  title               String
+  cnjNumber           String?    @unique
+  status              CaseStatus @default(ACTIVE)
+  stage               CaseStage?
+  legalArea           LegalArea?
+  opposingParty       String?
+  court               String?
+  jurisdiction        String?
+  division            String?
+  description         String?
+  openedAt            DateTime?
+  closedAt            DateTime?
   totalFeeAmountCents Int?
-  client            Client     @relation(fields: [clientId], references: [id])
-  responsibleUser   User?      @relation(fields: [responsibleUserId], references: [id])
-  payments          Payment[]
-  documents         Document[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  client              Client     @relation(fields: [clientId], references: [id])
+  responsibleUser     User?      @relation(fields: [responsibleUserId], references: [id])
+  payments            Payment[]
+  documents           Document[]
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
   @@index([clientId])
   @@index([responsibleUserId])
@@ -74,26 +73,26 @@ model Case {
 }
 
 model Payment {
-  id                String        @id @default(uuid())
+  id                String         @id @default(uuid())
   clientId          String
   caseId            String?
   paymentScheduleId String?
-  source            PaymentSource @default(MANUAL)
+  source            PaymentSource  @default(MANUAL)
   description       String
   amountCents       Int
   dueDate           DateTime
   paidAt            DateTime?
   paymentMethod     PaymentMethod?
-  status            PaymentStatus @default(PENDING)
-  installmentNumber Int           @default(1)
-  installmentTotal  Int           @default(1)
+  status            PaymentStatus  @default(PENDING)
+  installmentNumber Int            @default(1)
+  installmentTotal  Int            @default(1)
   notes             String?
   canceledAt        DateTime?
   cancelReason      String?
-  client            Client        @relation(fields: [clientId], references: [id])
-  case              Case?         @relation(fields: [caseId], references: [id])
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  client            Client         @relation(fields: [clientId], references: [id])
+  case              Case?          @relation(fields: [caseId], references: [id])
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   @@index([clientId])
   @@index([caseId])
