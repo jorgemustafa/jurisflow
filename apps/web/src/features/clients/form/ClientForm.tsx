@@ -1,7 +1,15 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { clientFormSchema, type ClientFormData } from "@jurisflow/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import { ClientFormData, createClient, getClient, updateClient } from "../../../services/clients.js";
+import { Button } from "../../../components/ui/button.js";
+import { Input } from "../../../components/ui/input.js";
+import { Label } from "../../../components/ui/label.js";
+import { Select } from "../../../components/ui/select.js";
+import { Textarea } from "../../../components/ui/textarea.js";
+import { createClient, getClient, updateClient } from "../../../services/clients.js";
 import { ApiError } from "../../../services/http.js";
 import { FieldError } from "./FieldError.js";
 import { emptyClientForm } from "./utils/clientFormDefaults.js";
@@ -15,9 +23,12 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
   const isEdit = mode === "update";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<ClientFormData>(emptyClientForm);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
+  const form = useForm<ClientFormData>({
+    resolver: zodResolver(clientFormSchema),
+    defaultValues: emptyClientForm
+  });
+  const watchedType = form.watch("type");
 
   const client = useQuery({ queryKey: ["client", clientId], queryFn: () => getClient(clientId!), enabled: isEdit && Boolean(clientId) });
   const mutation = useMutation({
@@ -29,7 +40,9 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        setFieldErrors(error.fieldErrors);
+        Object.entries(error.fieldErrors).forEach(([field, message]) => {
+          form.setError(field as keyof ClientFormData, { message });
+        });
         setGeneralError(Object.keys(error.fieldErrors).length ? "" : error.message);
       } else {
         setGeneralError("Não foi possível salvar o cliente.");
@@ -39,7 +52,7 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
 
   useEffect(() => {
     if (!client.data) return;
-    setForm({
+    form.reset({
       type: client.data.type,
       name: client.data.name,
       document: client.data.document ?? "",
@@ -48,18 +61,11 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
       address: client.data.address ?? "",
       notes: client.data.notes ?? ""
     });
-  }, [client.data]);
+  }, [client.data, form]);
 
-  const updateField = (field: keyof ClientFormData, value: string) => {
-    setForm((current) => ({ ...current, [field]: value }));
-    setFieldErrors((current) => ({ ...current, [field]: "" }));
-  };
-
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    setFieldErrors({});
+  const submit = (data: ClientFormData) => {
     setGeneralError("");
-    mutation.mutate(form);
+    mutation.mutate(data);
   };
 
   if (isEdit && client.isLoading) return <p>Carregando cliente...</p>;
@@ -71,61 +77,61 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
         <h1>{isEdit ? "Editar cliente" : "Novo cliente"}</h1>
       </header>
 
-      <form className="form" onSubmit={submit}>
+      <form className="form" onSubmit={form.handleSubmit(submit)}>
         {generalError ? <p className="alert">{generalError}</p> : null}
 
-        <label>
-          Tipo
-          <select value={form.type} onChange={(event) => updateField("type", event.target.value as ClientFormData["type"])}>
+        <div className="grid gap-2">
+          <Label htmlFor="type">Tipo</Label>
+          <Select id="type" {...form.register("type")}>
             <option value="individual">Pessoa física</option>
             <option value="company">Pessoa jurídica</option>
-          </select>
-        </label>
-        <FieldError message={fieldErrors.type} />
+          </Select>
+          <FieldError message={form.formState.errors.type?.message} />
+        </div>
 
-        <label>
-          {form.type === "individual" ? "Nome completo" : "Razão social"}
-          <input value={form.name} onChange={(event) => updateField("name", event.target.value)} />
-        </label>
-        <FieldError message={fieldErrors.name} />
+        <div className="grid gap-2">
+          <Label htmlFor="name">{watchedType === "individual" ? "Nome completo" : "Razão social"}</Label>
+          <Input id="name" {...form.register("name")} />
+          <FieldError message={form.formState.errors.name?.message} />
+        </div>
 
-        <label>
-          Documento
-          <input value={form.document} onChange={(event) => updateField("document", event.target.value)} />
-        </label>
-        <FieldError message={fieldErrors.document} />
+        <div className="grid gap-2">
+          <Label htmlFor="document">Documento</Label>
+          <Input id="document" {...form.register("document")} />
+          <FieldError message={form.formState.errors.document?.message} />
+        </div>
 
-        <label>
-          Email
-          <input value={form.email} onChange={(event) => updateField("email", event.target.value)} />
-        </label>
-        <FieldError message={fieldErrors.email} />
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" {...form.register("email")} />
+          <FieldError message={form.formState.errors.email?.message} />
+        </div>
 
-        <label>
-          Telefone
-          <input value={form.phone} onChange={(event) => updateField("phone", event.target.value)} />
-        </label>
-        <FieldError message={fieldErrors.phone} />
+        <div className="grid gap-2">
+          <Label htmlFor="phone">Telefone</Label>
+          <Input id="phone" {...form.register("phone")} />
+          <FieldError message={form.formState.errors.phone?.message} />
+        </div>
 
-        <label>
-          Endereço
-          <textarea value={form.address} onChange={(event) => updateField("address", event.target.value)} rows={3} />
-        </label>
-        <FieldError message={fieldErrors.address} />
+        <div className="grid gap-2">
+          <Label htmlFor="address">Endereço</Label>
+          <Textarea id="address" rows={3} {...form.register("address")} />
+          <FieldError message={form.formState.errors.address?.message} />
+        </div>
 
-        <label>
-          Observações
-          <textarea value={form.notes} onChange={(event) => updateField("notes", event.target.value)} rows={5} />
-        </label>
-        <FieldError message={fieldErrors.notes} />
+        <div className="grid gap-2">
+          <Label htmlFor="notes">Observações</Label>
+          <Textarea id="notes" rows={5} {...form.register("notes")} />
+          <FieldError message={form.formState.errors.notes?.message} />
+        </div>
 
         <div className="actions">
-          <button className="button primary" type="submit" disabled={mutation.isPending}>
+          <Button type="submit" disabled={mutation.isPending}>
             Salvar
-          </button>
-          <button className="button" type="button" onClick={() => navigate(isEdit ? `/clients/${clientId}` : "/clients")}>
+          </Button>
+          <Button variant="outline" type="button" onClick={() => navigate(isEdit ? `/clients/${clientId}` : "/clients")}>
             Cancelar
-          </button>
+          </Button>
         </div>
       </form>
     </>

@@ -1,7 +1,7 @@
+import type { ClientFormData, ClientStatus, ClientType } from "@jurisflow/shared";
 import { request, searchParams } from "./http.js";
 
-export type ClientType = "individual" | "company";
-export type ClientStatus = "active" | "inactive";
+export type { ClientFormData, ClientStatus, ClientType };
 
 export type Client = {
   id: string;
@@ -15,16 +15,6 @@ export type Client = {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
-};
-
-export type ClientFormData = {
-  type: ClientType;
-  name: string;
-  document: string;
-  email: string;
-  phone: string;
-  address: string;
-  notes: string;
 };
 
 export const listClients = (filters: { q: string; status: string; type: string }) => {

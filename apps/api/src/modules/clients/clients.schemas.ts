@@ -1,10 +1,15 @@
 import { z } from "zod";
-
-export const clientTypeSchema = z.enum(["individual", "company"]);
-export const clientStatusSchema = z.enum(["active", "inactive"]);
+import {
+  clientStatusSchema,
+  clientTypeSchema,
+  isValidCnpj,
+  isValidCpf,
+  isValidDocumentForType,
+  type ClientStatus,
+  type ClientType
+} from "@jurisflow/shared";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
-const isRepeated = (value: string) => /^(\d)\1+$/.test(value);
 
 const emptyToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((value) => {
@@ -42,35 +47,6 @@ const nullablePhone = emptyToNull(
 
 const optionalDocument = emptyToUndefined(z.string().transform(onlyDigits));
 const nullableDocument = emptyToNull(z.string().transform(onlyDigits));
-
-export function isValidCpf(value: string) {
-  if (!/^\d{11}$/.test(value) || isRepeated(value)) return false;
-
-  const digits = [...value].map(Number);
-  const first = digits.slice(0, 9).reduce((sum, digit, index) => sum + digit * (10 - index), 0);
-  const firstCheck = (first * 10) % 11;
-  const second = digits.slice(0, 10).reduce((sum, digit, index) => sum + digit * (11 - index), 0);
-  const secondCheck = (second * 10) % 11;
-
-  return (firstCheck === 10 ? 0 : firstCheck) === digits[9] && (secondCheck === 10 ? 0 : secondCheck) === digits[10];
-}
-
-export function isValidCnpj(value: string) {
-  if (!/^\d{14}$/.test(value) || isRepeated(value)) return false;
-
-  const digits = [...value].map(Number);
-  const calc = (weights: number[]) => {
-    const sum = weights.reduce((total, weight, index) => total + digits[index] * weight, 0);
-    const rest = sum % 11;
-    return rest < 2 ? 0 : 11 - rest;
-  };
-
-  return calc([5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]) === digits[12] && calc([6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]) === digits[13];
-}
-
-export function isValidDocumentForType(type: ClientType, document: string) {
-  return type === "individual" ? isValidCpf(document) : isValidCnpj(document);
-}
 
 function validateDocument(type: ClientType, document: string | null | undefined, context: z.RefinementCtx) {
   if (!document) return;
@@ -125,8 +101,8 @@ export const clientParamsSchema = z.object({
   id: z.string().uuid()
 });
 
-export type ClientType = z.infer<typeof clientTypeSchema>;
-export type ClientStatus = z.infer<typeof clientStatusSchema>;
 export type ClientListFilters = z.infer<typeof listClientsQuerySchema>;
 export type CreateClientInput = z.infer<typeof createClientSchema>;
 export type UpdateClientInput = z.infer<typeof updateClientSchema>;
+export type { ClientStatus, ClientType };
+export { isValidCnpj, isValidCpf, isValidDocumentForType };

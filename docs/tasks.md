@@ -17,6 +17,8 @@
 - [x] create initial database migration
 - [x] configure linting
 - [x] configure CI/CD
+- [x] add frontend stack: Tailwind, shadcn/ui-style primitives, Radix, React Hook Form, and Zod
+- [x] add AI agent instructions for project patterns, testing, frontend, and code review
 
 ---
 
@@ -106,6 +108,8 @@
 - [x] decide Docker strategy for local development
 - [x] verify full Docker runtime
 - [ ] document local Node/npm setup quirks on Windows
+- [x] document frontend stack and shared package boundaries
+- [x] adapt imported agent docs to JurisFlow conventions
 
 ---
 

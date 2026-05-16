@@ -5,6 +5,10 @@ A comprehensive law office management system designed to streamline client manag
 ## Stack
 
 - React + TypeScript + Vite
+- React Router
+- Tailwind CSS + shadcn/ui-style components + Radix UI
+- TanStack Query
+- React Hook Form + Zod
 - Node.js + TypeScript + Fastify
 - PostgreSQL + Prisma
 - Vitest
@@ -12,6 +16,7 @@ A comprehensive law office management system designed to streamline client manag
 ## Estrutura
 
 ```txt
+AGENTS.md
 apps/
   api/
   web/
@@ -20,6 +25,26 @@ packages/
 prisma/
 docs/
 ```
+
+Agent-facing project rules live in `AGENTS.md` and the linked files under `docs/`.
+
+## Shared Package
+
+`packages/shared` is reserved for small cross-boundary contracts used by both API and web, such as domain types, schemas, and pure validation helpers. Keep app-specific code out of it.
+
+Good candidates:
+
+- Request/input schemas shared by API and frontend forms.
+- Domain enums and DTO types.
+- Pure business validation, such as CPF/CNPJ validation.
+
+Avoid:
+
+- React components.
+- Prisma/database-specific types.
+- API services, repositories, or route logic.
+- Frontend-only UI/form behavior.
+- Generic utilities without real reuse.
 
 ## Scripts
 

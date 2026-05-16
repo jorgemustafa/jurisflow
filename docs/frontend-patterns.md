@@ -7,8 +7,25 @@ This document defines the frontend patterns for future implementations in `apps/
 - React + TypeScript + Vite.
 - React Router for client-side routes.
 - TanStack Query for server state, cache, loading states, and mutations.
+- Tailwind CSS for styling.
+- shadcn/ui-style local components for reusable UI primitives.
+- Radix UI for accessible low-level primitives where needed.
+- React Hook Form for non-trivial forms.
+- Zod for frontend validation when it improves UX and can reuse shared business rules.
 - Lucide React for icons.
-- CSS global for now. Do not add a UI kit, styling framework, or form library unless there is a clear need and existing patterns are not enough.
+
+Keep this stack lean. Add shadcn/Radix components only when a screen needs them; do not import a large component surface preemptively.
+
+## Hard Rules
+
+- Use npm workspace scripts because this repo is npm-based and has `package-lock.json`.
+- Do not add dependencies before checking whether the project already has a suitable library.
+- Do not use TypeScript `enum`; prefer string unions, Zod enums, or `as const` objects.
+- Do not use `any`; find the right type or narrow the data.
+- Do not create a new utility without searching existing `lib/`, `utils/`, feature `utils/`, and `packages/shared`.
+- Do not create a new reusable component before checking `components/ui/` and nearby feature components.
+- Do not use `==` or `!=`; use strict equality.
+- Do not duplicate API business rules in frontend-only code. Move shared contracts or pure validation to `packages/shared` when both API and web need them.
 
 ## File Organization
 
@@ -23,9 +40,12 @@ Preferred structure:
 apps/web/src/
   App.tsx
   main.tsx
+  components/
+    ui/
   layout/
   features/
     <domain>/
+  lib/
   services/
   utils/
   styles.css
@@ -92,6 +112,34 @@ utils/
 
 Use `features/<domain>/utils/` for domain-specific helpers, labels, defaults, and mappers.
 
+Use `lib/` for small frontend infrastructure helpers used by UI primitives, such as `cn()`.
+
+## UI Components
+
+Keep shared UI primitives in `components/ui/`.
+
+The current pattern follows shadcn/ui style:
+
+- Components are local source files, not a black-box UI package.
+- Tailwind classes live close to the component.
+- Radix primitives are used for accessibility when useful.
+- `cn()` combines conditional classes and resolves Tailwind conflicts.
+
+Examples:
+
+```txt
+components/ui/
+  button.tsx
+  input.tsx
+  label.tsx
+  select.tsx
+  textarea.tsx
+```
+
+Do not wrap every HTML element. Add a primitive when it creates consistency or removes repeated styling.
+
+Use raw HTML controls only when they are local to one screen and do not duplicate an existing primitive. When the same control styling repeats, promote it to `components/ui/`.
+
 ## Exports
 
 Prefer const exports:
@@ -125,15 +173,20 @@ Use TanStack Query for API reads and writes.
 - Query keys should be stable and domain-oriented.
 - Mutations should update or invalidate affected queries.
 - Keep raw `fetch` usage inside `services/http.ts`.
+- Use `services/<domain>.ts` functions as the only place where feature code talks to the API.
 
 ## Forms
 
-Use simple React state while forms are small.
+Use React Hook Form for forms with validation, API field errors, edit/create reuse, or enough fields that manual state becomes noisy.
 
 - Keep form defaults in feature-specific `.ts` helpers.
 - Keep field error display as a small component when reused across fields.
-- Use backend validation errors as the source of truth for business rules.
-- Do not add a form library unless the forms become complex enough to justify it.
+- Use Zod schemas through `zodResolver` for client-side validation.
+- Reuse schemas or pure validation helpers from `@jurisflow/shared` when the rule is a real business contract.
+- Keep backend validation as the authority. Frontend validation improves UX but does not replace API validation.
+- Map API validation errors back into React Hook Form with `setError`.
+
+Avoid duplicating business rules separately in the UI. If both API and web need the same rule, move the shared contract or pure helper to `packages/shared`.
 
 ## Tests
 
