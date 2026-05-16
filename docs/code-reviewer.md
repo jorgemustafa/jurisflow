@@ -32,6 +32,20 @@ Read the relevant project docs:
 
 If the diff is large, state that and focus on the highest-risk files first.
 
+## Pre-Commit Checks
+
+A change is not ready to commit or merge until these are addressed:
+
+- Backend tests pass when backend behavior changes.
+- `npm run lint` passes.
+- `npm run typecheck` passes.
+- `npm run build` passes.
+- `docker compose config` passes.
+- `docker compose build` passes.
+- The implementation follows the nearest existing code pattern, or the new pattern is documented.
+
+If any check was not run, call that out explicitly in the review.
+
 ## What To Check
 
 ### API

@@ -51,6 +51,18 @@ modules/<domain>/
 - Repositories isolate Prisma access.
 - Schemas define input contracts.
 
+## Authentication Pattern
+
+Current auth documentation lives in `docs/authentication.md`.
+
+- Users store `passwordHash`, never plain passwords.
+- Passwords are hashed with PBKDF2.
+- Auth uses HMAC-signed JWT access and refresh tokens.
+- Access token lifetime is 15 minutes.
+- Refresh token lifetime is 7 days.
+- Refresh tokens are currently stateless; revocation storage is future work.
+- RBAC middleware is not implemented yet.
+
 ## Initial Domains
 
 1. Clients

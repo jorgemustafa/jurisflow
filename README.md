@@ -46,6 +46,10 @@ Avoid:
 - Frontend-only UI/form behavior.
 - Generic utilities without real reuse.
 
+## Authentication
+
+See `docs/authentication.md` for Postman examples, password setup/change requests, token refresh behavior, and implementation notes.
+
 ## Scripts
 
 ```bash
