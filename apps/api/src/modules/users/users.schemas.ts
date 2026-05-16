@@ -14,7 +14,7 @@ export const createUserSchema = z.object({
   name: z.string().trim().min(2).max(255),
   email: z.string().trim().email().transform((value) => value.toLowerCase()),
   role: userRoleSchema.optional(),
-  passwordHash: optionalText(500)
+  password: z.string().min(8).max(128).optional()
 });
 
 export const updateUserSchema = z
@@ -23,7 +23,7 @@ export const updateUserSchema = z
     email: z.string().trim().email().transform((value) => value.toLowerCase()).optional(),
     role: userRoleSchema.optional(),
     status: userStatusSchema.optional(),
-    passwordHash: optionalText(500)
+    password: z.string().min(8).max(128).optional()
   })
   .refine((data) => Object.keys(data).length > 0, "At least one field must be provided");
 

@@ -265,7 +265,7 @@ Approved for Finance v1.
 
 ## Document
 
-Baseline model. Not approved as final until Document Management requirements are defined.
+Approved as a baseline for Document Management v1. Upload implementation should consider adding `originalName` and `sizeBytes` before the first file upload endpoint.
 
 | Field | Type | Required | Rules |
 | --- | --- | --- | --- |
@@ -283,4 +283,7 @@ Baseline model. Not approved as final until Document Management requirements are
 - A client can have many documents.
 - A document belongs to one client.
 - A document can optionally belong to one case.
-- Storage strategy and metadata validation are future scope.
+- If a document has `caseId`, the case must belong to the same client.
+- File storage is hidden behind a storage service boundary.
+- Repository code persists metadata only.
+- Physical delete, versioning, OCR, preview generation, and templates are out of scope for v1.

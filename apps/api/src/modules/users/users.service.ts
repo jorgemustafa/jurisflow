@@ -1,3 +1,4 @@
+import { hashPassword } from "../../shared/security/password.js";
 import type { CreateUserInput, UpdateUserInput, UserListFilters, UserRole, UserStatus } from "./users.schemas.js";
 
 export type UserRecord = {
@@ -15,9 +16,12 @@ type UsersRepository = {
   list(filters: UserListFilters): Promise<UserRecord[]>;
   findById(id: string): Promise<UserRecord | null>;
   findByEmail(email: string, excludeId?: string): Promise<UserRecord | null>;
-  create(data: CreateUserInput): Promise<UserRecord>;
-  update(id: string, data: UpdateUserInput): Promise<UserRecord>;
+  create(data: CreateUserData): Promise<UserRecord>;
+  update(id: string, data: UpdateUserData): Promise<UserRecord>;
 };
+
+export type CreateUserData = Omit<CreateUserInput, "password"> & { passwordHash?: string };
+export type UpdateUserData = Omit<UpdateUserInput, "password"> & { passwordHash?: string };
 
 export class UserNotFoundError extends Error {
   constructor() {
@@ -51,7 +55,8 @@ export function createUsersService(repository: UsersRepository) {
 
     async create(input: CreateUserInput) {
       await ensureUniqueEmail(input.email);
-      return repository.create(input);
+      const { password, ...data } = input;
+      return repository.create({ ...data, passwordHash: password ? await hashPassword(password) : undefined });
     },
 
     async update(id: string, input: UpdateUserInput) {
@@ -59,7 +64,8 @@ export function createUsersService(repository: UsersRepository) {
       if (!current) throw new UserNotFoundError();
 
       await ensureUniqueEmail(input.email, id);
-      return repository.update(id, input);
+      const { password, ...data } = input;
+      return repository.update(id, { ...data, passwordHash: password ? await hashPassword(password) : undefined });
     }
   };
 }

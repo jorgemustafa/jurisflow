@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../shared/db/prisma.js";
-import type { CreateUserInput, UpdateUserInput, UserListFilters, UserRole, UserStatus } from "./users.schemas.js";
-import type { UserRecord } from "./users.service.js";
+import type { UserListFilters, UserRole, UserStatus } from "./users.schemas.js";
+import type { CreateUserData, UpdateUserData, UserRecord } from "./users.service.js";
 
 type DbUserRole = "ADMIN" | "LAWYER" | "ASSISTANT";
 type DbUserStatus = "ACTIVE" | "INACTIVE";
@@ -30,7 +30,7 @@ function toUserRecord(user: DbUser): UserRecord {
   };
 }
 
-function writeData(data: CreateUserInput | UpdateUserInput) {
+function writeData(data: CreateUserData | UpdateUserData) {
   return {
     ...data,
     role: data.role ? toDbRole(data.role) : undefined,
@@ -69,12 +69,12 @@ export const usersRepository = {
     return user ? toUserRecord(user as DbUser) : null;
   },
 
-  async create(data: CreateUserInput) {
+  async create(data: CreateUserData) {
     const user = await prisma.user.create({ data: writeData(data) as Prisma.UserUncheckedCreateInput });
     return toUserRecord(user as DbUser);
   },
 
-  async update(id: string, data: UpdateUserInput) {
+  async update(id: string, data: UpdateUserData) {
     const user = await prisma.user.update({ where: { id }, data: writeData(data) as Prisma.UserUncheckedUpdateInput });
     return toUserRecord(user as DbUser);
   }

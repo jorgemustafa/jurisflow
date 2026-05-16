@@ -28,17 +28,17 @@
 - [x] define client business rules
 - [x] define case business rules
 - [x] define finance business rules
-- [ ] define document business rules
-- [ ] create domain glossary
+- [x] define document business rules
+- [x] create domain glossary
 
 ---
 
 ### Phase 3 - Authentication
 
 - [x] create minimal user model
-- [ ] backend JWT auth
-- [ ] password hashing
-- [ ] refresh token flow
+- [x] backend JWT auth
+- [x] password hashing
+- [x] refresh token flow
 - [ ] login page
 - [ ] forgot password
 - [ ] RBAC middleware
@@ -90,7 +90,7 @@
 
 ### Phase 7 - Documents
 
-- [ ] define storage strategy
+- [x] define storage strategy
 - [ ] upload document
 - [ ] link document to client
 - [ ] link document to case
@@ -139,6 +139,5 @@
 
 Working on:
 
-- Phase 2 product requirements
-- first usable workflow definition
-- domain glossary
+- Phase 3 authentication
+- backend auth endpoints

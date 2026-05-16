@@ -7,6 +7,11 @@ import { UserEmailConflictError, UserNotFoundError, createUsersService } from ".
 
 const usersService = createUsersService(usersRepository);
 
+function publicUser<T extends { passwordHash: string | null }>(user: T) {
+  const { passwordHash, ...safeUser } = user;
+  return safeUser;
+}
+
 function handleUserError(error: unknown, reply: FastifyReply) {
   if (error instanceof ZodError) return reply.code(400).send({ message: "Invalid user data", issues: error.issues });
   if (error instanceof UserNotFoundError) return reply.code(404).send({ message: error.message });
@@ -17,7 +22,8 @@ function handleUserError(error: unknown, reply: FastifyReply) {
 export async function usersRoutes(app: FastifyInstance) {
   app.get("/", async (request, reply) => {
     try {
-      return usersService.list(listUsersQuerySchema.parse(request.query));
+      const users = await usersService.list(listUsersQuerySchema.parse(request.query));
+      return users.map(publicUser);
     } catch (error) {
       return handleUserError(error, reply);
     }
@@ -26,7 +32,7 @@ export async function usersRoutes(app: FastifyInstance) {
   app.get("/:id", async (request, reply) => {
     try {
       const { id } = userParamsSchema.parse(request.params);
-      return usersService.get(id);
+      return publicUser(await usersService.get(id));
     } catch (error) {
       return handleUserError(error, reply);
     }
@@ -35,7 +41,7 @@ export async function usersRoutes(app: FastifyInstance) {
   app.post("/", async (request, reply) => {
     try {
       const user = await usersService.create(parseBody(createUserSchema, request.body));
-      return reply.code(201).send(user);
+      return reply.code(201).send(publicUser(user));
     } catch (error) {
       return handleUserError(error, reply);
     }
@@ -44,7 +50,7 @@ export async function usersRoutes(app: FastifyInstance) {
   app.patch("/:id", async (request, reply) => {
     try {
       const { id } = userParamsSchema.parse(request.params);
-      return usersService.update(id, parseBody(updateUserSchema, request.body));
+      return publicUser(await usersService.update(id, parseBody(updateUserSchema, request.body)));
     } catch (error) {
       return handleUserError(error, reply);
     }

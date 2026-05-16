@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CreateUserInput, UpdateUserInput, UserListFilters } from "./users.schemas.js";
-import { UserEmailConflictError, createUsersService, type UserRecord } from "./users.service.js";
+import { UserEmailConflictError, createUsersService, type CreateUserData, type UpdateUserData, type UserRecord } from "./users.service.js";
+import { verifyPassword } from "../../shared/security/password.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 
@@ -17,7 +18,7 @@ function createRepository(seed: UserRecord[] = []) {
     async findByEmail(email: string, excludeId?: string) {
       return users.find((user) => user.email === email && user.id !== excludeId) ?? null;
     },
-    async create(data: CreateUserInput) {
+    async create(data: CreateUserData) {
       const user: UserRecord = {
         id: `user-${users.length + 1}`,
         name: data.name,
@@ -31,7 +32,7 @@ function createRepository(seed: UserRecord[] = []) {
       users.push(user);
       return user;
     },
-    async update(id: string, data: UpdateUserInput) {
+    async update(id: string, data: UpdateUserData) {
       const user = users.find((item) => item.id === id);
       if (!user) throw new Error("test setup error");
       Object.assign(user, data, { updatedAt: now });
@@ -73,5 +74,16 @@ describe("users service", () => {
     await expect(service.create({ name: "Ana 2", email: "ana@jurisflow.test", role: "lawyer" })).rejects.toBeInstanceOf(
       UserEmailConflictError
     );
+  });
+
+  it("hashes passwords on create", async () => {
+    const repository = createRepository();
+    const service = createUsersService(repository);
+
+    const user = await service.create({ name: "Dra. Ana", email: "ana@jurisflow.test", password: "password123" });
+
+    expect(user.passwordHash).not.toBe("password123");
+    expect(user.passwordHash).toBeTruthy();
+    await expect(verifyPassword("password123", user.passwordHash!)).resolves.toBe(true);
   });
 });
