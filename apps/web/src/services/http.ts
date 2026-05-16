@@ -26,7 +26,7 @@ export function configureAuthHandlers(handlers: typeof authHandlers) {
 
 async function fetchApi(path: string, init?: AppRequestInit) {
   const token = init?.skipAuth ? null : authHandlers?.getAccessToken();
-  const { skipAuth, skipRefresh, ...fetchInit } = init ?? {};
+  const { skipAuth: _skipAuth, skipRefresh: _skipRefresh, ...fetchInit } = init ?? {};
 
   return fetch(`${API_URL}${path}`, {
     headers: {

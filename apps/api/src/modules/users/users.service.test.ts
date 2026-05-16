@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CreateUserInput, UpdateUserInput, UserListFilters } from "./users.schemas.js";
+import type { UserListFilters } from "./users.schemas.js";
 import { UserEmailConflictError, createUsersService, type CreateUserData, type UpdateUserData, type UserRecord } from "./users.service.js";
 import { verifyPassword } from "../../shared/security/password.js";
 

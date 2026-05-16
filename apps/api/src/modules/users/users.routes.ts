@@ -8,7 +8,7 @@ import { UserEmailConflictError, UserNotFoundError, createUsersService } from ".
 const usersService = createUsersService(usersRepository);
 
 function publicUser<T extends { passwordHash: string | null }>(user: T) {
-  const { passwordHash, ...safeUser } = user;
+  const { passwordHash: _passwordHash, ...safeUser } = user;
   return safeUser;
 }
 

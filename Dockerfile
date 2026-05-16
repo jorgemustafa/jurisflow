@@ -11,6 +11,7 @@ RUN npm ci
 
 COPY . .
 
+ARG DATABASE_URL=postgresql://postgres:postgres@postgres:5432/jurisflow?schema=public
 RUN npm run prisma:generate
 
 EXPOSE 3333 5173

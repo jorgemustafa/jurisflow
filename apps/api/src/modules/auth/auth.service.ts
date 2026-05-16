@@ -37,7 +37,7 @@ export class AuthSecretMissingError extends Error {
 }
 
 function publicUser(user: UserRecord) {
-  const { passwordHash, ...safeUser } = user;
+  const { passwordHash: _passwordHash, ...safeUser } = user;
   return safeUser;
 }
 
