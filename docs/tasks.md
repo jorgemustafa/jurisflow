@@ -39,10 +39,10 @@
 - [x] backend JWT auth
 - [x] password hashing
 - [x] refresh token flow
-- [ ] login page
+- [x] login page
 - [ ] forgot password
 - [ ] RBAC middleware
-- [ ] authenticated layout
+- [x] authenticated layout
 
 ---
 
@@ -108,6 +108,8 @@
 - [x] decide Docker strategy for local development
 - [x] verify full Docker runtime
 - [ ] document local Node/npm setup quirks on Windows
+- [x] document auth flow and Postman usage
+- [x] document pre-commit verification requirements
 - [x] document frontend stack and shared package boundaries
 - [x] adapt imported agent docs to JurisFlow conventions
 

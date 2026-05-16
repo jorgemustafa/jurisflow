@@ -104,7 +104,7 @@ it("normalizes CPF, email, and phone", () => {
 
 ## Verification
 
-Run the smallest useful command first, then the broader command before finishing:
+Run the smallest useful command first while developing, then run the full pre-commit gate before committing.
 
 ```bash
 npm test -w @jurisflow/api
@@ -117,3 +117,20 @@ For frontend-only changes, also run:
 ```bash
 npm run build -w @jurisflow/web
 ```
+
+## Pre-Commit Gate
+
+Before committing, make sure these pass:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+docker compose config
+docker compose build
+```
+
+Also run backend tests whenever backend behavior changes. If future backend test suites are split by type, run the relevant focused suite first and the full backend suite before committing.
+
+Do not commit code that does not follow an existing project pattern unless the new pattern is intentionally documented.

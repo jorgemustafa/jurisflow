@@ -9,6 +9,24 @@ Be direct, pragmatic, and concise. Keep the codebase small and clean. Avoid new 
 3. Keep edits scoped to the requested workflow.
 4. Update or add tests for real business rules.
 5. Do not create shallow tests that only mock behavior to pass.
+6. Follow the nearest existing pattern before creating a new one.
+
+## Before Committing
+
+Do not commit until the relevant checks pass.
+
+Required checks:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+docker compose config
+docker compose build
+```
+
+When backend tests grow beyond the current API Vitest suite, always run them before committing backend changes. If a command cannot be run, state exactly why before committing or handing off.
 
 ## Project Patterns
 
@@ -41,10 +59,13 @@ Do not put React components, Prisma repositories, API routes, or frontend-only U
 Use the existing npm workspace scripts:
 
 ```bash
+npm run prisma:generate
 npm run lint
 npm run typecheck
 npm test
 npm run build
+docker compose config
+docker compose build
 ```
 
 For package changes, use npm because this repo is npm-based and has `package-lock.json`.
