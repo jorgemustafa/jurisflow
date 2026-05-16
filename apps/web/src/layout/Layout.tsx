@@ -1,12 +1,25 @@
 import type { ReactNode } from "react";
-import { NavLink } from "react-router";
+import { LogOut } from "lucide-react";
+import { NavLink, useNavigate } from "react-router";
+import { Button } from "../components/ui/button.js";
+import { useAuth } from "../features/auth/AuthContext.js";
 import { appModules } from "../utils/appModules.js";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const logout = () => {
+    auth.logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <main className="app-shell">
       <aside className="sidebar" aria-label="Navegação principal">
-        <strong>JurisFlow</strong>
+        <div className="sidebar-brand">
+          <strong>JurisFlow</strong>
+          <span>{auth.session?.user.name}</span>
+        </div>
         <nav>
           {appModules.map((module) =>
             module.path === "#" ? (
@@ -22,6 +35,10 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             )
           )}
         </nav>
+        <Button className="sidebar-logout" variant="outline" type="button" onClick={logout}>
+          <LogOut size={18} />
+          Sair
+        </Button>
       </aside>
 
       <section className="workspace">{children}</section>

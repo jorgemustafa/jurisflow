@@ -48,6 +48,16 @@ textarea {
   font-size: 20px;
 }
 
+.sidebar-brand {
+  display: grid;
+  gap: 6px;
+}
+
+.sidebar-brand span {
+  color: #b8c6d5;
+  font-size: 13px;
+}
+
 .sidebar nav {
   display: grid;
   gap: 8px;
@@ -68,9 +78,32 @@ textarea {
   background: #21405d;
 }
 
+.sidebar-logout {
+  margin-top: auto;
+  border-color: #36516d;
+  color: #f8fafc;
+  background: transparent;
+}
+
 .workspace {
   width: min(1180px, 100%);
   padding: 40px;
+}
+
+.auth-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: #eef3f7;
+}
+
+.auth-panel {
+  width: min(460px, 100%);
+  padding: 32px;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #ffffff;
 }
 
 .page-header {
