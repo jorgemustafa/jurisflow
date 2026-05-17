@@ -38,3 +38,7 @@ export type CaseFilters = {
 export const listCases = (filters: CaseFilters) => {
   return request<LegalCase[]>(`/cases${searchParams(filters)}`);
 };
+
+export const getCase = (id: string) => {
+  return request<LegalCase>(`/cases/${id}`);
+};

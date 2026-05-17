@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import type { LegalCase } from "src/services/cases.js";
 import { fieldValue, formatDate } from "src/utils/format.js";
 import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea } from "src/features/cases/utils/caseLabels.js";
@@ -23,7 +24,9 @@ export const CasesTable = ({ cases }: { cases: LegalCase[] }) => {
           {cases.map((item) => (
             <tr key={item.id}>
               <td>
-                <strong>{item.title}</strong>
+                <Link className="table-link" to={`/cases/${item.id}`}>
+                  {item.title}
+                </Link>
               </td>
               <td>{labelCaseType(item.caseType)}</td>
               <td>{fieldValue(item.cnjNumber)}</td>
