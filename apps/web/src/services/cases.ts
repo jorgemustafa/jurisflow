@@ -36,10 +36,31 @@ export type CaseFilters = {
   clientId?: string;
 };
 
+export type CaseFormData = {
+  clientId: string;
+  caseType: CaseType;
+  title: string;
+  cnjNumber: string;
+  status: CaseStatus;
+  stage: CaseStage | "";
+  legalArea: LegalArea | "";
+  opposingParty: string;
+  court: string;
+  jurisdiction: string;
+  division: string;
+  description: string;
+  openedAt: string;
+  closedAt: string;
+};
+
 export const listCases = (filters: CaseFilters) => {
   return request<LegalCase[]>(`/cases${searchParams(filters)}`);
 };
 
 export const getCase = (id: string) => {
   return request<LegalCase>(`/cases/${id}`);
+};
+
+export const createCase = (data: CaseFormData) => {
+  return request<LegalCase>("/cases", { method: "POST", body: JSON.stringify(data) });
 };

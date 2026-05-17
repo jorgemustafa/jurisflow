@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { FolderPlus, Pencil } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { listCases } from "src/services/cases.js";
 import { ClientStatus, getClient, updateClientStatus } from "src/services/clients.js";
@@ -41,6 +41,10 @@ export const ClientDetailsPage = () => {
           <button className="button" onClick={() => statusMutation.mutate(nextStatus)} disabled={statusMutation.isPending}>
             {client.data.status === "active" ? "Inativar" : "Reativar"}
           </button>
+          <Link className="button" to={`/clients/${client.data.id}/cases/new`}>
+            <FolderPlus size={18} />
+            Novo processo
+          </Link>
           <Link className="button primary" to={`/clients/${client.data.id}/edit`}>
             <Pencil size={18} />
             Editar

@@ -44,6 +44,7 @@ Secondary users:
 ### Cases
 
 - Register legal cases and internal matters.
+- Allow creating a case directly from a client page; the new case remains linked to that client.
 - Track case status, CNJ number, area, responsible person, and relevant dates.
 - Values, value of each installment, number of installment, total value
 - Link documents, financial records, and client history.
