@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API: Debug",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "${env:ProgramFiles}\\nodejs\\node.exe",
+      "runtimeArgs": ["${env:ProgramFiles}\\nodejs\\node_modules\\npm\\bin\\npm-cli.js", "run", "dev:api"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "API_PORT": "3333",
+        "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/jurisflow?schema=public",
+        "JWT_SECRET": "jurisflow-development-secret",
+        "WEB_ORIGIN": "http://localhost:5173"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "autoAttachChildProcesses": true
+    },
+    {
+      "name": "Web: Chrome",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/apps/web/src",
+      "preLaunchTask": "dev:web"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug API + Web",
+      "configurations": ["API: Debug", "Web: Chrome"],
+      "stopAll": true
+    }
+  ]
+}
