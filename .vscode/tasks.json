@@ -2,10 +2,47 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "dev:web",
+      "label": "Run API + Web",
+      "dependsOn": ["run:api", "run:web"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "run:api",
+      "type": "shell",
+      "command": "\"${env:ProgramFiles}\\nodejs\\node.exe\" \"${env:ProgramFiles}\\nodejs\\node_modules\\npm\\bin\\npm-cli.js\" run dev:api",
+      "isBackground": true,
+      "hide": true,
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "API_PORT": "3333",
+          "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/jurisflow?schema=public",
+          "JWT_SECRET": "jurisflow-development-secret",
+          "WEB_ORIGIN": "http://localhost:5173"
+        }
+      },
+      "problemMatcher": {
+        "owner": "api",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Server listening at"
+        }
+      }
+    },
+    {
+      "label": "run:web",
       "type": "shell",
       "command": "\"${env:ProgramFiles}\\nodejs\\node.exe\" \"${env:ProgramFiles}\\nodejs\\node_modules\\npm\\bin\\npm-cli.js\" run dev:web",
       "isBackground": true,
+      "hide": true,
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": {
         "owner": "vite",
         "pattern": {
@@ -16,9 +53,6 @@
           "beginsPattern": ".*",
           "endsPattern": "Local:\\s+http://localhost:5173/"
         }
-      },
-      "options": {
-        "cwd": "${workspaceFolder}"
       }
     }
   ]
