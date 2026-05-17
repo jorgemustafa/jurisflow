@@ -10,5 +10,5 @@ export const appModules: AppModule[] = [
   { name: "Clientes", path: "/clients", icon: Users },
   { name: "Processos", path: "/cases", icon: BriefcaseBusiness },
   { name: "Financeiro", path: "/finance", icon: CircleDollarSign },
-  { name: "Documentos", path: "#", icon: FileText }
+  { name: "Documentos", path: "/documents", icon: FileText }
 ];
