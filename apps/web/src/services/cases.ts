@@ -64,3 +64,7 @@ export const getCase = (id: string) => {
 export const createCase = (data: CaseFormData) => {
   return request<LegalCase>("/cases", { method: "POST", body: JSON.stringify(data) });
 };
+
+export const updateCase = (id: string, data: CaseFormData) => {
+  return request<LegalCase>(`/cases/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+};

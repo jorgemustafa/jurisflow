@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { getCase } from "src/services/cases.js";
 import { fieldValue, formatDate, formatMoney } from "src/utils/format.js";
@@ -31,6 +32,10 @@ export const CaseDetailsPage = () => {
           </Link>
           <Link className="button primary" to={`/clients/${item.clientId}`}>
             Ver cliente
+          </Link>
+          <Link className="button primary" to={`/cases/${item.id}/edit`}>
+            <Pencil size={18} />
+            Editar
           </Link>
         </div>
       </header>

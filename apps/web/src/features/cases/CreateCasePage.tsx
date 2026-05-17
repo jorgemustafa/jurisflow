@@ -6,5 +6,5 @@ export const CreateCasePage = () => {
 
   if (!clientId) return <p className="alert">Cliente não informado.</p>;
 
-  return <CaseForm clientId={clientId} />;
+  return <CaseForm mode="create" clientId={clientId} />;
 };

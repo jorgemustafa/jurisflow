@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { z } from "zod";
@@ -10,7 +10,7 @@ import { Label } from "src/components/ui/label.js";
 import { Select } from "src/components/ui/select.js";
 import { Textarea } from "src/components/ui/textarea.js";
 import { FieldError } from "src/features/clients/form/FieldError.js";
-import { createCase, type CaseFormData } from "src/services/cases.js";
+import { createCase, getCase, updateCase, type CaseFormData } from "src/services/cases.js";
 import { ApiError } from "src/services/http.js";
 
 const caseFormSchema = z.object({
@@ -47,18 +47,37 @@ const emptyCaseForm = (clientId: string): CaseFormData => ({
   closedAt: ""
 });
 
-export const CaseForm = ({ clientId }: { clientId: string }) => {
+const dateInputValue = (value: string | null) => (value ? value.slice(0, 10) : "");
+
+type CaseFormProps =
+  | {
+      mode: "create";
+      clientId: string;
+    }
+  | {
+      mode: "update";
+      caseId: string;
+    };
+
+export const CaseForm = (props: CaseFormProps) => {
+  const isEdit = props.mode === "update";
+  const cancelPath = isEdit ? `/cases/${props.caseId}` : `/clients/${props.clientId}`;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [generalError, setGeneralError] = useState("");
   const form = useForm<CaseFormData>({
     resolver: zodResolver(caseFormSchema),
-    defaultValues: emptyCaseForm(clientId)
+    defaultValues: emptyCaseForm(props.mode === "create" ? props.clientId : "00000000-0000-0000-0000-000000000000")
   });
   const watchedType = form.watch("caseType");
+  const legalCase = useQuery({
+    queryKey: ["case", props.mode === "update" ? props.caseId : ""],
+    queryFn: () => getCase(props.mode === "update" ? props.caseId : ""),
+    enabled: isEdit
+  });
 
   const mutation = useMutation({
-    mutationFn: createCase,
+    mutationFn: (data: CaseFormData) => (isEdit ? updateCase(props.caseId, data) : createCase(data)),
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["cases"] });
       queryClient.setQueryData(["case", saved.id], saved);
@@ -76,16 +95,39 @@ export const CaseForm = ({ clientId }: { clientId: string }) => {
     }
   });
 
+  useEffect(() => {
+    if (!legalCase.data) return;
+    form.reset({
+      clientId: legalCase.data.clientId,
+      caseType: legalCase.data.caseType,
+      title: legalCase.data.title,
+      cnjNumber: legalCase.data.cnjNumber ?? "",
+      status: legalCase.data.status,
+      stage: legalCase.data.stage ?? "",
+      legalArea: legalCase.data.legalArea ?? "",
+      opposingParty: legalCase.data.opposingParty ?? "",
+      court: legalCase.data.court ?? "",
+      jurisdiction: legalCase.data.jurisdiction ?? "",
+      division: legalCase.data.division ?? "",
+      description: legalCase.data.description ?? "",
+      openedAt: dateInputValue(legalCase.data.openedAt),
+      closedAt: dateInputValue(legalCase.data.closedAt)
+    });
+  }, [form, legalCase.data]);
+
   const submit = (data: CaseFormData) => {
     setGeneralError("");
     mutation.mutate({ ...data, cnjNumber: data.caseType === "judicial" ? data.cnjNumber : "" });
   };
 
+  if (legalCase.isLoading) return <p>Carregando processo...</p>;
+  if (legalCase.isError) return <p className="alert">Processo não encontrado.</p>;
+
   return (
     <>
       <header className="page-header">
         <span>Processos</span>
-        <h1>Novo processo</h1>
+        <h1>{isEdit ? "Editar processo" : "Novo processo"}</h1>
       </header>
 
       <form className="form" onSubmit={form.handleSubmit(submit)}>
@@ -201,7 +243,7 @@ export const CaseForm = ({ clientId }: { clientId: string }) => {
           <Button type="submit" disabled={mutation.isPending}>
             Salvar
           </Button>
-          <Button variant="outline" type="button" onClick={() => navigate(`/clients/${clientId}`)}>
+          <Button variant="outline" type="button" onClick={() => navigate(cancelPath)}>
             Cancelar
           </Button>
         </div>

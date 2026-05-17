@@ -5,6 +5,7 @@ import { RequireAuth } from "src/features/auth/RequireAuth.js";
 import { CreateCasePage } from "src/features/cases/CreateCasePage.js";
 import { CaseDetailsPage } from "src/features/cases/detail/CaseDetailsPage.js";
 import { CasesPage } from "src/features/cases/list/CasesPage.js";
+import { UpdateCasePage } from "src/features/cases/UpdateCasePage.js";
 import { DashboardPage } from "src/features/dashboard/DashboardPage.js";
 import { DocumentsPage } from "src/features/documents/DocumentsPage.js";
 import { ClientDetailsPage } from "src/features/clients/detail/ClientDetailsPage.js";
@@ -33,6 +34,7 @@ export const App = () => {
                   <Route path="/clients/:clientId/cases/new" element={<CreateCasePage />} />
                   <Route path="/cases" element={<CasesPage />} />
                   <Route path="/cases/:id" element={<CaseDetailsPage />} />
+                  <Route path="/cases/:id/edit" element={<UpdateCasePage />} />
                   <Route path="/finance" element={<FinancePage />} />
                   <Route path="/documents" element={<DocumentsPage />} />
                 </Routes>
