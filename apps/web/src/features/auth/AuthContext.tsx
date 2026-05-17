@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { configureAuthHandlers } from "../../services/http.js";
-import { clearStoredAuth, getStoredAuth, setStoredAuth, type StoredAuth } from "../../services/authStorage.js";
-import { refreshSession, type AuthSession } from "../../services/auth.js";
+import { configureAuthHandlers } from "src/services/http.js";
+import { clearStoredAuth, getStoredAuth, setStoredAuth, type StoredAuth } from "src/services/authStorage.js";
+import { refreshSession, type AuthSession } from "src/services/auth.js";
 
 type AuthContextValue = {
   session: StoredAuth | null;

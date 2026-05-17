@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { appModules } from "../../utils/appModules.js";
+import { appModules } from "src/utils/appModules.js";
 
 export const DashboardPage = () => {
   return (

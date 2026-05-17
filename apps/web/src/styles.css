@@ -239,6 +239,10 @@ textarea {
   margin-bottom: 18px;
 }
 
+.cases-toolbar {
+  grid-template-columns: minmax(260px, 1fr) 150px 170px 200px 190px;
+}
+
 input,
 select,
 textarea {
@@ -313,6 +317,21 @@ tr:last-child td {
 .badge.inactive {
   color: #7c2d12;
   background: #ffedd5;
+}
+
+.badge.on_hold {
+  color: #854d0e;
+  background: #fef3c7;
+}
+
+.badge.closed {
+  color: #1e3a8a;
+  background: #dbeafe;
+}
+
+.badge.canceled {
+  color: #991b1b;
+  background: #fee2e2;
 }
 
 .details-grid {

@@ -8,7 +8,7 @@ type AppModule = {
 
 export const appModules: AppModule[] = [
   { name: "Clientes", path: "/clients", icon: Users },
-  { name: "Processos", path: "#", icon: BriefcaseBusiness },
+  { name: "Processos", path: "/cases", icon: BriefcaseBusiness },
   { name: "Financeiro", path: "/finance", icon: CircleDollarSign },
   { name: "Documentos", path: "#", icon: FileText }
 ];

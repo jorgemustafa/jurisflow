@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { Link, useParams } from "react-router";
-import { ClientStatus, getClient, updateClientStatus } from "../../../services/clients.js";
-import { fieldValue, formatDate } from "../../../utils/format.js";
-import { ClientDetailItem } from "./ClientDetailItem.js";
-import { labelClientStatus, labelClientType } from "../utils/clientLabels.js";
+import { ClientStatus, getClient, updateClientStatus } from "src/services/clients.js";
+import { fieldValue, formatDate } from "src/utils/format.js";
+import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
+import { labelClientStatus, labelClientType } from "src/features/clients/utils/clientLabels.js";
 
 export const ClientDetailsPage = () => {
   const { id = "" } = useParams();

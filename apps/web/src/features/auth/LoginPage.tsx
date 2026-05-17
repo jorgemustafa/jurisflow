@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { z } from "zod";
-import { Button } from "../../components/ui/button.js";
-import { Input } from "../../components/ui/input.js";
-import { Label } from "../../components/ui/label.js";
-import { ApiError } from "../../services/http.js";
-import { login, type LoginInput } from "../../services/auth.js";
-import { FieldError } from "../clients/form/FieldError.js";
-import { useAuth } from "./AuthContext.js";
+import { Button } from "src/components/ui/button.js";
+import { Input } from "src/components/ui/input.js";
+import { Label } from "src/components/ui/label.js";
+import { ApiError } from "src/services/http.js";
+import { login, type LoginInput } from "src/services/auth.js";
+import { FieldError } from "src/features/clients/form/FieldError.js";
+import { useAuth } from "src/features/auth/AuthContext.js";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Informe um email válido").transform((value) => value.toLowerCase()),
