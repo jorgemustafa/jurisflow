@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { getFinanceDashboard } from "../../services/finance.js";
-import { formatMoney } from "../../utils/format.js";
-import { Metric } from "./Metric.js";
-import { PaymentSummaryList } from "./PaymentSummaryList.js";
-import { currentMonth } from "./utils/currentMonth.js";
+import { getFinanceDashboard } from "src/services/finance.js";
+import { formatMoney } from "src/utils/format.js";
+import { Metric } from "src/features/finance/Metric.js";
+import { PaymentSummaryList } from "src/features/finance/PaymentSummaryList.js";
+import { currentMonth } from "src/features/finance/utils/currentMonth.js";
 
 export const FinancePage = () => {
   const [month, setMonth] = useState(currentMonth());

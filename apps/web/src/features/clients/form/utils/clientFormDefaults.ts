@@ -1,4 +1,4 @@
-import type { ClientFormData } from "../../../../services/clients.js";
+import type { ClientFormData } from "src/services/clients.js";
 
 export const emptyClientForm: ClientFormData = {
   type: "individual",

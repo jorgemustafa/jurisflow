@@ -1,4 +1,4 @@
-import { request } from "./http.js";
+import { request } from "src/services/http.js";
 
 export type AuthUser = {
   id: string;

@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { LogOut } from "lucide-react";
 import { NavLink, useNavigate } from "react-router";
-import { Button } from "../components/ui/button.js";
-import { useAuth } from "../features/auth/AuthContext.js";
-import { appModules } from "../utils/appModules.js";
+import { Button } from "src/components/ui/button.js";
+import { useAuth } from "src/features/auth/AuthContext.js";
+import { appModules } from "src/utils/appModules.js";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const auth = useAuth();

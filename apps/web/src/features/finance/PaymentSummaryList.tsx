@@ -1,5 +1,5 @@
-import type { FinancePaymentSummary } from "../../services/finance.js";
-import { formatDate, formatMoney } from "../../utils/format.js";
+import type { FinancePaymentSummary } from "src/services/finance.js";
+import { formatDate, formatMoney } from "src/utils/format.js";
 
 type PaymentSummaryListProps = {
   title: string;

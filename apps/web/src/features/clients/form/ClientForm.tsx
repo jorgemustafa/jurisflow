@@ -4,15 +4,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
-import { Button } from "../../../components/ui/button.js";
-import { Input } from "../../../components/ui/input.js";
-import { Label } from "../../../components/ui/label.js";
-import { Select } from "../../../components/ui/select.js";
-import { Textarea } from "../../../components/ui/textarea.js";
-import { createClient, getClient, updateClient } from "../../../services/clients.js";
-import { ApiError } from "../../../services/http.js";
-import { FieldError } from "./FieldError.js";
-import { emptyClientForm } from "./utils/clientFormDefaults.js";
+import { Button } from "src/components/ui/button.js";
+import { Input } from "src/components/ui/input.js";
+import { Label } from "src/components/ui/label.js";
+import { Select } from "src/components/ui/select.js";
+import { Textarea } from "src/components/ui/textarea.js";
+import { createClient, getClient, updateClient } from "src/services/clients.js";
+import { ApiError } from "src/services/http.js";
+import { FieldError } from "src/features/clients/form/FieldError.js";
+import { emptyClientForm } from "src/features/clients/form/utils/clientFormDefaults.js";
 
 type ClientFormProps = {
   clientId?: string;

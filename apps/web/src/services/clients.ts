@@ -1,5 +1,5 @@
 import type { ClientFormData, ClientStatus, ClientType } from "@jurisflow/shared";
-import { request, searchParams } from "./http.js";
+import { request, searchParams } from "src/services/http.js";
 
 export type { ClientFormData, ClientStatus, ClientType };
 

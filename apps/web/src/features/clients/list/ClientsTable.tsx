@@ -1,7 +1,7 @@
 import { Link } from "react-router";
-import type { Client } from "../../../services/clients.js";
-import { fieldValue, formatDate } from "../../../utils/format.js";
-import { labelClientStatus, labelClientType } from "../utils/clientLabels.js";
+import type { Client } from "src/services/clients.js";
+import { fieldValue, formatDate } from "src/utils/format.js";
+import { labelClientStatus, labelClientType } from "src/features/clients/utils/clientLabels.js";
 
 export const ClientsTable = ({ clients }: { clients: Client[] }) => {
   if (clients.length === 0) return <p className="empty">Nenhum cliente encontrado.</p>;

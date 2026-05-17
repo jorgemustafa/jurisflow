@@ -1,4 +1,4 @@
-import type { AuthSession } from "./auth.js";
+import type { AuthSession } from "src/services/auth.js";
 
 const storageKey = "jurisflow.auth";
 

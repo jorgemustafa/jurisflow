@@ -1,6 +1,6 @@
-import type { LegalCase } from "../../../services/cases.js";
-import { fieldValue, formatDate } from "../../../utils/format.js";
-import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea } from "../utils/caseLabels.js";
+import type { LegalCase } from "src/services/cases.js";
+import { fieldValue, formatDate } from "src/utils/format.js";
+import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea } from "src/features/cases/utils/caseLabels.js";
 
 export const CasesTable = ({ cases }: { cases: LegalCase[] }) => {
   if (cases.length === 0) return <p className="empty">Nenhum processo encontrado.</p>;

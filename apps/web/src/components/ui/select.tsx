@@ -1,5 +1,5 @@
 import type { SelectHTMLAttributes } from "react";
-import { cn } from "../../lib/utils.js";
+import { cn } from "src/lib/utils.js";
 
 export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (

@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
-import { listClients } from "../../../services/clients.js";
-import { ClientsTable } from "./ClientsTable.js";
+import { listClients } from "src/services/clients.js";
+import { ClientsTable } from "src/features/clients/list/ClientsTable.js";
 
 export const ClientsPage = () => {
   const [filters, setFilters] = useState({ q: "", status: "active", type: "all" });

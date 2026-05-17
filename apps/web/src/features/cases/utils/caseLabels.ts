@@ -1,4 +1,4 @@
-import type { CaseStage, CaseStatus, CaseType, LegalArea } from "../../../services/cases.js";
+import type { CaseStage, CaseStatus, CaseType, LegalArea } from "src/services/cases.js";
 
 const caseTypeLabels: Record<CaseType, string> = {
   judicial: "Judicial",

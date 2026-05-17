@@ -1,4 +1,4 @@
-import type { Client, ClientStatus } from "../../../services/clients.js";
+import type { Client, ClientStatus } from "src/services/clients.js";
 
 export const labelClientType = (type: Client["type"]) => {
   return type === "individual" ? "Pessoa física" : "Pessoa jurídica";

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { listCases, type CaseFilters } from "../../../services/cases.js";
-import { CasesTable } from "./CasesTable.js";
+import { listCases, type CaseFilters } from "src/services/cases.js";
+import { CasesTable } from "src/features/cases/list/CasesTable.js";
 
 const defaultFilters: CaseFilters = {
   q: "",

@@ -1,4 +1,4 @@
-import { request, searchParams } from "./http.js";
+import { request, searchParams } from "src/services/http.js";
 
 export type CaseType = "judicial" | "extrajudicial";
 export type CaseStatus = "active" | "on_hold" | "closed" | "canceled";
