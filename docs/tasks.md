@@ -66,7 +66,7 @@
 
 - [x] case creation
 - [x] case update
-- [ ] case list page
+- [x] case list page
 - [x] link case to client
 - [x] CNJ number validation
 - [ ] timeline events

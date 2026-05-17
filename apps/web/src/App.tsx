@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router";
 import { AuthProvider } from "./features/auth/AuthContext.js";
 import { LoginPage } from "./features/auth/LoginPage.js";
 import { RequireAuth } from "./features/auth/RequireAuth.js";
+import { CasesPage } from "./features/cases/list/CasesPage.js";
 import { DashboardPage } from "./features/dashboard/DashboardPage.js";
 import { ClientDetailsPage } from "./features/clients/detail/ClientDetailsPage.js";
 import { ClientsPage } from "./features/clients/list/ClientsPage.js";
@@ -26,6 +27,7 @@ export const App = () => {
                   <Route path="/clients/new" element={<CreateClientPage />} />
                   <Route path="/clients/:id" element={<ClientDetailsPage />} />
                   <Route path="/clients/:id/edit" element={<UpdateClientPage />} />
+                  <Route path="/cases" element={<CasesPage />} />
                   <Route path="/finance" element={<FinancePage />} />
                 </Routes>
               </Layout>
