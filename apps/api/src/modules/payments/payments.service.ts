@@ -28,6 +28,8 @@ export type PaymentRecord = {
   notes: string | null;
   canceledAt: Date | null;
   cancelReason: string | null;
+  clientName?: string;
+  caseTitle?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };

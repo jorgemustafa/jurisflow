@@ -85,6 +85,7 @@ Manual payments use:
 
 - Payment is atomic. No partial payments in v1.
 - User can pay current and future installments early by marking each payment as paid.
+- Finance UI shows month-scoped payment rows and lets users mark pending rows as received.
 - `paidAt` is required when status becomes `PAID`.
 - UI defaults `paidAt` to today.
 - User can override `paidAt` because payments may be registered late.

@@ -31,6 +31,8 @@ type DbPayment = {
   notes: string | null;
   canceledAt: Date | null;
   cancelReason: string | null;
+  client?: { name: string };
+  case?: { title: string } | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -40,7 +42,9 @@ function toPaymentRecord(payment: DbPayment): PaymentRecord {
     ...payment,
     source: toApiSource(payment.source),
     status: toApiStatus(payment.status),
-    paymentMethod: payment.paymentMethod ? toApiMethod(payment.paymentMethod) : null
+    paymentMethod: payment.paymentMethod ? toApiMethod(payment.paymentMethod) : null,
+    clientName: payment.client?.name,
+    caseTitle: payment.case?.title ?? null
   };
 }
 
@@ -100,7 +104,11 @@ function listWhere(filters: PaymentListFilters): Prisma.PaymentWhereInput {
 
 export const paymentsRepository = {
   async list(filters: PaymentListFilters) {
-    const payments = await prisma.payment.findMany({ where: listWhere(filters), orderBy: { dueDate: "asc" } });
+    const payments = await prisma.payment.findMany({
+      where: listWhere(filters),
+      include: { client: { select: { name: true } }, case: { select: { title: true } } },
+      orderBy: { dueDate: "asc" }
+    });
     return payments.map((payment) => toPaymentRecord(payment as DbPayment));
   },
 
