@@ -30,6 +30,7 @@ export type PaymentRecord = {
   cancelReason: string | null;
   clientName?: string;
   caseTitle?: string | null;
+  caseTotalFeeAmountCents?: number | null;
   createdAt: Date;
   updatedAt: Date;
 };

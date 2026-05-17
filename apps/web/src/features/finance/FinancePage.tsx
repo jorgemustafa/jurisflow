@@ -4,6 +4,7 @@ import { markPaymentPaid, listPayments, type PaymentMethod, type PaymentStatus }
 import { ApiError } from "src/services/http.js";
 import { formatDate, formatMoney } from "src/utils/format.js";
 import { currentMonth } from "src/features/finance/utils/currentMonth.js";
+import { buildPaymentPlanSummaries } from "src/features/finance/utils/paymentPlans.js";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -36,6 +37,11 @@ export const FinancePage = () => {
     queryKey: ["payments", { month, status }],
     queryFn: () => listPayments({ month, status })
   });
+  const planPayments = useQuery({
+    queryKey: ["payments", "plans"],
+    queryFn: () => listPayments({ status: "all" })
+  });
+  const plans = planPayments.data ? buildPaymentPlanSummaries(planPayments.data) : [];
   const paidMutation = useMutation({
     mutationFn: (id: string) => markPaymentPaid(id, { paidAt, paymentMethod }),
     onSuccess: () => {
@@ -78,6 +84,47 @@ export const FinancePage = () => {
       </section>
 
       {error ? <p className="alert">{error}</p> : null}
+      {planPayments.isLoading ? <p>Carregando parcelas dos processos...</p> : null}
+      {planPayments.isError ? <p className="alert">Não foi possível carregar o resumo de parcelas.</p> : null}
+      {plans.length ? (
+        <section className="panel">
+          <h2>Parcelas por processo</h2>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Processo</th>
+                  <th>Valor total</th>
+                  <th>Divisão</th>
+                  <th>Recebido</th>
+                  <th>Pendente</th>
+                  <th>Canceladas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {plans.map((plan) => (
+                  <tr key={plan.id}>
+                    <td>{plan.clientName}</td>
+                    <td>{plan.caseTitle}</td>
+                    <td>{formatMoney(plan.totalCents)}</td>
+                    <td>
+                      {plan.installmentCount}x ({plan.paidInstallments} recebidas, {plan.pendingInstallments} pendentes)
+                    </td>
+                    <td>{formatMoney(plan.paidCents)}</td>
+                    <td>{formatMoney(plan.pendingCents)}</td>
+                    <td>{plan.canceledInstallments}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="panel">
+        <h2>Pagamentos do mês</h2>
+      </section>
       {payments.isLoading ? <p>Carregando pagamentos...</p> : null}
       {payments.isError ? <p className="alert">Não foi possível carregar os pagamentos.</p> : null}
 

@@ -7,6 +7,7 @@
     "build": "tsc -b && vite build --config vite.config.mjs --configLoader native",
     "dev": "vite --config vite.config.mjs --configLoader native",
     "preview": "vite preview --configLoader native",
+    "test": "vitest run --config vite.config.mjs --configLoader native",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

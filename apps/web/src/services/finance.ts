@@ -46,15 +46,16 @@ export type Payment = {
   notes: string | null;
   clientName?: string;
   caseTitle?: string | null;
+  caseTotalFeeAmountCents?: number | null;
 };
 
 export type PaymentFilters = {
-  month: string;
+  month?: string;
   status: PaymentStatus | "all";
 };
 
 export const listPayments = (filters: PaymentFilters) => {
-  return request<Payment[]>(`/payments${searchParams(filters)}`);
+  return request<Payment[]>(`/payments${searchParams({ month: filters.month ?? "", status: filters.status })}`);
 };
 
 export const markPaymentPaid = (id: string, data: { paidAt: string; paymentMethod: PaymentMethod }) => {

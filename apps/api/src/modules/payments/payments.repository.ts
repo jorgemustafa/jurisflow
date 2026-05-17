@@ -32,19 +32,22 @@ type DbPayment = {
   canceledAt: Date | null;
   cancelReason: string | null;
   client?: { name: string };
-  case?: { title: string } | null;
+  case?: { title: string; totalFeeAmountCents: number | null } | null;
   createdAt: Date;
   updatedAt: Date;
 };
 
 function toPaymentRecord(payment: DbPayment): PaymentRecord {
+  const { client, case: linkedCase, ...data } = payment;
+
   return {
-    ...payment,
+    ...data,
     source: toApiSource(payment.source),
     status: toApiStatus(payment.status),
     paymentMethod: payment.paymentMethod ? toApiMethod(payment.paymentMethod) : null,
-    clientName: payment.client?.name,
-    caseTitle: payment.case?.title ?? null
+    clientName: client?.name,
+    caseTitle: linkedCase?.title ?? null,
+    caseTotalFeeAmountCents: linkedCase?.totalFeeAmountCents ?? null
   };
 }
 
@@ -106,7 +109,7 @@ export const paymentsRepository = {
   async list(filters: PaymentListFilters) {
     const payments = await prisma.payment.findMany({
       where: listWhere(filters),
-      include: { client: { select: { name: true } }, case: { select: { title: true } } },
+      include: { client: { select: { name: true } }, case: { select: { title: true, totalFeeAmountCents: true } } },
       orderBy: { dueDate: "asc" }
     });
     return payments.map((payment) => toPaymentRecord(payment as DbPayment));
