@@ -33,6 +33,7 @@ export type CaseFilters = {
   caseType: string;
   stage: string;
   legalArea: string;
+  clientId?: string;
 };
 
 export const listCases = (filters: CaseFilters) => {

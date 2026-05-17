@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { Link, useParams } from "react-router";
+import { listCases } from "src/services/cases.js";
 import { ClientStatus, getClient, updateClientStatus } from "src/services/clients.js";
 import { fieldValue, formatDate } from "src/utils/format.js";
+import { ClientCasesList } from "src/features/clients/detail/ClientCasesList.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
 import { labelClientStatus, labelClientType } from "src/features/clients/utils/clientLabels.js";
 
@@ -10,6 +12,11 @@ export const ClientDetailsPage = () => {
   const { id = "" } = useParams();
   const queryClient = useQueryClient();
   const client = useQuery({ queryKey: ["client", id], queryFn: () => getClient(id), enabled: Boolean(id) });
+  const cases = useQuery({
+    queryKey: ["cases", "client", id],
+    queryFn: () => listCases({ q: "", status: "all", caseType: "all", stage: "all", legalArea: "all", clientId: id }),
+    enabled: Boolean(id)
+  });
   const statusMutation = useMutation({
     mutationFn: (status: ClientStatus) => updateClientStatus(id, status),
     onSuccess: (updated) => {
@@ -51,6 +58,10 @@ export const ClientDetailsPage = () => {
         <ClientDetailItem label="Criado em" value={formatDate(client.data.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(client.data.updatedAt)} />
       </section>
+
+      {cases.isLoading ? <p>Carregando processos do cliente...</p> : null}
+      {cases.isError ? <p className="alert">Não foi possível carregar os processos do cliente.</p> : null}
+      {cases.data ? <ClientCasesList cases={cases.data} /> : null}
     </>
   );
 };
