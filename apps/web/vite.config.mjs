@@ -4,6 +4,6 @@ export default {
     port: 5173
   },
   optimizeDeps: {
-    include: ["lucide-react", "react", "react-dom/client", "react/jsx-runtime"]
+    include: ["@hookform/resolvers/zod", "lucide-react", "react", "react-dom/client", "react-hook-form", "react/jsx-runtime"]
   }
 };

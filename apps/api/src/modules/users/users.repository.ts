@@ -31,11 +31,10 @@ function toUserRecord(user: DbUser): UserRecord {
 }
 
 function writeData(data: CreateUserData | UpdateUserData) {
-  return {
-    ...data,
-    role: data.role ? toDbRole(data.role) : undefined,
-    status: "status" in data && data.status ? toDbStatus(data.status) : undefined
-  };
+  const write: Record<string, unknown> = { ...data };
+  if (data.role) write.role = toDbRole(data.role);
+  if ("status" in data && data.status) write.status = toDbStatus(data.status);
+  return write;
 }
 
 function listWhere(filters: UserListFilters): Prisma.UserWhereInput {

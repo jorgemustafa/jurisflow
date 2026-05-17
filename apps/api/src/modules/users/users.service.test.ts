@@ -86,4 +86,26 @@ describe("users service", () => {
     expect(user.passwordHash).toBeTruthy();
     await expect(verifyPassword("password123", user.passwordHash!)).resolves.toBe(true);
   });
+
+  it("hashes passwords on update", async () => {
+    const repository = createRepository([
+      {
+        id: "user-1",
+        name: "Dra. Ana",
+        email: "ana@jurisflow.test",
+        passwordHash: null,
+        role: "lawyer",
+        status: "active",
+        createdAt: now,
+        updatedAt: now
+      }
+    ]);
+    const service = createUsersService(repository);
+
+    const user = await service.update("user-1", { password: "newpass123" });
+
+    expect(user.passwordHash).not.toBe("newpass123");
+    expect(user.passwordHash).toBeTruthy();
+    await expect(verifyPassword("newpass123", user.passwordHash!)).resolves.toBe(true);
+  });
 });
