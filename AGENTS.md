@@ -10,6 +10,7 @@ Be direct, pragmatic, and concise. Keep the codebase small and clean. Avoid new 
 4. Update or add tests for real business rules.
 5. Do not create shallow tests that only mock behavior to pass.
 6. Follow the nearest existing pattern before creating a new one.
+7. You must document every new or updated business rule
 
 ## Before Committing
 
