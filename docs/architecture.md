@@ -17,6 +17,8 @@ Follow `docs/frontend-patterns.md` for web folder structure, service boundaries,
 
 `packages/shared` is a contract package, not a general-purpose common folder.
 
+Current shared-package review lives in `docs/shared-package-review.md`.
+
 Use it for code that must stay aligned between API and web:
 
 - Domain types and enums.

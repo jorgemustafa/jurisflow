@@ -102,12 +102,12 @@
 
 ## Technical Debt
 
-- [ ] improve workspace scripts after dev workflow stabilizes
-- [ ] review shared package usage before adding runtime contracts
+- [x] improve workspace scripts after dev workflow stabilizes
+- [x] review shared package usage before adding runtime contracts
 - [x] add lint rules after first modules are implemented
 - [x] decide Docker strategy for local development
 - [x] verify full Docker runtime
-- [ ] document local Node/npm setup quirks on Windows
+- [x] document local Node/npm setup quirks on Windows
 - [x] document auth flow and Postman usage
 - [x] document pre-commit verification requirements
 - [x] document frontend stack and shared package boundaries
@@ -141,5 +141,5 @@
 
 Working on:
 
-- Technical debt
-- local Node/npm setup quirks on Windows
+- MVP backlog complete
+- ready for next product slice
