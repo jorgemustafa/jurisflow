@@ -69,7 +69,7 @@
 - [x] case list page
 - [x] link case to client
 - [x] CNJ number validation
-- [ ] timeline events
+- [x] timeline events
 - [ ] document links
 - [ ] deadline alerts
 
@@ -142,4 +142,4 @@
 Working on:
 
 - Phase 5 case management
-- timeline events
+- document links

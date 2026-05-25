@@ -1,22 +1,53 @@
-import { useQuery } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Pencil, Plus } from "lucide-react";
+import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
-import { getCase } from "src/services/cases.js";
+import { createCaseTimelineEvent, getCase, listCaseTimeline, type CaseTimelineEventFormData, type CaseTimelineEventType } from "src/services/cases.js";
+import { ApiError } from "src/services/http.js";
 import { fieldValue, formatDate, formatMoney } from "src/utils/format.js";
-import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea } from "src/features/cases/utils/caseLabels.js";
+import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea, labelTimelineType } from "src/features/cases/utils/caseLabels.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
 const optionalMoney = (value: number | null) => (value === null ? "Não informado" : formatMoney(value));
+const today = () => new Date().toISOString().slice(0, 10);
+
+const timelineTypes: CaseTimelineEventType[] = ["note", "hearing", "petition", "decision", "status_change", "other"];
+
+const emptyTimelineForm = (): CaseTimelineEventFormData => ({
+  type: "note",
+  title: "",
+  description: "",
+  occurredAt: today()
+});
 
 export const CaseDetailsPage = () => {
   const { id = "" } = useParams();
+  const [timelineForm, setTimelineForm] = useState<CaseTimelineEventFormData>(emptyTimelineForm);
+  const [timelineError, setTimelineError] = useState("");
+  const queryClient = useQueryClient();
   const legalCase = useQuery({ queryKey: ["case", id], queryFn: () => getCase(id), enabled: Boolean(id) });
+  const timeline = useQuery({ queryKey: ["case-timeline", id], queryFn: () => listCaseTimeline(id), enabled: Boolean(id) });
+  const createTimelineMutation = useMutation({
+    mutationFn: (data: CaseTimelineEventFormData) => createCaseTimelineEvent(id, data),
+    onSuccess: async () => {
+      setTimelineForm(emptyTimelineForm());
+      setTimelineError("");
+      await queryClient.invalidateQueries({ queryKey: ["case-timeline", id] });
+    },
+    onError: (failure) => {
+      setTimelineError(failure instanceof ApiError ? failure.message : "Não foi possível registrar o andamento.");
+    }
+  });
 
   if (legalCase.isLoading) return <p>Carregando processo...</p>;
   if (legalCase.isError || !legalCase.data) return <p className="alert">Processo não encontrado.</p>;
 
   const item = legalCase.data;
+  const submitTimeline = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    createTimelineMutation.mutate(timelineForm);
+  };
 
   return (
     <>
@@ -57,6 +88,61 @@ export const CaseDetailsPage = () => {
         <ClientDetailItem label="Responsável" value={fieldValue(item.responsibleUserId)} />
         <ClientDetailItem label="Criado em" value={formatDate(item.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(item.updatedAt)} />
+      </section>
+
+      <section className="panel timeline-panel">
+        <h2>Andamentos</h2>
+        <form className="timeline-form" onSubmit={submitTimeline}>
+          <select
+            value={timelineForm.type}
+            onChange={(event) => setTimelineForm((current) => ({ ...current, type: event.target.value as CaseTimelineEventType }))}
+          >
+            {timelineTypes.map((type) => (
+              <option key={type} value={type}>
+                {labelTimelineType(type)}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            value={timelineForm.occurredAt}
+            onChange={(event) => setTimelineForm((current) => ({ ...current, occurredAt: event.target.value }))}
+          />
+          <input
+            placeholder="Título"
+            value={timelineForm.title}
+            onChange={(event) => setTimelineForm((current) => ({ ...current, title: event.target.value }))}
+          />
+          <textarea
+            placeholder="Descrição"
+            rows={3}
+            value={timelineForm.description}
+            onChange={(event) => setTimelineForm((current) => ({ ...current, description: event.target.value }))}
+          />
+          <button className="button primary" disabled={createTimelineMutation.isPending}>
+            <Plus size={18} />
+            Registrar
+          </button>
+        </form>
+        {timelineError ? <p className="alert">{timelineError}</p> : null}
+        {timeline.isLoading ? <p>Carregando andamentos...</p> : null}
+        {timeline.isError ? <p className="alert">Não foi possível carregar os andamentos.</p> : null}
+        {timeline.data?.length === 0 ? <p className="empty">Nenhum andamento registrado.</p> : null}
+        {timeline.data?.length ? (
+          <div className="timeline-list">
+            {timeline.data.map((event) => (
+              <article className="timeline-item" key={event.id}>
+                <div>
+                  <span>{labelTimelineType(event.type)}</span>
+                  <strong>{event.title}</strong>
+                  {event.description ? <p>{event.description}</p> : null}
+                  <small>{event.createdByUserName ?? "Usuário não informado"}</small>
+                </div>
+                <time>{formatDate(event.occurredAt)}</time>
+              </article>
+            ))}
+          </div>
+        ) : null}
       </section>
     </>
   );

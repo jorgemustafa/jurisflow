@@ -1,4 +1,4 @@
-import type { CaseStage, CaseStatus, CaseType, LegalArea } from "src/services/cases.js";
+import type { CaseStage, CaseStatus, CaseTimelineEventType, CaseType, LegalArea } from "src/services/cases.js";
 
 const caseTypeLabels: Record<CaseType, string> = {
   judicial: "Judicial",
@@ -32,7 +32,17 @@ const legalAreaLabels: Record<LegalArea, string> = {
   other: "Outro"
 };
 
+const timelineTypeLabels: Record<CaseTimelineEventType, string> = {
+  note: "Nota",
+  hearing: "Audiência",
+  petition: "Petição",
+  decision: "Decisão",
+  status_change: "Mudança de status",
+  other: "Outro"
+};
+
 export const labelCaseType = (value: CaseType) => caseTypeLabels[value];
 export const labelCaseStatus = (value: CaseStatus) => caseStatusLabels[value];
 export const labelCaseStage = (value: CaseStage | null) => (value ? caseStageLabels[value] : "Não informado");
 export const labelLegalArea = (value: LegalArea | null) => (value ? legalAreaLabels[value] : "Não informado");
+export const labelTimelineType = (value: CaseTimelineEventType) => timelineTypeLabels[value];

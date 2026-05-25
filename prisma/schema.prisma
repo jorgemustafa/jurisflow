@@ -35,6 +35,7 @@ model User {
   role         UserRole   @default(LAWYER)
   status       UserStatus @default(ACTIVE)
   cases        Case[]
+  timelineEvents CaseTimelineEvent[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
@@ -61,6 +62,7 @@ model Case {
   responsibleUser     User?      @relation(fields: [responsibleUserId], references: [id])
   payments            Payment[]
   documents           Document[]
+  timelineEvents      CaseTimelineEvent[]
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
@@ -115,6 +117,24 @@ model Document {
   updatedAt DateTime @updatedAt
 }
 
+model CaseTimelineEvent {
+  id              String                @id @default(uuid())
+  caseId          String
+  createdByUserId String?
+  type            CaseTimelineEventType
+  title           String
+  description     String?
+  occurredAt      DateTime
+  case            Case                  @relation(fields: [caseId], references: [id])
+  createdByUser   User?                 @relation(fields: [createdByUserId], references: [id])
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([caseId, occurredAt])
+  @@index([createdByUserId])
+  @@index([type])
+}
+
 enum CaseStatus {
   ACTIVE
   ON_HOLD
@@ -154,6 +174,15 @@ enum LegalArea {
   CONSUMER
   BUSINESS
   SOCIAL_SECURITY
+  OTHER
+}
+
+enum CaseTimelineEventType {
+  NOTE
+  HEARING
+  PETITION
+  DECISION
+  STATUS_CHANGE
   OTHER
 }
 

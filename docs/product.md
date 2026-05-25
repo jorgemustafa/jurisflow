@@ -47,6 +47,7 @@ Secondary users:
 - Allow creating a case directly from a client page; the new case remains linked to that client.
 - Allow editing case details from the case detail page.
 - Track case status, CNJ number, area, responsible person, and relevant dates.
+- Register timeline events for important case activity, such as notes, hearings, petitions, decisions, and status changes.
 - Values, value of each installment, number of installment, total value
 - Link documents, financial records, and client history.
 - A client can have multiple cases, but one case is linked to only one client

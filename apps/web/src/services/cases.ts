@@ -4,6 +4,7 @@ export type CaseType = "judicial" | "extrajudicial";
 export type CaseStatus = "active" | "on_hold" | "closed" | "canceled";
 export type CaseStage = "initial" | "hearing_scheduled" | "waiting_decision" | "appeal" | "enforcement";
 export type LegalArea = "civil" | "labor" | "family" | "criminal" | "tax" | "consumer" | "business" | "social_security" | "other";
+export type CaseTimelineEventType = "note" | "hearing" | "petition" | "decision" | "status_change" | "other";
 
 export type LegalCase = {
   id: string;
@@ -53,6 +54,26 @@ export type CaseFormData = {
   closedAt: string;
 };
 
+export type CaseTimelineEvent = {
+  id: string;
+  caseId: string;
+  createdByUserId: string | null;
+  createdByUserName: string | null;
+  type: CaseTimelineEventType;
+  title: string;
+  description: string | null;
+  occurredAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CaseTimelineEventFormData = {
+  type: CaseTimelineEventType;
+  title: string;
+  description: string;
+  occurredAt: string;
+};
+
 export const listCases = (filters: CaseFilters) => {
   return request<LegalCase[]>(`/cases${searchParams(filters)}`);
 };
@@ -67,4 +88,12 @@ export const createCase = (data: CaseFormData) => {
 
 export const updateCase = (id: string, data: CaseFormData) => {
   return request<LegalCase>(`/cases/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+};
+
+export const listCaseTimeline = (caseId: string) => {
+  return request<CaseTimelineEvent[]>(`/cases/${caseId}/timeline`);
+};
+
+export const createCaseTimelineEvent = (caseId: string, data: CaseTimelineEventFormData) => {
+  return request<CaseTimelineEvent>(`/cases/${caseId}/timeline`, { method: "POST", body: JSON.stringify(data) });
 };
