@@ -43,6 +43,7 @@ const statuses = ["ACTIVE", "ON_HOLD", "CLOSED", "CANCELED"] as const;
 const stages = ["INITIAL", "HEARING_SCHEDULED", "WAITING_DECISION", "APPEAL", "ENFORCEMENT"] as const;
 const methods = ["PIX", "CASH", "BANK_TRANSFER", "CREDIT_CARD", "DEBIT_CARD", "BOLETO", "OTHER"] as const;
 const timelineTypes = ["NOTE", "HEARING", "PETITION", "DECISION", "STATUS_CHANGE", "OTHER"] as const;
+const deadlineStatuses = ["PENDING", "PENDING", "PENDING", "DONE", "CANCELED"] as const;
 
 const timelineTitles = [
   "Cliente enviou documentos",
@@ -153,6 +154,7 @@ async function seed() {
   await prisma.payment.deleteMany({ where: { description: { startsWith: "[DEMO]" } } });
   await prisma.document.deleteMany({ where: { name: { startsWith: "[DEMO]" } } });
   await prisma.caseTimelineEvent.deleteMany({ where: { title: { startsWith: "[DEMO]" } } });
+  await prisma.caseDeadline.deleteMany({ where: { title: { startsWith: "[DEMO]" } } });
 
   await prisma.payment.createMany({
     data: cases.map((item, index) => {
@@ -203,7 +205,23 @@ async function seed() {
     )
   });
 
-  console.log(`Seeded ${count} users, clients, cases, payments, documents, and timeline events.`);
+  await prisma.caseDeadline.createMany({
+    data: cases.flatMap((item, index) =>
+      [0, 1].map((deadlineIndex) => {
+        const status = deadlineStatuses[(index + deadlineIndex) % deadlineStatuses.length];
+        return {
+          caseId: item.id,
+          title: `[DEMO] ${deadlineIndex === 0 ? "Protocolar manifestação" : "Conferir publicação"}`,
+          description: "[DEMO] Prazo criado para validar alertas de vencimento.",
+          dueAt: date(index % 4 === 0 ? -1 : deadlineIndex, 6 + ((index + deadlineIndex) % 18)),
+          status,
+          completedAt: status === "DONE" ? date(0, 12) : null
+        };
+      })
+    )
+  });
+
+  console.log(`Seeded ${count} users, clients, cases, payments, documents, timeline events, and deadlines.`);
   console.log("Demo login: demo.user.1@jurisflow.local / demo1234");
 }
 

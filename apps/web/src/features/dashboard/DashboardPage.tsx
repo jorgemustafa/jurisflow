@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listCases } from "src/services/cases.js";
 import { listClients } from "src/services/clients.js";
+import { listDeadlines } from "src/services/deadlines.js";
 import { getFinanceDashboard } from "src/services/finance.js";
 import { formatMoney } from "src/utils/format.js";
 import { Metric } from "src/features/finance/Metric.js";
@@ -22,9 +23,13 @@ export const DashboardPage = () => {
     queryKey: ["cases", "dashboard"],
     queryFn: () => listCases({ q: "", status: "all", caseType: "all", stage: "all", legalArea: "all" })
   });
+  const deadlines = useQuery({
+    queryKey: ["deadlines", "dashboard"],
+    queryFn: () => listDeadlines({ status: "pending", alertWindowDays: "7" })
+  });
 
-  const isLoading = finance.isLoading || clients.isLoading || cases.isLoading;
-  const isError = finance.isError || clients.isError || cases.isError;
+  const isLoading = finance.isLoading || clients.isLoading || cases.isLoading || deadlines.isLoading;
+  const isError = finance.isError || clients.isError || cases.isError || deadlines.isError;
 
   const activeClients = clients.data?.filter((client) => client.status === "active").length ?? 0;
   const inactiveClients = clients.data?.filter((client) => client.status === "inactive").length ?? 0;
@@ -39,6 +44,7 @@ export const DashboardPage = () => {
     (finance.data?.receivedInMonthCents ?? 0) + (finance.data?.dueInMonthCents ?? 0) + (finance.data?.overdueAmountCents ?? 0);
   const overdueCount = finance.data?.overduePayments.length ?? 0;
   const upcomingCount = finance.data?.upcomingPayments.length ?? 0;
+  const deadlineAlerts = deadlines.data?.filter((item) => item.alertLevel !== "none").length ?? 0;
 
   return (
     <>
@@ -61,7 +67,7 @@ export const DashboardPage = () => {
             <Metric label="Em atraso" value={formatMoney(finance.data?.overdueAmountCents ?? 0)} />
             <Metric label="Clientes ativos" value={String(activeClients)} />
             <Metric label="Processos ativos" value={String(activeCases)} />
-            <Metric label="Alertas financeiros" value={String(overdueCount)} />
+            <Metric label="Alertas de prazo" value={String(deadlineAlerts)} />
           </section>
 
           <section className="chart-grid">
@@ -105,7 +111,8 @@ export const DashboardPage = () => {
                 { label: "Clientes inativos", value: inactiveClients, color: "#9a3412" },
                 { label: "Judiciais", value: judicialCases, color: "#2563eb" },
                 { label: "Extrajudiciais", value: extrajudicialCases, color: "#7c3aed" },
-                { label: "Vencimentos", value: upcomingCount, color: "#64748b" }
+                { label: "Financeiro", value: upcomingCount + overdueCount, color: "#64748b" },
+                { label: "Prazos", value: deadlineAlerts, color: "#b42318" }
               ]}
             />
           </section>

@@ -368,6 +368,10 @@ textarea {
   grid-template-columns: minmax(260px, 1fr) 190px;
 }
 
+.deadlines-toolbar {
+  grid-template-columns: minmax(260px, 1fr) 170px 120px;
+}
+
 .documents-toolbar {
   grid-template-columns: minmax(260px, 1fr) 180px;
 }
@@ -464,6 +468,22 @@ tr:last-child td {
   background: #fee2e2;
 }
 
+.badge.overdue {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.badge.due_soon {
+  color: #854d0e;
+  background: #fef3c7;
+}
+
+.badge.none,
+.badge.done {
+  color: #0f5f3e;
+  background: #dff3e8;
+}
+
 .details-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -542,6 +562,17 @@ tr:last-child td {
   align-items: start;
 }
 
+.deadline-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 150px auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.deadline-form textarea {
+  grid-column: 1 / -2;
+}
+
 .timeline-form textarea {
   grid-column: 1 / -2;
 }
@@ -615,6 +646,7 @@ tr:last-child td {
   .toolbar,
   .timeline-form,
   .document-form,
+  .deadline-form,
   .details-grid,
   .metric-grid,
   .chart-grid,
@@ -637,6 +669,10 @@ tr:last-child td {
   }
 
   .timeline-form textarea {
+    grid-column: auto;
+  }
+
+  .deadline-form textarea {
     grid-column: auto;
   }
 

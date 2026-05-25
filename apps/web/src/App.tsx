@@ -14,6 +14,7 @@ import { CreateClientPage } from "src/features/clients/CreateClientPage.js";
 import { UpdateClientPage } from "src/features/clients/UpdateClientPage.js";
 import { FinancePage } from "src/features/finance/FinancePage.js";
 import { TimelinePage } from "src/features/timeline/TimelinePage.js";
+import { DeadlinesPage } from "src/features/deadlines/DeadlinesPage.js";
 import { Layout } from "src/layout/Layout.js";
 
 export const App = () => {
@@ -37,6 +38,7 @@ export const App = () => {
                   <Route path="/cases/:id" element={<CaseDetailsPage />} />
                   <Route path="/cases/:id/edit" element={<UpdateCasePage />} />
                   <Route path="/timeline" element={<TimelinePage />} />
+                  <Route path="/deadlines" element={<DeadlinesPage />} />
                   <Route path="/finance" element={<FinancePage />} />
                   <Route path="/documents" element={<DocumentsPage />} />
                 </Routes>

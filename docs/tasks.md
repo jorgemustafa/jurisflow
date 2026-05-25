@@ -71,7 +71,7 @@
 - [x] CNJ number validation
 - [x] timeline events
 - [x] document links
-- [ ] deadline alerts
+- [x] deadline alerts
 
 ---
 
@@ -141,5 +141,5 @@
 
 Working on:
 
-- Phase 5 case management
-- deadline alerts
+- Technical debt
+- local Node/npm setup quirks on Windows

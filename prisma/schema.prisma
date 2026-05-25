@@ -63,6 +63,7 @@ model Case {
   payments            Payment[]
   documents           Document[]
   timelineEvents      CaseTimelineEvent[]
+  deadlines           CaseDeadline[]
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
@@ -119,6 +120,22 @@ model Document {
   @@index([clientId])
   @@index([caseId])
   @@index([mimeType])
+}
+
+model CaseDeadline {
+  id          String             @id @default(uuid())
+  caseId      String
+  title       String
+  description String?
+  dueAt       DateTime
+  status      CaseDeadlineStatus @default(PENDING)
+  completedAt DateTime?
+  case        Case               @relation(fields: [caseId], references: [id])
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([caseId, dueAt])
+  @@index([status, dueAt])
 }
 
 model CaseTimelineEvent {
@@ -188,6 +205,12 @@ enum CaseTimelineEventType {
   DECISION
   STATUS_CHANGE
   OTHER
+}
+
+enum CaseDeadlineStatus {
+  PENDING
+  DONE
+  CANCELED
 }
 
 enum UserRole {

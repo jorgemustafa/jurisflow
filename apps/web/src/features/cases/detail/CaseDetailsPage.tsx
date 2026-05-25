@@ -7,8 +7,10 @@ import { ApiError } from "src/services/http.js";
 import { fieldValue, formatDate, formatMoney } from "src/utils/format.js";
 import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea, labelTimelineType } from "src/features/cases/utils/caseLabels.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
+import { DeadlineList } from "src/features/deadlines/DeadlineList.js";
 import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
 import { listDocuments } from "src/services/documents.js";
+import { createDeadline, listDeadlines, updateDeadlineStatus, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
 const optionalMoney = (value: number | null) => (value === null ? "Não informado" : formatMoney(value));
@@ -23,14 +25,27 @@ const emptyTimelineForm = (): CaseTimelineEventFormData => ({
   occurredAt: today()
 });
 
+const emptyDeadlineForm = (): DeadlineFormData => ({
+  title: "",
+  description: "",
+  dueAt: today()
+});
+
 export const CaseDetailsPage = () => {
   const { id = "" } = useParams();
   const [timelineForm, setTimelineForm] = useState<CaseTimelineEventFormData>(emptyTimelineForm);
+  const [deadlineForm, setDeadlineForm] = useState<DeadlineFormData>(emptyDeadlineForm);
   const [timelineError, setTimelineError] = useState("");
+  const [deadlineError, setDeadlineError] = useState("");
   const queryClient = useQueryClient();
   const legalCase = useQuery({ queryKey: ["case", id], queryFn: () => getCase(id), enabled: Boolean(id) });
   const timeline = useQuery({ queryKey: ["case-timeline", id], queryFn: () => listCaseTimeline(id), enabled: Boolean(id) });
   const documents = useQuery({ queryKey: ["documents", "case", id], queryFn: () => listDocuments({ caseId: id }), enabled: Boolean(id) });
+  const deadlines = useQuery({
+    queryKey: ["deadlines", "case", id],
+    queryFn: () => listDeadlines({ caseId: id, status: "all", alertWindowDays: "7" }),
+    enabled: Boolean(id)
+  });
   const createTimelineMutation = useMutation({
     mutationFn: (data: CaseTimelineEventFormData) => createCaseTimelineEvent(id, data),
     onSuccess: async () => {
@@ -42,6 +57,23 @@ export const CaseDetailsPage = () => {
       setTimelineError(failure instanceof ApiError ? failure.message : "Não foi possível registrar o andamento.");
     }
   });
+  const createDeadlineMutation = useMutation({
+    mutationFn: (data: DeadlineFormData) => createDeadline(id, data),
+    onSuccess: async () => {
+      setDeadlineForm(emptyDeadlineForm());
+      setDeadlineError("");
+      await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
+    },
+    onError: (failure) => {
+      setDeadlineError(failure instanceof ApiError ? failure.message : "Não foi possível cadastrar o prazo.");
+    }
+  });
+  const deadlineStatusMutation = useMutation({
+    mutationFn: ({ deadlineId, status }: { deadlineId: string; status: DeadlineStatus }) => updateDeadlineStatus(deadlineId, status),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
+    }
+  });
 
   if (legalCase.isLoading) return <p>Carregando processo...</p>;
   if (legalCase.isError || !legalCase.data) return <p className="alert">Processo não encontrado.</p>;
@@ -50,6 +82,10 @@ export const CaseDetailsPage = () => {
   const submitTimeline = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     createTimelineMutation.mutate(timelineForm);
+  };
+  const submitDeadline = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    createDeadlineMutation.mutate(deadlineForm);
   };
 
   return (
@@ -98,6 +134,38 @@ export const CaseDetailsPage = () => {
         {documents.isLoading ? <p>Carregando documentos do processo...</p> : null}
         {documents.isError ? <p className="alert">Não foi possível carregar os documentos do processo.</p> : null}
         {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
+      </section>
+
+      <section className="panel timeline-panel">
+        <h2>Prazos</h2>
+        <form className="deadline-form" onSubmit={submitDeadline}>
+          <input
+            placeholder="Título do prazo"
+            value={deadlineForm.title}
+            onChange={(event) => setDeadlineForm((current) => ({ ...current, title: event.target.value }))}
+          />
+          <input type="date" value={deadlineForm.dueAt} onChange={(event) => setDeadlineForm((current) => ({ ...current, dueAt: event.target.value }))} />
+          <textarea
+            placeholder="Descrição"
+            rows={3}
+            value={deadlineForm.description}
+            onChange={(event) => setDeadlineForm((current) => ({ ...current, description: event.target.value }))}
+          />
+          <button className="button primary" disabled={createDeadlineMutation.isPending}>
+            <Plus size={18} />
+            Cadastrar
+          </button>
+        </form>
+        {deadlineError ? <p className="alert">{deadlineError}</p> : null}
+        {deadlines.isLoading ? <p>Carregando prazos...</p> : null}
+        {deadlines.isError ? <p className="alert">Não foi possível carregar os prazos do processo.</p> : null}
+        {deadlines.data ? (
+          <DeadlineList
+            deadlines={deadlines.data}
+            isUpdating={deadlineStatusMutation.isPending}
+            onStatusChange={(deadlineId, status) => deadlineStatusMutation.mutate({ deadlineId, status })}
+          />
+        ) : null}
       </section>
 
       <section className="panel timeline-panel">

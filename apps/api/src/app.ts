@@ -4,6 +4,7 @@ import { authRoutes } from "./modules/auth/auth.routes.js";
 import { caseTimelineRoutes } from "./modules/cases/case-timeline.routes.js";
 import { casesRoutes } from "./modules/cases/cases.routes.js";
 import { clientsRoutes } from "./modules/clients/clients.routes.js";
+import { deadlinesRoutes } from "./modules/deadlines/deadlines.routes.js";
 import { documentsRoutes } from "./modules/documents/documents.routes.js";
 import { financeRoutes } from "./modules/finance/finance.routes.js";
 import { paymentsRoutes } from "./modules/payments/payments.routes.js";
@@ -23,6 +24,7 @@ export function buildApp() {
   app.register(casesRoutes, { prefix: "/cases" });
   app.register(caseTimelineRoutes, { prefix: "/timeline" });
   app.register(documentsRoutes, { prefix: "/documents" });
+  app.register(deadlinesRoutes);
   app.register(paymentsRoutes);
   app.register(financeRoutes);
 
