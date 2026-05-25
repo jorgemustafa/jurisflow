@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link } from "react-router";
 import { listCases } from "src/services/cases.js";
 import { listClients } from "src/services/clients.js";
 import { getFinanceDashboard } from "src/services/finance.js";
 import { formatMoney } from "src/utils/format.js";
-import { appModules } from "src/utils/appModules.js";
 import { Metric } from "src/features/finance/Metric.js";
 import { currentMonth } from "src/features/finance/utils/currentMonth.js";
 import { DashboardBarChart } from "src/features/dashboard/DashboardBarChart.js";
@@ -110,15 +108,6 @@ export const DashboardPage = () => {
                 { label: "Vencimentos", value: upcomingCount, color: "#64748b" }
               ]}
             />
-          </section>
-
-          <section className="module-grid">
-            {appModules.map((module) => (
-              <Link className="module-card" to={module.path} key={module.name}>
-                <module.icon size={22} />
-                <h2>{module.name}</h2>
-              </Link>
-            ))}
           </section>
         </>
       ) : null}

@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyReply } from "fastify";
 import { ZodError } from "zod";
 import { parseBody } from "../../shared/http/validate.js";
 import { usersRepository } from "../users/users.repository.js";
-import { loginSchema, refreshTokenSchema } from "./auth.schemas.js";
+import { forgotPasswordSchema, loginSchema, refreshTokenSchema, resetPasswordSchema } from "./auth.schemas.js";
 import { AuthSecretMissingError, InvalidCredentialsError, InvalidTokenError, createAuthService } from "./auth.service.js";
 
 const authService = createAuthService(usersRepository);
@@ -28,6 +28,22 @@ export async function authRoutes(app: FastifyInstance) {
     try {
       const { refreshToken } = parseBody(refreshTokenSchema, request.body);
       return authService.refresh(refreshToken);
+    } catch (error) {
+      return handleAuthError(error, reply);
+    }
+  });
+
+  app.post("/forgot-password", async (request, reply) => {
+    try {
+      return authService.requestPasswordReset(parseBody(forgotPasswordSchema, request.body));
+    } catch (error) {
+      return handleAuthError(error, reply);
+    }
+  });
+
+  app.post("/reset-password", async (request, reply) => {
+    try {
+      return authService.resetPassword(parseBody(resetPasswordSchema, request.body));
     } catch (error) {
       return handleAuthError(error, reply);
     }

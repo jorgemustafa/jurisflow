@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { ZodError } from "zod";
+import { requireAuth } from "../../shared/http/protected.js";
 import { parseBody } from "../../shared/http/validate.js";
 import { caseParamsSchema, createCaseSchema, listCasesQuerySchema, updateCaseSchema } from "./cases.schemas.js";
 import { casesRepository } from "./cases.repository.js";
@@ -27,6 +28,8 @@ function handleCaseError(error: unknown, reply: FastifyReply) {
 }
 
 export async function casesRoutes(app: FastifyInstance) {
+  app.addHook("preHandler", requireAuth());
+
   app.get("/", async (request, reply) => {
     try {
       return casesService.list(listCasesQuerySchema.parse(request.query));

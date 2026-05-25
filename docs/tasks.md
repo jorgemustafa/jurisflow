@@ -40,8 +40,8 @@
 - [x] password hashing
 - [x] refresh token flow
 - [x] login page
-- [ ] forgot password
-- [ ] RBAC middleware
+- [x] forgot password
+- [x] RBAC middleware
 - [x] authenticated layout
 
 ---
@@ -141,5 +141,5 @@
 
 Working on:
 
-- Phase 3 authentication
-- backend auth endpoints
+- Phase 5 case management
+- timeline events

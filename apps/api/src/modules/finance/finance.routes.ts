@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { ZodError } from "zod";
+import { requireAuth } from "../../shared/http/protected.js";
 import { financeRepository } from "./finance.repository.js";
 import { financeDashboardQuerySchema } from "./finance.schemas.js";
 import { createFinanceService } from "./finance.service.js";
@@ -12,6 +13,8 @@ function handleFinanceError(error: unknown, reply: FastifyReply) {
 }
 
 export async function financeRoutes(app: FastifyInstance) {
+  app.addHook("preHandler", requireAuth());
+
   app.get("/finance/dashboard", async (request, reply) => {
     try {
       return financeService.dashboard(financeDashboardQuerySchema.parse(request.query));

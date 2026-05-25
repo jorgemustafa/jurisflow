@@ -61,7 +61,7 @@ Current auth documentation lives in `docs/authentication.md`.
 - Access token lifetime is 15 minutes.
 - Refresh token lifetime is 7 days.
 - Refresh tokens are currently stateless; revocation storage is future work.
-- RBAC middleware is not implemented yet.
+- RBAC middleware protects operational API routes and restricts `/users` to admins.
 
 ## Initial Domains
 

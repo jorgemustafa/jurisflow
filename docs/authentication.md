@@ -13,15 +13,44 @@ Implemented:
 - Refresh endpoint.
 - Current-user endpoint.
 - Frontend login screen and authenticated layout.
+- RBAC middleware.
+- Protected API routes for clients, cases, payments, finance, and users.
+- Forgot password API endpoints.
 
 Not implemented yet:
 
-- RBAC middleware.
-- Protected API routes beyond `/auth/me`.
-- Forgot password.
+- Email delivery for forgot password.
 - Refresh token rotation/revocation storage.
 
-Until RBAC middleware is added, existing domain endpoints such as `/clients`, `/cases`, and `/payments` are still callable without a token.
+Public endpoints:
+
+- `GET /health`
+- `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /auth/forgot-password`
+- `POST /auth/reset-password`
+
+Protected endpoints:
+
+- `/clients`, `/cases`, `/payments`, and `/finance/dashboard` require any active authenticated user.
+- `/users` requires an active authenticated admin user.
+- `GET /auth/me` requires a valid access token and returns the current active user.
+
+RBAC rules:
+
+- Active `admin`, `lawyer`, and `assistant` users can access operational modules.
+- Only active `admin` users can list, create, update, or view internal users through `/users`.
+- Invalid, missing, expired, refresh-token, or inactive-user access attempts return `401`.
+- Authenticated users without the required role return `403`.
+
+Forgot password rules:
+
+- `POST /auth/forgot-password` always returns a generic success message, even when the email does not exist.
+- Only active users receive a reset token.
+- Until email delivery exists, non-production environments include `resetToken` in the response for local testing.
+- Production responses do not expose reset tokens.
+- Password reset tokens expire after 30 minutes and can only be used on `POST /auth/reset-password`.
+- Reset passwords must be 8 to 128 characters.
 
 ## Environment
 

@@ -15,6 +15,7 @@
 
 body {
   margin: 0;
+  overflow: hidden;
 }
 
 a {
@@ -32,13 +33,18 @@ textarea {
 .app-shell {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar {
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: column;
   gap: 28px;
+  height: 100vh;
+  overflow: hidden;
   padding: 28px 20px;
   color: #f8fafc;
   background: #132235;
@@ -88,6 +94,8 @@ textarea {
 .workspace {
   width: 100%;
   max-width: 1440px;
+  height: 100vh;
+  overflow-y: auto;
   padding: 40px;
 }
 
@@ -382,7 +390,8 @@ textarea {
 }
 
 .table-wrap {
-  overflow-x: auto;
+  max-height: calc(100vh - 260px);
+  overflow: auto;
   border: 1px solid #dde3ea;
   border-radius: 8px;
   background: #ffffff;
@@ -513,9 +522,11 @@ tr:last-child td {
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .sidebar {
+    height: auto;
     padding: 18px;
   }
 
@@ -533,6 +544,8 @@ tr:last-child td {
   }
 
   .workspace {
+    height: 100%;
+    min-height: 0;
     padding: 28px 18px;
   }
 

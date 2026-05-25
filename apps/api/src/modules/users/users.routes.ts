@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { ZodError } from "zod";
+import { requireAuth } from "../../shared/http/protected.js";
 import { parseBody } from "../../shared/http/validate.js";
 import { createUserSchema, listUsersQuerySchema, updateUserSchema, userParamsSchema } from "./users.schemas.js";
 import { usersRepository } from "./users.repository.js";
@@ -20,6 +21,8 @@ function handleUserError(error: unknown, reply: FastifyReply) {
 }
 
 export async function usersRoutes(app: FastifyInstance) {
+  app.addHook("preHandler", requireAuth(["admin"]));
+
   app.get("/", async (request, reply) => {
     try {
       const users = await usersService.list(listUsersQuerySchema.parse(request.query));

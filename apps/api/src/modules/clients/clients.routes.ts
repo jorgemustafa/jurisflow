@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
+import { requireAuth } from "../../shared/http/protected.js";
 import { ZodError } from "zod";
 import { parseBody } from "../../shared/http/validate.js";
 import { clientsRepository } from "./clients.repository.js";
@@ -43,6 +44,8 @@ function handleClientError(error: unknown, reply: FastifyReply) {
 }
 
 export async function clientsRoutes(app: FastifyInstance) {
+  app.addHook("preHandler", requireAuth());
+
   app.get("/", async (request, reply) => {
     try {
       const filters = listClientsQuerySchema.parse(request.query);

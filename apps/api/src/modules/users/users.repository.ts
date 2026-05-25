@@ -76,5 +76,10 @@ export const usersRepository = {
   async update(id: string, data: UpdateUserData) {
     const user = await prisma.user.update({ where: { id }, data: writeData(data) as Prisma.UserUncheckedUpdateInput });
     return toUserRecord(user as DbUser);
+  },
+
+  async updatePasswordHash(id: string, passwordHash: string) {
+    const user = await prisma.user.update({ where: { id }, data: { passwordHash } });
+    return toUserRecord(user as DbUser);
   }
 };

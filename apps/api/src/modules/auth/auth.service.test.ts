@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hashPassword } from "../../shared/security/password.js";
+import { hashPassword, verifyPassword } from "../../shared/security/password.js";
 import { createAuthService, InvalidCredentialsError, InvalidTokenError } from "./auth.service.js";
 import type { UserRecord } from "../users/users.service.js";
 
@@ -21,12 +21,18 @@ function createUser(overrides: Partial<UserRecord> = {}): UserRecord {
 }
 
 function createRepository(user: UserRecord | null) {
+  let storedUser = user;
   return {
     async findById(id: string) {
-      return user?.id === id ? user : null;
+      return storedUser?.id === id ? storedUser : null;
     },
     async findByEmail(email: string) {
-      return user?.email === email ? user : null;
+      return storedUser?.email === email ? storedUser : null;
+    },
+    async updatePasswordHash(id: string, passwordHash: string) {
+      if (!storedUser || storedUser.id !== id) throw new Error("User not found");
+      storedUser = { ...storedUser, passwordHash };
+      return storedUser;
     }
   };
 }
@@ -79,5 +85,45 @@ describe("auth service", () => {
     const login = await service.login({ email: user.email, password: "password123" });
 
     await expect(service.refresh(login.accessToken)).rejects.toBeInstanceOf(InvalidTokenError);
+  });
+
+  it("generates a password reset token for active users", async () => {
+    const user = createUser({ passwordHash: await hashPassword("password123") });
+    const service = createAuthService(createRepository(user), secret);
+
+    const result = await service.requestPasswordReset({ email: user.email }, true);
+
+    expect(result.message).toBe("If the email exists, password reset instructions were generated.");
+    expect(result.resetToken).toBeTruthy();
+  });
+
+  it("does not generate password reset tokens for unknown emails", async () => {
+    const service = createAuthService(createRepository(null), secret);
+
+    const result = await service.requestPasswordReset({ email: "missing@jurisflow.test" }, true);
+
+    expect(result).toEqual({ message: "If the email exists, password reset instructions were generated." });
+  });
+
+  it("resets the password with a valid reset token", async () => {
+    const user = createUser({ passwordHash: await hashPassword("password123") });
+    const repository = createRepository(user);
+    const service = createAuthService(repository, secret);
+    const reset = await service.requestPasswordReset({ email: user.email }, true);
+
+    await service.resetPassword({ resetToken: reset.resetToken!, password: "newpass123" });
+
+    const updated = await repository.findById(user.id);
+    await expect(verifyPassword("newpass123", updated!.passwordHash!)).resolves.toBe(true);
+  });
+
+  it("rejects access tokens in the password reset flow", async () => {
+    const user = createUser({ passwordHash: await hashPassword("password123") });
+    const service = createAuthService(createRepository(user), secret);
+    const login = await service.login({ email: user.email, password: "password123" });
+
+    await expect(service.resetPassword({ resetToken: login.accessToken, password: "newpass123" })).rejects.toBeInstanceOf(
+      InvalidTokenError
+    );
   });
 });

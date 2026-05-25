@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { ZodError } from "zod";
+import { requireAuth } from "../../shared/http/protected.js";
 import { parseBody } from "../../shared/http/validate.js";
 import { paymentsRepository } from "./payments.repository.js";
 import {
@@ -34,6 +35,8 @@ function handlePaymentError(error: unknown, reply: FastifyReply) {
 }
 
 export async function paymentsRoutes(app: FastifyInstance) {
+  app.addHook("preHandler", requireAuth());
+
   app.get("/payments", async (request, reply) => {
     try {
       return paymentsService.list(listPaymentsQuerySchema.parse(request.query));
