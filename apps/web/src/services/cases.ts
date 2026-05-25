@@ -37,6 +37,11 @@ export type CaseFilters = {
   clientId?: string;
 };
 
+export type TimelineFilters = {
+  q: string;
+  type: CaseTimelineEventType | "all";
+};
+
 export type CaseFormData = {
   clientId: string;
   caseType: CaseType;
@@ -59,6 +64,8 @@ export type CaseTimelineEvent = {
   caseId: string;
   createdByUserId: string | null;
   createdByUserName: string | null;
+  caseTitle: string | null;
+  clientName: string | null;
   type: CaseTimelineEventType;
   title: string;
   description: string | null;
@@ -96,4 +103,8 @@ export const listCaseTimeline = (caseId: string) => {
 
 export const createCaseTimelineEvent = (caseId: string, data: CaseTimelineEventFormData) => {
   return request<CaseTimelineEvent>(`/cases/${caseId}/timeline`, { method: "POST", body: JSON.stringify(data) });
+};
+
+export const listTimeline = (filters: TimelineFilters) => {
+  return request<CaseTimelineEvent[]>(`/timeline${searchParams(filters)}`);
 };

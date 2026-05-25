@@ -1,5 +1,6 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../../shared/db/prisma.js";
-import type { CaseTimelineEventType, CreateCaseTimelineEventInput } from "./case-timeline.schemas.js";
+import type { CaseTimelineEventType, CaseTimelineFilters, CreateCaseTimelineEventInput } from "./case-timeline.schemas.js";
 import type { CaseTimelineEventRecord } from "./case-timeline.service.js";
 
 type DbCaseTimelineEventType = "NOTE" | "HEARING" | "PETITION" | "DECISION" | "STATUS_CHANGE" | "OTHER";
@@ -15,6 +16,7 @@ type DbCaseTimelineEvent = {
   createdAt: Date;
   updatedAt: Date;
   createdByUser?: { name: string } | null;
+  case?: { title: string; client: { name: string } } | null;
 };
 
 const toDbType = (value: CaseTimelineEventType): DbCaseTimelineEventType => value.toUpperCase() as DbCaseTimelineEventType;
@@ -26,6 +28,8 @@ function toRecord(item: DbCaseTimelineEvent): CaseTimelineEventRecord {
     caseId: item.caseId,
     createdByUserId: item.createdByUserId,
     createdByUserName: item.createdByUser?.name ?? null,
+    caseTitle: item.case?.title ?? null,
+    clientName: item.case?.client.name ?? null,
     type: toApiType(item.type),
     title: item.title,
     description: item.description,
@@ -35,7 +39,25 @@ function toRecord(item: DbCaseTimelineEvent): CaseTimelineEventRecord {
   };
 }
 
-const includeUser = { createdByUser: { select: { name: true } } };
+const includeRelations = {
+  createdByUser: { select: { name: true } },
+  case: { select: { title: true, client: { select: { name: true } } } }
+};
+
+function listAllWhere(filters: CaseTimelineFilters): Prisma.CaseTimelineEventWhereInput {
+  const where: Prisma.CaseTimelineEventWhereInput = {};
+  if (filters.type !== "all") where.type = toDbType(filters.type);
+  if (filters.caseId) where.caseId = filters.caseId;
+  if (filters.q) {
+    where.OR = [
+      { title: { contains: filters.q, mode: "insensitive" } },
+      { description: { contains: filters.q, mode: "insensitive" } },
+      { case: { title: { contains: filters.q, mode: "insensitive" } } },
+      { case: { client: { name: { contains: filters.q, mode: "insensitive" } } } }
+    ];
+  }
+  return where;
+}
 
 export const caseTimelineRepository = {
   async findCaseById(id: string) {
@@ -45,7 +67,16 @@ export const caseTimelineRepository = {
   async list(caseId: string) {
     const items = await prisma.caseTimelineEvent.findMany({
       where: { caseId },
-      include: includeUser,
+      include: includeRelations,
+      orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }]
+    });
+    return items.map((item) => toRecord(item as DbCaseTimelineEvent));
+  },
+
+  async listAll(filters: CaseTimelineFilters) {
+    const items = await prisma.caseTimelineEvent.findMany({
+      where: listAllWhere(filters),
+      include: includeRelations,
       orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }]
     });
     return items.map((item) => toRecord(item as DbCaseTimelineEvent));
@@ -61,7 +92,7 @@ export const caseTimelineRepository = {
         description: data.description ?? null,
         occurredAt: data.occurredAt
       },
-      include: includeUser
+      include: includeRelations
     });
     return toRecord(item as DbCaseTimelineEvent);
   }

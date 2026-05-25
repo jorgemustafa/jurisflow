@@ -19,5 +19,12 @@ export const createCaseTimelineEventSchema = z.object({
   occurredAt: optionalDate
 });
 
+export const listCaseTimelineQuerySchema = z.object({
+  q: optionalText(100),
+  type: z.union([caseTimelineEventTypeSchema, z.literal("all")]).default("all"),
+  caseId: optionalText(80)
+});
+
 export type CaseTimelineEventType = z.infer<typeof caseTimelineEventTypeSchema>;
 export type CreateCaseTimelineEventInput = z.infer<typeof createCaseTimelineEventSchema>;
+export type CaseTimelineFilters = z.infer<typeof listCaseTimelineQuerySchema>;

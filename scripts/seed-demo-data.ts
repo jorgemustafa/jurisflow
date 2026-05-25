@@ -42,6 +42,16 @@ const caseTitles = [
 const statuses = ["ACTIVE", "ON_HOLD", "CLOSED", "CANCELED"] as const;
 const stages = ["INITIAL", "HEARING_SCHEDULED", "WAITING_DECISION", "APPEAL", "ENFORCEMENT"] as const;
 const methods = ["PIX", "CASH", "BANK_TRANSFER", "CREDIT_CARD", "DEBIT_CARD", "BOLETO", "OTHER"] as const;
+const timelineTypes = ["NOTE", "HEARING", "PETITION", "DECISION", "STATUS_CHANGE", "OTHER"] as const;
+
+const timelineTitles = [
+  "Cliente enviou documentos",
+  "Audiência designada",
+  "Petição protocolada",
+  "Decisão publicada",
+  "Status do processo revisado",
+  "Contato com cartório"
+];
 
 const pad = (value: number, length: number) => String(value).padStart(length, "0");
 const date = (monthOffset: number, day: number) => {
@@ -142,6 +152,7 @@ async function seed() {
 
   await prisma.payment.deleteMany({ where: { description: { startsWith: "[DEMO]" } } });
   await prisma.document.deleteMany({ where: { name: { startsWith: "[DEMO]" } } });
+  await prisma.caseTimelineEvent.deleteMany({ where: { title: { startsWith: "[DEMO]" } } });
 
   await prisma.payment.createMany({
     data: cases.map((item, index) => {
@@ -176,7 +187,23 @@ async function seed() {
     }))
   });
 
-  console.log(`Seeded ${count} users, clients, cases, payments, and documents.`);
+  await prisma.caseTimelineEvent.createMany({
+    data: cases.flatMap((item, caseIndex) =>
+      [0, 1, 2].map((eventIndex) => {
+        const type = timelineTypes[(caseIndex + eventIndex) % timelineTypes.length];
+        return {
+          caseId: item.id,
+          createdByUserId: users[(caseIndex + eventIndex) % users.length].id,
+          type,
+          title: `[DEMO] ${timelineTitles[(caseIndex + eventIndex) % timelineTitles.length]}`,
+          description: `[DEMO] Registro de andamento para validar a linha do tempo do processo ${item.title}.`,
+          occurredAt: date(-eventIndex, 8 + ((caseIndex + eventIndex) % 18))
+        };
+      })
+    )
+  });
+
+  console.log(`Seeded ${count} users, clients, cases, payments, documents, and timeline events.`);
   console.log("Demo login: demo.user.1@jurisflow.local / demo1234");
 }
 

@@ -1,6 +1,7 @@
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { authRoutes } from "./modules/auth/auth.routes.js";
+import { caseTimelineRoutes } from "./modules/cases/case-timeline.routes.js";
 import { casesRoutes } from "./modules/cases/cases.routes.js";
 import { clientsRoutes } from "./modules/clients/clients.routes.js";
 import { financeRoutes } from "./modules/finance/finance.routes.js";
@@ -19,6 +20,7 @@ export function buildApp() {
   app.register(clientsRoutes, { prefix: "/clients" });
   app.register(usersRoutes, { prefix: "/users" });
   app.register(casesRoutes, { prefix: "/cases" });
+  app.register(caseTimelineRoutes, { prefix: "/timeline" });
   app.register(paymentsRoutes);
   app.register(financeRoutes);
 

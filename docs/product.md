@@ -48,6 +48,7 @@ Secondary users:
 - Allow editing case details from the case detail page.
 - Track case status, CNJ number, area, responsible person, and relevant dates.
 - Register timeline events for important case activity, such as notes, hearings, petitions, decisions, and status changes.
+- Show a general timeline so the office can scan recent activity across all cases.
 - Values, value of each installment, number of installment, total value
 - Link documents, financial records, and client history.
 - A client can have multiple cases, but one case is linked to only one client

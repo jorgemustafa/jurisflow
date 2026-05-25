@@ -1,10 +1,12 @@
-import type { CaseTimelineEventType, CreateCaseTimelineEventInput } from "./case-timeline.schemas.js";
+import type { CaseTimelineEventType, CaseTimelineFilters, CreateCaseTimelineEventInput } from "./case-timeline.schemas.js";
 
 export type CaseTimelineEventRecord = {
   id: string;
   caseId: string;
   createdByUserId: string | null;
   createdByUserName: string | null;
+  caseTitle: string | null;
+  clientName: string | null;
   type: CaseTimelineEventType;
   title: string;
   description: string | null;
@@ -16,6 +18,7 @@ export type CaseTimelineEventRecord = {
 type CaseTimelineRepository = {
   findCaseById(id: string): Promise<{ id: string } | null>;
   list(caseId: string): Promise<CaseTimelineEventRecord[]>;
+  listAll(filters: CaseTimelineFilters): Promise<CaseTimelineEventRecord[]>;
   create(caseId: string, data: CreateCaseTimelineEventInput & { occurredAt: Date }, createdByUserId: string | null): Promise<CaseTimelineEventRecord>;
 };
 
@@ -35,6 +38,10 @@ export function createCaseTimelineService(repository: CaseTimelineRepository) {
     async list(caseId: string) {
       await ensureCase(caseId);
       return repository.list(caseId);
+    },
+
+    listAll(filters: CaseTimelineFilters) {
+      return repository.listAll(filters);
     },
 
     async create(caseId: string, input: CreateCaseTimelineEventInput, createdByUserId: string | null) {

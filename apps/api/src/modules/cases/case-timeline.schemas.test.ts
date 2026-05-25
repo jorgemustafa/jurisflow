@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCaseTimelineEventSchema } from "./case-timeline.schemas.js";
+import { createCaseTimelineEventSchema, listCaseTimelineQuerySchema } from "./case-timeline.schemas.js";
 
 describe("case timeline schemas", () => {
   it("accepts a minimal timeline event", () => {
@@ -28,5 +28,9 @@ describe("case timeline schemas", () => {
       description: undefined,
       occurredAt: new Date("2026-05-25T00:00:00.000Z")
     });
+  });
+
+  it("defaults global timeline listing to all event types", () => {
+    expect(listCaseTimelineQuerySchema.parse({})).toEqual({ type: "all" });
   });
 });

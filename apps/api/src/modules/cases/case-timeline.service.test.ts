@@ -10,6 +10,8 @@ function eventRecord(overrides: Partial<CaseTimelineEventRecord> = {}): CaseTime
     caseId: "case-1",
     createdByUserId: "user-1",
     createdByUserName: "Dra. Ana",
+    caseTitle: "Ação penal",
+    clientName: "Ana Silva",
     type: "note",
     title: "Cliente enviou documentos",
     description: null,
@@ -29,6 +31,9 @@ function createRepository() {
     },
     async list(caseId: string) {
       return events.filter((item) => item.caseId === caseId).sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+    },
+    async listAll() {
+      return [...events].sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
     },
     async create(caseId: string, data: CreateCaseTimelineEventInput & { occurredAt: Date }, createdByUserId: string | null) {
       const item = eventRecord({
@@ -77,5 +82,14 @@ describe("case timeline service", () => {
     const service = createCaseTimelineService(repository);
 
     await expect(service.list("case-1")).resolves.toMatchObject([{ id: "new" }, { id: "old" }]);
+  });
+
+  it("lists all timeline events across cases", async () => {
+    const repository = createRepository();
+    repository.seed(eventRecord({ id: "case-1-event", caseId: "case-1", occurredAt: new Date("2026-01-01T00:00:00.000Z") }));
+    repository.seed(eventRecord({ id: "case-2-event", caseId: "case-2", occurredAt: new Date("2026-03-01T00:00:00.000Z") }));
+    const service = createCaseTimelineService(repository);
+
+    await expect(service.listAll({ type: "all" })).resolves.toMatchObject([{ id: "case-2-event" }, { id: "case-1-event" }]);
   });
 });
