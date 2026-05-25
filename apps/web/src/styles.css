@@ -535,6 +535,13 @@ tr:last-child td {
   align-items: start;
 }
 
+.document-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr)) minmax(220px, 1.2fr);
+  gap: 10px;
+  align-items: start;
+}
+
 .timeline-form textarea {
   grid-column: 1 / -2;
 }
@@ -607,6 +614,7 @@ tr:last-child td {
   .sidebar nav,
   .toolbar,
   .timeline-form,
+  .document-form,
   .details-grid,
   .metric-grid,
   .chart-grid,

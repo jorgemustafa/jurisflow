@@ -325,6 +325,14 @@ Approved as a baseline for Document Management v1. Upload implementation should 
 - A document belongs to one client.
 - A document can optionally belong to one case.
 - If a document has `caseId`, the case must belong to the same client.
+- Document metadata registration validates `name`, storage `path`, and MIME type before persistence.
+- Upload v1 stores metadata and storage path only; binary transfer is still behind the storage service boundary.
 - File storage is hidden behind a storage service boundary.
 - Repository code persists metadata only.
 - Physical delete, versioning, OCR, preview generation, and templates are out of scope for v1.
+
+### Document Indexes
+
+- Index on `clientId`.
+- Index on `caseId`.
+- Index on `mimeType`.

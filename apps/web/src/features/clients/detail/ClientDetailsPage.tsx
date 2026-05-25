@@ -7,6 +7,8 @@ import { fieldValue, formatDate } from "src/utils/format.js";
 import { ClientCasesList } from "src/features/clients/detail/ClientCasesList.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
 import { labelClientStatus, labelClientType } from "src/features/clients/utils/clientLabels.js";
+import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
+import { listDocuments } from "src/services/documents.js";
 
 export const ClientDetailsPage = () => {
   const { id = "" } = useParams();
@@ -15,6 +17,11 @@ export const ClientDetailsPage = () => {
   const cases = useQuery({
     queryKey: ["cases", "client", id],
     queryFn: () => listCases({ q: "", status: "all", caseType: "all", stage: "all", legalArea: "all", clientId: id }),
+    enabled: Boolean(id)
+  });
+  const documents = useQuery({
+    queryKey: ["documents", "client", id],
+    queryFn: () => listDocuments({ clientId: id }),
     enabled: Boolean(id)
   });
   const statusMutation = useMutation({
@@ -66,6 +73,13 @@ export const ClientDetailsPage = () => {
       {cases.isLoading ? <p>Carregando processos do cliente...</p> : null}
       {cases.isError ? <p className="alert">Não foi possível carregar os processos do cliente.</p> : null}
       {cases.data ? <ClientCasesList cases={cases.data} /> : null}
+
+      <section className="panel">
+        <h2>Documentos</h2>
+        {documents.isLoading ? <p>Carregando documentos do cliente...</p> : null}
+        {documents.isError ? <p className="alert">Não foi possível carregar os documentos do cliente.</p> : null}
+        {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
+      </section>
     </>
   );
 };

@@ -64,6 +64,7 @@ Secondary users:
 
 - Store and organize documents by client and case.
 - Keep metadata such as name, type, upload date, and related entity.
+- Register document storage paths with validated metadata before binary storage is automated.
 - Every document belongs to a client and can optionally belong to one case from that same client.
 - Start with a replaceable storage service boundary. Local storage is acceptable for development, and external object storage can be added later.
 

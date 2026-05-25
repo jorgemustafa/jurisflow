@@ -7,6 +7,8 @@ import { ApiError } from "src/services/http.js";
 import { fieldValue, formatDate, formatMoney } from "src/utils/format.js";
 import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea, labelTimelineType } from "src/features/cases/utils/caseLabels.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
+import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
+import { listDocuments } from "src/services/documents.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
 const optionalMoney = (value: number | null) => (value === null ? "Não informado" : formatMoney(value));
@@ -28,6 +30,7 @@ export const CaseDetailsPage = () => {
   const queryClient = useQueryClient();
   const legalCase = useQuery({ queryKey: ["case", id], queryFn: () => getCase(id), enabled: Boolean(id) });
   const timeline = useQuery({ queryKey: ["case-timeline", id], queryFn: () => listCaseTimeline(id), enabled: Boolean(id) });
+  const documents = useQuery({ queryKey: ["documents", "case", id], queryFn: () => listDocuments({ caseId: id }), enabled: Boolean(id) });
   const createTimelineMutation = useMutation({
     mutationFn: (data: CaseTimelineEventFormData) => createCaseTimelineEvent(id, data),
     onSuccess: async () => {
@@ -88,6 +91,13 @@ export const CaseDetailsPage = () => {
         <ClientDetailItem label="Responsável" value={fieldValue(item.responsibleUserId)} />
         <ClientDetailItem label="Criado em" value={formatDate(item.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(item.updatedAt)} />
+      </section>
+
+      <section className="panel">
+        <h2>Documentos</h2>
+        {documents.isLoading ? <p>Carregando documentos do processo...</p> : null}
+        {documents.isError ? <p className="alert">Não foi possível carregar os documentos do processo.</p> : null}
+        {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
       </section>
 
       <section className="panel timeline-panel">

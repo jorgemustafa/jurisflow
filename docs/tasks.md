@@ -70,7 +70,7 @@
 - [x] link case to client
 - [x] CNJ number validation
 - [x] timeline events
-- [ ] document links
+- [x] document links
 - [ ] deadline alerts
 
 ---
@@ -91,12 +91,12 @@
 ### Phase 7 - Documents
 
 - [x] define storage strategy
-- [ ] upload document
-- [ ] link document to client
-- [ ] link document to case
-- [ ] list documents by client
-- [ ] list documents by case
-- [ ] document metadata validation
+- [x] upload document
+- [x] link document to client
+- [x] link document to case
+- [x] list documents by client
+- [x] list documents by case
+- [x] document metadata validation
 
 ---
 
@@ -142,4 +142,4 @@
 Working on:
 
 - Phase 5 case management
-- document links
+- deadline alerts
