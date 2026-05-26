@@ -284,6 +284,8 @@ Approved for Case Management v1.
 - Overdue is computed as pending with `dueAt` before today.
 - Due-soon is computed as pending with `dueAt` within the selected alert window.
 - Done and canceled deadlines do not produce alerts.
+- Deadline `title`, `description`, and `dueAt` can be edited for correction without changing `status` or `completedAt`.
+- Deadline status can be manually changed between pending, done, and canceled. Changing to done sets `completedAt`; changing to pending or canceled clears `completedAt`.
 
 ### Case Deadline Indexes
 

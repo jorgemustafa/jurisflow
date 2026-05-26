@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDeadlineSchema, listDeadlinesQuerySchema } from "./deadlines.schemas.js";
+import { createDeadlineSchema, listDeadlinesQuerySchema, updateDeadlineSchema } from "./deadlines.schemas.js";
 
 describe("deadline schemas", () => {
   it("accepts valid deadline creation input", () => {
@@ -18,5 +18,13 @@ describe("deadline schemas", () => {
 
   it("defaults listing to pending deadlines with seven-day alert window", () => {
     expect(listDeadlinesQuerySchema.parse({})).toEqual({ status: "pending", alertWindowDays: 7 });
+  });
+
+  it("accepts partial deadline metadata updates and clears empty descriptions", () => {
+    expect(updateDeadlineSchema.parse({ title: " Conferir publicação ", description: "", dueAt: "2026-06-01" })).toEqual({
+      title: "Conferir publicação",
+      description: null,
+      dueAt: new Date("2026-06-01T00:00:00.000Z")
+    });
   });
 });

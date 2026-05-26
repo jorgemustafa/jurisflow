@@ -10,7 +10,7 @@ import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.j
 import { DeadlineList } from "src/features/deadlines/DeadlineList.js";
 import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
 import { listDocuments } from "src/services/documents.js";
-import { createDeadline, listDeadlines, updateDeadlineStatus, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
+import { createDeadline, listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
 const optionalMoney = (value: number | null) => (value === null ? "Não informado" : formatMoney(value));
@@ -71,7 +71,21 @@ export const CaseDetailsPage = () => {
   const deadlineStatusMutation = useMutation({
     mutationFn: ({ deadlineId, status }: { deadlineId: string; status: DeadlineStatus }) => updateDeadlineStatus(deadlineId, status),
     onSuccess: async () => {
+      setDeadlineError("");
       await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
+    },
+    onError: (failure) => {
+      setDeadlineError(failure instanceof ApiError ? failure.message : "Não foi possível atualizar o prazo.");
+    }
+  });
+  const updateDeadlineMutation = useMutation({
+    mutationFn: ({ deadlineId, data }: { deadlineId: string; data: DeadlineFormData }) => updateDeadline(deadlineId, data),
+    onSuccess: async () => {
+      setDeadlineError("");
+      await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
+    },
+    onError: (failure) => {
+      setDeadlineError(failure instanceof ApiError ? failure.message : "Não foi possível atualizar o prazo.");
     }
   });
 
@@ -162,8 +176,9 @@ export const CaseDetailsPage = () => {
         {deadlines.data ? (
           <DeadlineList
             deadlines={deadlines.data}
-            isUpdating={deadlineStatusMutation.isPending}
-            onStatusChange={(deadlineId, status) => deadlineStatusMutation.mutate({ deadlineId, status })}
+            isUpdating={deadlineStatusMutation.isPending || updateDeadlineMutation.isPending}
+            onUpdate={(deadlineId, data) => updateDeadlineMutation.mutateAsync({ deadlineId, data }).then(() => undefined)}
+            onStatusChange={(deadlineId, status) => deadlineStatusMutation.mutateAsync({ deadlineId, status }).then(() => undefined)}
           />
         ) : null}
       </section>

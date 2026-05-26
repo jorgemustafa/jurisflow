@@ -39,6 +39,10 @@ export const createDeadline = (caseId: string, data: DeadlineFormData) => {
   return request<CaseDeadline>(`/cases/${caseId}/deadlines`, { method: "POST", body: JSON.stringify(data) });
 };
 
+export const updateDeadline = (id: string, data: DeadlineFormData) => {
+  return request<CaseDeadline>(`/deadlines/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+};
+
 export const updateDeadlineStatus = (id: string, status: DeadlineStatus) => {
   return request<CaseDeadline>(`/deadlines/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
 };

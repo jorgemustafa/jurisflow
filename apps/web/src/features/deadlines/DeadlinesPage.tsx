@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { DeadlineList } from "src/features/deadlines/DeadlineList.js";
-import { listDeadlines, updateDeadlineStatus, type DeadlineFilters, type DeadlineStatus } from "src/services/deadlines.js";
+import { listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFilters, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
+import { ApiError } from "src/services/http.js";
 
 const defaultFilters: DeadlineFilters = {
   q: "",
@@ -11,12 +12,27 @@ const defaultFilters: DeadlineFilters = {
 
 export const DeadlinesPage = () => {
   const [filters, setFilters] = useState(defaultFilters);
+  const [deadlineError, setDeadlineError] = useState("");
   const queryClient = useQueryClient();
   const deadlines = useQuery({ queryKey: ["deadlines", filters], queryFn: () => listDeadlines(filters) });
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: DeadlineFormData }) => updateDeadline(id, data),
+    onSuccess: async () => {
+      setDeadlineError("");
+      await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
+    },
+    onError: (failure) => {
+      setDeadlineError(failure instanceof ApiError ? failure.message : "Não foi possível atualizar o prazo.");
+    }
+  });
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: DeadlineStatus }) => updateDeadlineStatus(id, status),
     onSuccess: async () => {
+      setDeadlineError("");
       await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
+    },
+    onError: (failure) => {
+      setDeadlineError(failure instanceof ApiError ? failure.message : "Não foi possível atualizar o prazo.");
     }
   });
 
@@ -51,11 +67,13 @@ export const DeadlinesPage = () => {
 
       {deadlines.isLoading ? <p>Carregando prazos...</p> : null}
       {deadlines.isError ? <p className="alert">Não foi possível carregar os prazos.</p> : null}
+      {deadlineError ? <p className="alert">{deadlineError}</p> : null}
       {deadlines.data ? (
         <DeadlineList
           deadlines={deadlines.data}
-          isUpdating={statusMutation.isPending}
-          onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
+          isUpdating={statusMutation.isPending || updateMutation.isPending}
+          onUpdate={(id, data) => updateMutation.mutateAsync({ id, data }).then(() => undefined)}
+          onStatusChange={(id, status) => statusMutation.mutateAsync({ id, status }).then(() => undefined)}
         />
       ) : null}
     </>

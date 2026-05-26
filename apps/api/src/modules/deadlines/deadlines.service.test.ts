@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CreateDeadlineInput, DeadlineListFilters, DeadlineStatus } from "./deadlines.schemas.js";
+import type { CreateDeadlineInput, DeadlineListFilters, DeadlineStatus, UpdateDeadlineInput } from "./deadlines.schemas.js";
 import { createDeadlinesService, DeadlineCaseNotFoundError, DeadlineNotFoundError, type DeadlineRecord } from "./deadlines.service.js";
 
 const now = new Date("2026-05-25T12:00:00.000Z");
@@ -38,6 +38,12 @@ function createRepository() {
     async create(caseId: string, data: CreateDeadlineInput) {
       const item = deadlineRecord({ id: `deadline-${deadlines.length + 1}`, caseId, ...data });
       deadlines.push(item);
+      return item;
+    },
+    async update(id: string, data: UpdateDeadlineInput) {
+      const item = deadlines.find((current) => current.id === id);
+      if (!item) throw new Error("test setup error");
+      Object.assign(item, data);
       return item;
     },
     async updateStatus(id: string, status: DeadlineStatus, completedAt: Date | null) {
@@ -97,9 +103,45 @@ describe("deadlines service", () => {
     vi.useRealTimers();
   });
 
+  it("clears completion time when deadline status is no longer done", async () => {
+    const repository = createRepository();
+    repository.seed(deadlineRecord({ status: "done", completedAt: now }));
+    const service = createDeadlinesService(repository);
+
+    const item = await service.updateStatus("deadline-1", "canceled");
+
+    expect(item).toMatchObject({ status: "canceled", completedAt: null });
+  });
+
+  it("updates deadline fields without changing completion state", async () => {
+    const repository = createRepository();
+    repository.seed(deadlineRecord({ status: "done", completedAt: now }));
+    const service = createDeadlinesService(repository);
+
+    const item = await service.update("deadline-1", {
+      title: "Conferir publicação",
+      description: "Revisar teor da intimação",
+      dueAt: new Date("2026-06-02T00:00:00.000Z")
+    });
+
+    expect(item).toMatchObject({
+      title: "Conferir publicação",
+      description: "Revisar teor da intimação",
+      dueAt: new Date("2026-06-02T00:00:00.000Z"),
+      status: "done",
+      completedAt: now
+    });
+  });
+
   it("rejects status updates for missing deadlines", async () => {
     const service = createDeadlinesService(createRepository());
 
     await expect(service.updateStatus("missing", "done")).rejects.toBeInstanceOf(DeadlineNotFoundError);
+  });
+
+  it("rejects field updates for missing deadlines", async () => {
+    const service = createDeadlinesService(createRepository());
+
+    await expect(service.update("missing", { title: "Novo prazo" })).rejects.toBeInstanceOf(DeadlineNotFoundError);
   });
 });

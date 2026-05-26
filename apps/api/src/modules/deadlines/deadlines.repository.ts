@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../shared/db/prisma.js";
-import type { CreateDeadlineInput, DeadlineListFilters, DeadlineStatus } from "./deadlines.schemas.js";
+import type { CreateDeadlineInput, DeadlineListFilters, DeadlineStatus, UpdateDeadlineInput } from "./deadlines.schemas.js";
 import type { DeadlineRecord } from "./deadlines.service.js";
 
 type DbDeadlineStatus = "PENDING" | "DONE" | "CANCELED";
@@ -76,6 +76,11 @@ export const deadlinesRepository = {
 
   async create(caseId: string, data: CreateDeadlineInput) {
     const item = await prisma.caseDeadline.create({ data: { ...data, caseId }, include: includeCase });
+    return toRecord(item as DbDeadline);
+  },
+
+  async update(id: string, data: UpdateDeadlineInput) {
+    const item = await prisma.caseDeadline.update({ where: { id }, data, include: includeCase });
     return toRecord(item as DbDeadline);
   },
 

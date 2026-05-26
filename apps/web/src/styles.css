@@ -433,6 +433,44 @@ tr:last-child td {
   font-weight: 700;
 }
 
+.deadline-title-cell {
+  min-width: 280px;
+  white-space: normal;
+}
+
+.deadline-title-cell strong,
+.deadline-title-cell small {
+  display: block;
+}
+
+.deadline-title-cell small {
+  margin-top: 4px;
+  color: #62748a;
+  font-size: 13px;
+}
+
+.deadline-edit-fields {
+  display: grid;
+  min-width: 280px;
+  gap: 8px;
+}
+
+.table-actions {
+  vertical-align: middle;
+}
+
+.table-action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-action-group .button {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

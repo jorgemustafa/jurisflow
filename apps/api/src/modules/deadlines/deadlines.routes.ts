@@ -3,7 +3,14 @@ import { ZodError } from "zod";
 import { requireAuth } from "../../shared/http/protected.js";
 import { parseBody } from "../../shared/http/validate.js";
 import { deadlinesRepository } from "./deadlines.repository.js";
-import { caseDeadlineParamsSchema, createDeadlineSchema, deadlineParamsSchema, listDeadlinesQuerySchema, updateDeadlineStatusSchema } from "./deadlines.schemas.js";
+import {
+  caseDeadlineParamsSchema,
+  createDeadlineSchema,
+  deadlineParamsSchema,
+  listDeadlinesQuerySchema,
+  updateDeadlineSchema,
+  updateDeadlineStatusSchema
+} from "./deadlines.schemas.js";
 import { createDeadlinesService, DeadlineCaseNotFoundError, DeadlineNotFoundError } from "./deadlines.service.js";
 
 const deadlinesService = createDeadlinesService(deadlinesRepository);
@@ -41,6 +48,15 @@ export async function deadlinesRoutes(app: FastifyInstance) {
       const { id } = deadlineParamsSchema.parse(request.params);
       const { status } = parseBody(updateDeadlineStatusSchema, request.body);
       return deadlinesService.updateStatus(id, status);
+    } catch (error) {
+      return handleDeadlineError(error, reply);
+    }
+  });
+
+  app.patch("/deadlines/:id", async (request, reply) => {
+    try {
+      const { id } = deadlineParamsSchema.parse(request.params);
+      return deadlinesService.update(id, parseBody(updateDeadlineSchema, request.body));
     } catch (error) {
       return handleDeadlineError(error, reply);
     }

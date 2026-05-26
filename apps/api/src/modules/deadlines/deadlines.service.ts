@@ -1,4 +1,4 @@
-import type { CreateDeadlineInput, DeadlineListFilters, DeadlineStatus } from "./deadlines.schemas.js";
+import type { CreateDeadlineInput, DeadlineListFilters, DeadlineStatus, UpdateDeadlineInput } from "./deadlines.schemas.js";
 
 export type DeadlineAlertLevel = "overdue" | "due_soon" | "none";
 
@@ -22,6 +22,7 @@ type DeadlinesRepository = {
   findById(id: string): Promise<DeadlineRecord | null>;
   list(filters: DeadlineListFilters): Promise<DeadlineRecord[]>;
   create(caseId: string, data: CreateDeadlineInput): Promise<DeadlineRecord>;
+  update(id: string, data: UpdateDeadlineInput): Promise<DeadlineRecord>;
   updateStatus(id: string, status: DeadlineStatus, completedAt: Date | null): Promise<DeadlineRecord>;
 };
 
@@ -60,6 +61,12 @@ export function createDeadlinesService(repository: DeadlinesRepository) {
       const legalCase = await repository.findCaseById(caseId);
       if (!legalCase) throw new DeadlineCaseNotFoundError();
       return repository.create(caseId, input);
+    },
+
+    async update(id: string, input: UpdateDeadlineInput) {
+      const current = await repository.findById(id);
+      if (!current) throw new DeadlineNotFoundError();
+      return repository.update(id, input);
     },
 
     async updateStatus(id: string, status: DeadlineStatus) {
