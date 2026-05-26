@@ -35,6 +35,11 @@ textarea {
   grid-template-columns: 248px minmax(0, 1fr);
   height: 100vh;
   overflow: hidden;
+  transition: grid-template-columns 160ms ease;
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 76px minmax(0, 1fr);
 }
 
 .sidebar {
@@ -50,6 +55,13 @@ textarea {
   background: #132235;
 }
 
+.sidebar-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .sidebar strong {
   font-size: 20px;
 }
@@ -62,6 +74,24 @@ textarea {
 .sidebar-brand span {
   color: #b8c6d5;
   font-size: 13px;
+}
+
+.sidebar-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-height: 36px;
+  border: 1px solid #36516d;
+  border-radius: 6px;
+  color: #dce5ef;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  background: #21405d;
 }
 
 .sidebar nav {
@@ -89,6 +119,27 @@ textarea {
   border-color: #36516d;
   color: #f8fafc;
   background: transparent;
+}
+
+.sidebar-collapsed .sidebar {
+  padding: 28px 14px;
+}
+
+.sidebar-collapsed .sidebar-top {
+  justify-content: center;
+}
+
+.sidebar-collapsed .sidebar-brand,
+.sidebar-collapsed .sidebar-link-label,
+.sidebar-collapsed .sidebar-logout span {
+  display: none;
+}
+
+.sidebar-collapsed .sidebar a,
+.sidebar-collapsed .sidebar-logout {
+  justify-content: center;
+  padding-right: 0;
+  padding-left: 0;
 }
 
 .workspace {
@@ -678,6 +729,38 @@ tr:last-child td {
   .sidebar {
     height: auto;
     padding: 18px;
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .app-shell.sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-collapsed .sidebar {
+    padding: 18px;
+  }
+
+  .sidebar-collapsed .sidebar-top {
+    justify-content: space-between;
+  }
+
+  .sidebar-collapsed .sidebar-brand {
+    display: grid;
+  }
+
+  .sidebar-collapsed .sidebar-link-label,
+  .sidebar-collapsed .sidebar-logout span {
+    display: inline;
+  }
+
+  .sidebar-collapsed .sidebar a,
+  .sidebar-collapsed .sidebar-logout {
+    justify-content: flex-start;
+    padding-right: 10px;
+    padding-left: 10px;
   }
 
   .sidebar nav,
