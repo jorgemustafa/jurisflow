@@ -5,6 +5,9 @@ export type CaseTimelineEventRecord = {
   caseId: string;
   createdByUserId: string | null;
   createdByUserName: string | null;
+  externalSource: string | null;
+  externalId: string | null;
+  sourceHash: string | null;
   caseTitle: string | null;
   clientName: string | null;
   type: CaseTimelineEventType;

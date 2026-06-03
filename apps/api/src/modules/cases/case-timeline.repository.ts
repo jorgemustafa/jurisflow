@@ -9,6 +9,9 @@ type DbCaseTimelineEvent = {
   id: string;
   caseId: string;
   createdByUserId: string | null;
+  externalSource: string | null;
+  externalId: string | null;
+  sourceHash: string | null;
   type: DbCaseTimelineEventType;
   title: string;
   description: string | null;
@@ -28,6 +31,9 @@ function toRecord(item: DbCaseTimelineEvent): CaseTimelineEventRecord {
     caseId: item.caseId,
     createdByUserId: item.createdByUserId,
     createdByUserName: item.createdByUser?.name ?? null,
+    externalSource: item.externalSource,
+    externalId: item.externalId,
+    sourceHash: item.sourceHash,
     caseTitle: item.case?.title ?? null,
     clientName: item.case?.client.name ?? null,
     type: toApiType(item.type),
@@ -87,6 +93,9 @@ export const caseTimelineRepository = {
       data: {
         caseId,
         createdByUserId,
+        externalSource: null,
+        externalId: null,
+        sourceHash: null,
         type: toDbType(data.type),
         title: data.title,
         description: data.description ?? null,

@@ -5,8 +5,12 @@ import { parseBody } from "../../shared/http/validate.js";
 import { caseTimelineRepository } from "./case-timeline.repository.js";
 import { createCaseTimelineEventSchema } from "./case-timeline.schemas.js";
 import { CaseTimelineCaseNotFoundError, createCaseTimelineService } from "./case-timeline.service.js";
+import { caseImportRepository } from "./case-import.repository.js";
+import { confirmCaseImportSchema, previewCaseImportSchema } from "./case-import.schemas.js";
+import { CaseImportClientError, CaseImportDuplicateError, createCaseImportService } from "./case-import.service.js";
 import { caseParamsSchema, createCaseSchema, listCasesQuerySchema, updateCaseSchema } from "./cases.schemas.js";
 import { casesRepository } from "./cases.repository.js";
+import { DataJudCaseNotFoundError, DataJudConfigError, DataJudRequestError, fetchDataJudCase } from "./datajud.client.js";
 import {
   CaseClientError,
   CaseCnjConflictError,
@@ -19,6 +23,7 @@ import {
 
 const casesService = createCasesService(casesRepository);
 const timelineService = createCaseTimelineService(caseTimelineRepository);
+const caseImportService = createCaseImportService(caseImportRepository, { fetchCase: fetchDataJudCase });
 
 function handleCaseError(error: unknown, reply: FastifyReply) {
   if (error instanceof ZodError) return reply.code(400).send({ message: "Invalid case data", issues: error.issues });
@@ -29,6 +34,13 @@ function handleCaseError(error: unknown, reply: FastifyReply) {
   if (error instanceof CaseCnjConflictError) return reply.code(409).send({ message: error.message, field: "cnjNumber" });
   if (error instanceof CaseCnjTypeError) return reply.code(400).send({ message: error.message, field: "cnjNumber" });
   if (error instanceof CasePendingFinanceError) return reply.code(409).send({ message: error.message, field: "status" });
+  if (error instanceof CaseImportClientError) return reply.code(400).send({ message: error.message, field: "clientId" });
+  if (error instanceof CaseImportDuplicateError) {
+    return reply.code(409).send({ message: error.message, field: "cnjNumber", existingCaseId: error.existingCase.id });
+  }
+  if (error instanceof DataJudConfigError) return reply.code(503).send({ message: error.message });
+  if (error instanceof DataJudCaseNotFoundError) return reply.code(404).send({ message: error.message });
+  if (error instanceof DataJudRequestError) return reply.code(502).send({ message: error.message });
   throw error;
 }
 
@@ -38,6 +50,23 @@ export async function casesRoutes(app: FastifyInstance) {
   app.get("/", async (request, reply) => {
     try {
       return casesService.list(listCasesQuerySchema.parse(request.query));
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.post("/import/preview", async (request, reply) => {
+    try {
+      return caseImportService.preview(parseBody(previewCaseImportSchema, request.body));
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.post("/import", async (request, reply) => {
+    try {
+      const item = await caseImportService.confirm(parseBody(confirmCaseImportSchema, request.body));
+      return reply.code(201).send(item);
     } catch (error) {
       return handleCaseError(error, reply);
     }

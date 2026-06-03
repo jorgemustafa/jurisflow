@@ -142,6 +142,9 @@ model CaseTimelineEvent {
   id              String                @id @default(uuid())
   caseId          String
   createdByUserId String?
+  externalSource  String?
+  externalId      String?
+  sourceHash      String?
   type            CaseTimelineEventType
   title           String
   description     String?
@@ -151,8 +154,10 @@ model CaseTimelineEvent {
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
 
+  @@unique([caseId, sourceHash])
   @@index([caseId, occurredAt])
   @@index([createdByUserId])
+  @@index([externalSource])
   @@index([type])
 }
 
