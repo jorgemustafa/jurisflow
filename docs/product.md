@@ -45,9 +45,12 @@ Secondary users:
 
 - Register legal cases and internal matters.
 - Allow creating a case directly from a client page; the new case remains linked to that client.
+- Allow assisted import of Brazilian judicial cases by CNJ using free public DataJud data when configured.
+- Imported judicial cases must be manually linked to an active client before they become office cases.
 - Allow editing case details from the case detail page.
 - Track case status, CNJ number, area, responsible person, and relevant dates.
 - Register timeline events for important case activity, such as notes, hearings, petitions, decisions, and status changes.
+- Import public process movements into the case timeline when available from DataJud.
 - Show a general timeline so the office can scan recent activity across all cases.
 - Track case deadlines and surface overdue or near-due alerts.
 - Values, value of each installment, number of installment, total value
@@ -86,4 +89,5 @@ Secondary users:
 - Every important record should have ownership, status, and history when useful.
 - Avoid building generic CRM features unless they solve a real law office workflow.
 - Keep imports, automation, and AI features behind well-defined business rules.
+- Treat public process integrations as assistive data, not as the only source of truth.
 - Use pt-br as main language for frontend (later we can have a translator), backend must be in en-us

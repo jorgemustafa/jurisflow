@@ -13,6 +13,16 @@ npm run prisma:deploy
 npm run seed:demo
 ```
 
+## Public DataJud Import
+
+The assisted case import uses the CNJ DataJud public API. Set `DATAJUD_API_KEY` in `.env` before using `/cases/import`.
+
+```env
+DATAJUD_API_KEY="your-cnj-datajud-key"
+```
+
+Without this variable the API returns a service-unavailable response for DataJud import routes, while the rest of the system continues to work.
+
 For Docker-based local development:
 
 ```bash
