@@ -55,7 +55,7 @@ export const TimelinePage = () => {
                 <strong>{event.title}</strong>
                 <p>{fieldValue(event.description)}</p>
                 <small>
-                  {event.clientName ?? "Cliente não informado"} · {event.createdByUserName ?? "Usuário não informado"}
+                  {event.clientName ?? "Cliente não informado"} · {event.externalSource === "datajud" ? "DataJud" : event.createdByUserName ?? "Usuário não informado"}
                 </small>
               </div>
               <div className="timeline-side">

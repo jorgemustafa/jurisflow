@@ -229,7 +229,7 @@ export const CaseDetailsPage = () => {
                   <span>{labelTimelineType(event.type)}</span>
                   <strong>{event.title}</strong>
                   {event.description ? <p>{event.description}</p> : null}
-                  <small>{event.createdByUserName ?? "Usuário não informado"}</small>
+                  <small>{event.externalSource === "datajud" ? "DataJud" : event.createdByUserName ?? "Usuário não informado"}</small>
                 </div>
                 <time>{formatDate(event.occurredAt)}</time>
               </article>

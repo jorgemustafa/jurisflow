@@ -64,6 +64,9 @@ export type CaseTimelineEvent = {
   caseId: string;
   createdByUserId: string | null;
   createdByUserName: string | null;
+  externalSource: string | null;
+  externalId: string | null;
+  sourceHash: string | null;
   caseTitle: string | null;
   clientName: string | null;
   type: CaseTimelineEventType;
@@ -79,6 +82,37 @@ export type CaseTimelineEventFormData = {
   title: string;
   description: string;
   occurredAt: string;
+};
+
+export type ImportedMovement = {
+  externalId: string;
+  sourceHash: string;
+  type: CaseTimelineEventType;
+  title: string;
+  description: string | null;
+  occurredAt: string;
+};
+
+export type CaseImportDraft = {
+  cnjNumber: string;
+  title: string;
+  court: string | null;
+  jurisdiction: string | null;
+  division: string | null;
+  description: string | null;
+  openedAt: string | null;
+  movements: ImportedMovement[];
+};
+
+export type CaseImportPreview = {
+  draft: CaseImportDraft | null;
+  duplicate: LegalCase | null;
+};
+
+export type CaseImportResult = {
+  case: LegalCase;
+  importedMovements: number;
+  skippedMovements: number;
 };
 
 export const listCases = (filters: CaseFilters) => {
@@ -107,4 +141,12 @@ export const createCaseTimelineEvent = (caseId: string, data: CaseTimelineEventF
 
 export const listTimeline = (filters: TimelineFilters) => {
   return request<CaseTimelineEvent[]>(`/timeline${searchParams(filters)}`);
+};
+
+export const previewCaseImport = (data: { cnjNumber: string; courtCode: string }) => {
+  return request<CaseImportPreview>("/cases/import/preview", { method: "POST", body: JSON.stringify(data) });
+};
+
+export const confirmCaseImport = (data: { cnjNumber: string; courtCode: string; clientId: string }) => {
+  return request<CaseImportResult>("/cases/import", { method: "POST", body: JSON.stringify(data) });
 };

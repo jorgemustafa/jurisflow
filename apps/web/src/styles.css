@@ -658,6 +658,30 @@ tr:last-child td {
   align-items: start;
 }
 
+.case-import-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 180px auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.case-import-confirm {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.import-preview {
+  display: grid;
+  gap: 14px;
+}
+
+.import-preview h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
 .deadline-form textarea {
   grid-column: 1 / -2;
 }
@@ -768,6 +792,8 @@ tr:last-child td {
   .timeline-form,
   .document-form,
   .deadline-form,
+  .case-import-form,
+  .case-import-confirm,
   .details-grid,
   .metric-grid,
   .chart-grid,

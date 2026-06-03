@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "react-router";
 import { listCases, type CaseFilters } from "src/services/cases.js";
 import { CasesTable } from "src/features/cases/list/CasesTable.js";
 
@@ -25,6 +26,9 @@ export const CasesPage = () => {
           <span>Processos</span>
           <h1>Gestão de processos</h1>
         </div>
+        <Link className="button primary" to="/cases/import">
+          Importar processo
+        </Link>
       </header>
 
       <section className="toolbar cases-toolbar">
