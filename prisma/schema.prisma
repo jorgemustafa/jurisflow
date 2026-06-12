@@ -185,4 +185,120 @@ model CaseImportItem {
   clientId     String?
   caseId       String?
   batch        CaseImportBatch      @relation(fields: [batchId], references: [id])
- 
+
+  @@index([batchId])
+  @@index([status])
+  @@index([cnjNumber])
+}
+
+enum ClientType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum UserRole {
+  ADMIN
+  LAWYER
+  PARALEGAL
+  SECRETARY
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CaseType {
+  JUDICIAL
+  EXTRAJUDICIAL
+  CONSULTANCY
+}
+
+enum CaseStatus {
+  ACTIVE
+  ARCHIVED
+  CLOSED
+}
+
+enum CaseStage {
+  KNOWLEDGE
+  EXECUTION
+  APPEAL
+  PRECATORY
+  ADMINISTRATIVE
+}
+
+enum LegalArea {
+  CIVIL
+  CRIMINAL
+  LABOR
+  FAMILY
+  TAX
+  CONSUMER
+  ENVIRONMENTAL
+  ADMINISTRATIVE
+  CONSTITUTIONAL
+  CORPORATE
+  REAL_ESTATE
+  INTELLECTUAL_PROPERTY
+  OTHER
+}
+
+enum PaymentSource {
+  MANUAL
+  SCHEDULE
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  PIX
+  BOLETO
+  CHECK
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+enum CaseDeadlineStatus {
+  PENDING
+  COMPLETED
+  MISSED
+  CANCELED
+}
+
+enum CaseTimelineEventType {
+  MANUAL
+  DATAJUD
+  SYSTEM
+  DEADLINE
+  PAYMENT
+  DOCUMENT
+}
+
+enum CaseImportBatchStatus {
+  OPEN
+  PROCESSING
+  DONE
+  CANCELLED
+}
+
+enum CaseImportItemStatus {
+  PENDING
+  PROCESSING
+  DONE
+  ERROR
+}
