@@ -4,6 +4,7 @@ import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { NavLink, useNavigate } from "react-router";
 import { Button } from "src/components/ui/button.js";
 import { useAuth } from "src/features/auth/AuthContext.js";
+import { TodoPanel } from "src/layout/TodoPanel.js";
 import { appModules } from "src/utils/appModules.js";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
@@ -56,6 +57,8 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       </aside>
 
       <section className="workspace">{children}</section>
+
+      <TodoPanel />
     </main>
   );
 };
