@@ -18,6 +18,8 @@ type DbUser = {
   passwordHash: string | null;
   role: DbUserRole;
   status: DbUserStatus;
+  oabNumber: string | null;
+  oabState: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -79,7 +81,4 @@ export const usersRepository = {
   },
 
   async updatePasswordHash(id: string, passwordHash: string) {
-    const user = await prisma.user.update({ where: { id }, data: { passwordHash } });
-    return toUserRecord(user as DbUser);
-  }
-};
+    const user = await prisma.user.update({ where: { id }, data: { pass

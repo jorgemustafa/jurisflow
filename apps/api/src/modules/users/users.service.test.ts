@@ -26,6 +26,8 @@ function createRepository(seed: UserRecord[] = []) {
         passwordHash: data.passwordHash ?? null,
         role: data.role ?? "lawyer",
         status: "active",
+        oabNumber: data.oabNumber ?? null,
+        oabState: data.oabState ?? null,
         createdAt: now,
         updatedAt: now
       };
@@ -65,6 +67,8 @@ describe("users service", () => {
         passwordHash: null,
         role: "lawyer",
         status: "active",
+        oabNumber: null,
+        oabState: null,
         createdAt: now,
         updatedAt: now
       }
@@ -96,6 +100,8 @@ describe("users service", () => {
         passwordHash: null,
         role: "lawyer",
         status: "active",
+        oabNumber: null,
+        oabState: null,
         createdAt: now,
         updatedAt: now
       }
@@ -104,8 +110,4 @@ describe("users service", () => {
 
     const user = await service.update("user-1", { password: "newpass123" });
 
-    expect(user.passwordHash).not.toBe("newpass123");
-    expect(user.passwordHash).toBeTruthy();
-    await expect(verifyPassword("newpass123", user.passwordHash!)).resolves.toBe(true);
-  });
-});
+    expect(us

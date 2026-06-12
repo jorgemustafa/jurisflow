@@ -682,154 +682,33 @@ tr:last-child td {
   font-size: 16px;
 }
 
-.deadline-form textarea {
-  grid-column: 1 / -2;
-}
-
-.timeline-form textarea {
-  grid-column: 1 / -2;
-}
-
-.timeline-list {
+.case-import-batch-form {
   display: grid;
   gap: 10px;
 }
 
-.timeline-item {
+.case-import-batch-form textarea {
+  width: 100%;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.case-import-batch-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  border: 1px solid #dde3ea;
-  border-radius: 8px;
-  background: #ffffff;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
 }
 
-.timeline-item span,
-.timeline-item small,
-.timeline-item time {
-  color: #62748a;
-  font-size: 13px;
+.alert.success {
+  color: #0f766e;
 }
 
-.timeline-item strong,
-.timeline-item span,
-.timeline-item small {
-  display: block;
+
+.deadline-form textarea {
+  grid-column: 1 / -2;
 }
 
-.timeline-item strong {
-  margin: 4px 0;
-}
-
-.timeline-item p {
-  max-width: 760px;
-  margin: 0 0 8px;
-  color: #52616f;
-}
-
-.timeline-item time {
-  white-space: nowrap;
-}
-
-.timeline-item-wide {
-  align-items: flex-start;
-}
-
-.timeline-side {
-  display: grid;
-  min-width: 220px;
-  gap: 8px;
-  justify-items: end;
-  text-align: right;
-}
-
-@media (max-width: 900px) {
-  .app-shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .sidebar {
-    height: auto;
-    padding: 18px;
-  }
-
-  .sidebar-toggle {
-    display: none;
-  }
-
-  .app-shell.sidebar-collapsed {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar-collapsed .sidebar {
-    padding: 18px;
-  }
-
-  .sidebar-collapsed .sidebar-top {
-    justify-content: space-between;
-  }
-
-  .sidebar-collapsed .sidebar-brand {
-    display: grid;
-  }
-
-  .sidebar-collapsed .sidebar-link-label,
-  .sidebar-collapsed .sidebar-logout span {
-    display: inline;
-  }
-
-  .sidebar-collapsed .sidebar a,
-  .sidebar-collapsed .sidebar-logout {
-    justify-content: flex-start;
-    padding-right: 10px;
-    padding-left: 10px;
-  }
-
-  .sidebar nav,
-  .toolbar,
-  .timeline-form,
-  .document-form,
-  .deadline-form,
-  .case-import-form,
-  .case-import-confirm,
-  .details-grid,
-  .metric-grid,
-  .chart-grid,
-  .module-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .donut-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .workspace {
-    height: 100%;
-    min-height: 0;
-    padding: 28px 18px;
-  }
-
-  .row-header {
-    display: grid;
-  }
-
-  .timeline-form textarea {
-    grid-column: auto;
-  }
-
-  .deadline-form textarea {
-    grid-column: auto;
-  }
-
-  .timeline-item {
-    display: grid;
-  }
-
-  .timeline-side {
-    min-width: 0;
-    justify-items: start;
-    text-align: left;
-  }
-}
+.timeline-form 

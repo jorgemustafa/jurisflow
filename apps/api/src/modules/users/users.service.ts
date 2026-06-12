@@ -8,6 +8,8 @@ export type UserRecord = {
   role: UserRole;
   status: UserStatus;
   passwordHash: string | null;
+  oabNumber: string | null;
+  oabState: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -65,7 +67,4 @@ export function createUsersService(repository: UsersRepository) {
 
       await ensureUniqueEmail(input.email, id);
       const { password, ...data } = input;
-      return repository.update(id, { ...data, passwordHash: password ? await hashPassword(password) : undefined });
-    }
-  };
-}
+      return repository.update(id, { ...data, passwordHash: password ? awa

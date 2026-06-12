@@ -143,6 +143,55 @@ export const listTimeline = (filters: TimelineFilters) => {
   return request<CaseTimelineEvent[]>(`/timeline${searchParams(filters)}`);
 };
 
+export type CaseImportBatchStatus = "open" | "completed";
+export type CaseImportItemStatus = "pending" | "duplicate" | "failed" | "imported" | "discarded";
+
+export type CaseImportBatchItem = {
+  id: string;
+  batchId: string;
+  cnjNumber: string;
+  courtCode: string | null;
+  status: CaseImportItemStatus;
+  errorMessage: string | null;
+  draft: CaseImportDraft | null;
+  clientId: string | null;
+  caseId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CaseImportBatch = {
+  id: string;
+  status: CaseImportBatchStatus;
+  source: string;
+  items: CaseImportBatchItem[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CaseImportBatchResult = {
+  batch: CaseImportBatch;
+  imported: number;
+  duplicates: number;
+  importedMovements: number;
+};
+
+export const createCaseImportBatch = (cnjNumbers: string[]) => {
+  return request<CaseImportBatch>("/cases/import/batches", { method: "POST", body: JSON.stringify({ cnjNumbers }) });
+};
+
+export const getCaseImportBatch = (batchId: string) => {
+  return request<CaseImportBatch>(`/cases/import/batches/${batchId}`);
+};
+
+export const updateCaseImportItem = (batchId: string, itemId: string, data: { clientId?: string | null; status?: "pending" | "discarded" }) => {
+  return request<CaseImportBatch>(`/cases/import/batches/${batchId}/items/${itemId}`, { method: "PATCH", body: JSON.stringify(data) });
+};
+
+export const confirmCaseImportBatch = (batchId: string) => {
+  return request<CaseImportBatchResult>(`/cases/import/batches/${batchId}/confirm`, { method: "POST" });
+};
+
 export const previewCaseImport = (data: { cnjNumber: string; courtCode: string }) => {
   return request<CaseImportPreview>("/cases/import/preview", { method: "POST", body: JSON.stringify(data) });
 };

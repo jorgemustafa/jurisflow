@@ -14,6 +14,8 @@ function createUser(overrides: Partial<UserRecord> = {}): UserRecord {
     passwordHash: null,
     role: "lawyer",
     status: "active",
+    oabNumber: null,
+    oabState: null,
     createdAt: now,
     updatedAt: now,
     ...overrides
@@ -61,6 +63,4 @@ describe("auth middleware", () => {
     await requireAuth()(request, reply);
 
     expect(reply.code).toHaveBeenCalledWith(401);
-    expect(reply.send).toHaveBeenCalledWith({ message: "Invalid token" });
-  });
-});
+    expect(reply.send).toHaveBeenCalledWith(

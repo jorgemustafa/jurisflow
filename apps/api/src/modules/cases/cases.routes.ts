@@ -8,6 +8,21 @@ import { CaseTimelineCaseNotFoundError, createCaseTimelineService } from "./case
 import { caseImportRepository } from "./case-import.repository.js";
 import { confirmCaseImportSchema, previewCaseImportSchema } from "./case-import.schemas.js";
 import { CaseImportClientError, CaseImportDuplicateError, createCaseImportService } from "./case-import.service.js";
+import { caseImportBatchRepository } from "./case-import-batch.repository.js";
+import {
+  caseImportBatchParamsSchema,
+  caseImportItemParamsSchema,
+  createCaseImportBatchSchema,
+  updateCaseImportItemSchema
+} from "./case-import-batch.schemas.js";
+import {
+  CaseImportBatchEmptyError,
+  CaseImportBatchNotFoundError,
+  CaseImportBatchStateError,
+  CaseImportItemNotFoundError,
+  CaseImportItemStateError,
+  createCaseImportBatchService
+} from "./case-import-batch.service.js";
 import { caseParamsSchema, createCaseSchema, listCasesQuerySchema, updateCaseSchema } from "./cases.schemas.js";
 import { casesRepository } from "./cases.repository.js";
 import { DataJudCaseNotFoundError, DataJudConfigError, DataJudRequestError, fetchDataJudCase } from "./datajud.client.js";
@@ -24,6 +39,7 @@ import {
 const casesService = createCasesService(casesRepository);
 const timelineService = createCaseTimelineService(caseTimelineRepository);
 const caseImportService = createCaseImportService(caseImportRepository, { fetchCase: fetchDataJudCase });
+const caseImportBatchService = createCaseImportBatchService(caseImportBatchRepository, { fetchCase: fetchDataJudCase });
 
 function handleCaseError(error: unknown, reply: FastifyReply) {
   if (error instanceof ZodError) return reply.code(400).send({ message: "Invalid case data", issues: error.issues });
@@ -35,6 +51,11 @@ function handleCaseError(error: unknown, reply: FastifyReply) {
   if (error instanceof CaseCnjTypeError) return reply.code(400).send({ message: error.message, field: "cnjNumber" });
   if (error instanceof CasePendingFinanceError) return reply.code(409).send({ message: error.message, field: "status" });
   if (error instanceof CaseImportClientError) return reply.code(400).send({ message: error.message, field: "clientId" });
+  if (error instanceof CaseImportBatchNotFoundError) return reply.code(404).send({ message: error.message });
+  if (error instanceof CaseImportItemNotFoundError) return reply.code(404).send({ message: error.message });
+  if (error instanceof CaseImportBatchStateError) return reply.code(409).send({ message: error.message });
+  if (error instanceof CaseImportItemStateError) return reply.code(409).send({ message: error.message });
+  if (error instanceof CaseImportBatchEmptyError) return reply.code(400).send({ message: error.message });
   if (error instanceof CaseImportDuplicateError) {
     return reply.code(409).send({ message: error.message, field: "cnjNumber", existingCaseId: error.existingCase.id });
   }
@@ -67,6 +88,50 @@ export async function casesRoutes(app: FastifyInstance) {
     try {
       const item = await caseImportService.confirm(parseBody(confirmCaseImportSchema, request.body));
       return reply.code(201).send(item);
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.get("/import/batches", async (request, reply) => {
+    try {
+      return await caseImportBatchService.list();
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.post("/import/batches", async (request, reply) => {
+    try {
+      const batch = await caseImportBatchService.create(parseBody(createCaseImportBatchSchema, request.body));
+      return reply.code(201).send(batch);
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.get("/import/batches/:batchId", async (request, reply) => {
+    try {
+      const { batchId } = caseImportBatchParamsSchema.parse(request.params);
+      return await caseImportBatchService.get(batchId);
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.patch("/import/batches/:batchId/items/:itemId", async (request, reply) => {
+    try {
+      const { batchId, itemId } = caseImportItemParamsSchema.parse(request.params);
+      return await caseImportBatchService.updateItem(batchId, itemId, parseBody(updateCaseImportItemSchema, request.body));
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.post("/import/batches/:batchId/confirm", async (request, reply) => {
+    try {
+      const { batchId } = caseImportBatchParamsSchema.parse(request.params);
+      return await caseImportBatchService.confirm(batchId);
     } catch (error) {
       return handleCaseError(error, reply);
     }
