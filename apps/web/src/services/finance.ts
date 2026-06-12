@@ -17,6 +17,9 @@ export type FinanceDashboard = {
   dueInMonthCents: number;
   totalToReceiveCents: number;
   overdueAmountCents: number;
+  monthPaidCents: number;
+  monthOpenCents: number;
+  monthOverdueCents: number;
   activeClients: number;
   runningCases: number;
   overduePayments: FinancePaymentSummary[];
@@ -44,6 +47,7 @@ export type Payment = {
   installmentNumber: number;
   installmentTotal: number;
   notes: string | null;
+  cancelReason?: string | null;
   clientName?: string;
   caseTitle?: string | null;
   caseTotalFeeAmountCents?: number | null;
@@ -60,4 +64,33 @@ export const listPayments = (filters: PaymentFilters) => {
 
 export const markPaymentPaid = (id: string, data: { paidAt: string; paymentMethod: PaymentMethod }) => {
   return request<Payment>(`/payments/${id}/paid`, { method: "PATCH", body: JSON.stringify(data) });
+};
+
+export type CreatePaymentData = {
+  clientId: string;
+  caseId?: string;
+  description: string;
+  amountCents: number;
+  dueDate: string;
+  notes?: string;
+};
+
+export type UpdatePaymentData = {
+  amountCents?: number;
+  dueDate?: string;
+  paidAt?: string;
+  description?: string;
+  notes?: string | null;
+};
+
+export const createPayment = (data: CreatePaymentData) => {
+  return request<Payment>("/payments", { method: "POST", body: JSON.stringify(data) });
+};
+
+export const updatePayment = (id: string, data: UpdatePaymentData) => {
+  return request<Payment>(`/payments/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+};
+
+export const cancelPayment = (id: string, data: { cancelReason: string }) => {
+  return request<Payment>(`/payments/${id}/cancel`, { method: "PATCH", body: JSON.stringify(data) });
 };

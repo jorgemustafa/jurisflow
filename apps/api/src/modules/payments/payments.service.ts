@@ -166,11 +166,20 @@ export function createPaymentsService(repository: PaymentsRepository) {
       const payment = await repository.findById(id);
       if (!payment) throw new PaymentNotFoundError();
 
-      if (payment.status === "paid") throw new PaymentStatusError("Paid payments can only correct paidAt or be canceled");
+      if (payment.status === "paid") {
+        const forbidden = input.amountCents !== undefined || input.dueDate !== undefined || input.description !== undefined || input.cancelReason !== undefined;
+        if (forbidden) throw new PaymentStatusError("Paid payments can only correct paidAt or be canceled");
+        return repository.update(id, input as Partial<PaymentRecord>);
+      }
       if (payment.status === "canceled") {
-        const forbidden = input.amountCents !== undefined || input.dueDate !== undefined || input.description !== undefined;
+        const forbidden =
+          input.amountCents !== undefined || input.dueDate !== undefined || input.description !== undefined || input.paidAt !== undefined;
         if (forbidden) throw new PaymentStatusError("Canceled payments can only edit cancel reason and notes");
         return repository.update(id, input as Partial<PaymentRecord>);
+      }
+
+      if (input.paidAt !== undefined) {
+        throw new PaymentStatusError("Use the paid action to register a payment receipt");
       }
 
       if (payment.source === "generated" && input.amountCents !== undefined) {
@@ -192,17 +201,4 @@ export function createPaymentsService(repository: PaymentsRepository) {
       });
     },
 
-    async cancel(id: string, input: CancelPaymentInput) {
-      const payment = await repository.findById(id);
-      if (!payment) throw new PaymentNotFoundError();
-      if (payment.status === "canceled") throw new PaymentStatusError("Payment is already canceled");
-
-      return repository.update(id, {
-        status: "canceled",
-        canceledAt: new Date(),
-        cancelReason: input.cancelReason,
-        notes: input.notes === undefined ? payment.notes : input.notes
-      });
-    }
-  };
-}
+    async cancel(id: string, input: CancelPaymentInput) 

@@ -38,6 +38,7 @@ export const updatePaymentSchema = z
   .object({
     amountCents: positiveCents.optional(),
     dueDate: z.coerce.date().optional(),
+    paidAt: z.coerce.date().optional(),
     description: z.string().trim().min(2).max(255).optional(),
     notes: nullableText(1000),
     cancelReason: nullableText(500)
@@ -89,4 +90,4 @@ export type UpdatePaymentInput = z.infer<typeof updatePaymentSchema>;
 export type MarkPaymentPaidInput = z.infer<typeof markPaymentPaidSchema>;
 export type CancelPaymentInput = z.infer<typeof cancelPaymentSchema>;
 export type CreatePaymentScheduleInput = z.infer<typeof createPaymentScheduleSchema>;
-export type PaymentListFilters = z.infer<typeof listPaymentsQuerySchema>;
+export type PaymentListFilters = z

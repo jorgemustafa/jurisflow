@@ -6,6 +6,9 @@ export type FinanceDashboard = {
   dueInMonthCents: number;
   totalToReceiveCents: number;
   overdueAmountCents: number;
+  monthPaidCents: number;
+  monthOpenCents: number;
+  monthOverdueCents: number;
   activeClients: number;
   runningCases: number;
   overduePayments: FinancePaymentSummary[];
@@ -35,7 +38,3 @@ function currentMonth() {
 export function createFinanceService(repository: FinanceRepository) {
   return {
     dashboard(filters: FinanceDashboardFilters) {
-      return repository.dashboard(filters.month ?? currentMonth());
-    }
-  };
-}
