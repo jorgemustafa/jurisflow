@@ -807,7 +807,229 @@ tr:last-child td {
   gap: 14px;
 }
 
-.timeline-form {
+.timeline-form,
+.deadline-form,
+.document-form {
   display: grid;
-  grid-template-columns: 160px 
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.timeline-form textarea,
+.deadline-form textarea {
+  grid-column: 1 / -1;
+}
+
+.timeline-form button,
+.deadline-form button,
+.document-form button {
+  justify-self: start;
+}
+
+.timeline-list {
+  display: grid;
+  gap: 10px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.timeline-item-wide {
+  grid-template-columns: minmax(0, 1fr) 220px;
+}
+
+.timeline-item span {
+  display: inline-block;
+  margin-bottom: 6px;
+  color: #62748a;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.timeline-item strong {
+  display: block;
+}
+
+.timeline-item p {
+  margin: 6px 0 0;
+  color: #52616f;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.timeline-item small {
+  display: block;
+  margin-top: 8px;
+  color: #8a96a3;
+  font-size: 13px;
+}
+
+.timeline-item time {
+  color: #62748a;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.timeline-side {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  text-align: right;
+}
+
+.timeline-side time {
+  color: #62748a;
+  font-size: 13px;
+}
+
+.month-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month-nav .month-input {
+  min-width: 150px;
+  margin: 0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.chip-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid #cad3dd;
+  border-radius: 999px;
+  color: #52616f;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: #f4f6f8;
+}
+
+.chip-active {
+  border-color: #0f766e;
+  color: #ffffff;
+  background: #0f766e;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.button.small {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.button.danger {
+  border-color: #b42318;
+  color: #b42318;
+  background: #ffffff;
+}
+
+.button.danger:hover:not(:disabled) {
+  color: #ffffff;
+  background: #b42318;
+}
+
+.row-editor td {
+  background: #f8fafc;
+}
+
+.overdue-row td {
+  background: #fef2f2;
+}
+
+.row-editor-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.row-editor-form label {
+  display: grid;
+  gap: 6px;
+  min-width: 200px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.row-editor-form .grow {
+  flex: 1;
+}
+
+.muted {
+  color: #8a96a3;
+}
+
+.progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf1f5;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #0f766e;
+}
+
+.alert.success {
+  color: #0f5f3e;
+}
+
+.case-import-batch-form {
+  display: grid;
+  gap: 12px;
+}
+
+.case-import-batch-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.case-import-batch-actions small {
+  color: #62748a;
+  font-size: 13px;
 }
