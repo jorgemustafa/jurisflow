@@ -110,4 +110,7 @@ describe("users service", () => {
 
     const user = await service.update("user-1", { password: "newpass123" });
 
-    expect(us
+    expect(user.passwordHash).toBeTruthy();
+    await expect(verifyPassword("newpass123", user.passwordHash!)).resolves.toBe(true);
+  });
+});

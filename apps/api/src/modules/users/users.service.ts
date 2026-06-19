@@ -67,4 +67,7 @@ export function createUsersService(repository: UsersRepository) {
 
       await ensureUniqueEmail(input.email, id);
       const { password, ...data } = input;
-      return repository.update(id, { ...data, passwordHash: password ? awa
+      return repository.update(id, { ...data, passwordHash: password ? await hashPassword(password) : undefined });
+    }
+  };
+}

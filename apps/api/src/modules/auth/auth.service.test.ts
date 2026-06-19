@@ -125,3 +125,7 @@ describe("auth service", () => {
     const login = await service.login({ email: user.email, password: "password123" });
 
     await expect(service.resetPassword({ resetToken: login.accessToken, password: "newpass123" })).rejects.toBeInstanceOf(
+      InvalidTokenError
+    );
+  });
+});

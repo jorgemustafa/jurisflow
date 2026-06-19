@@ -90,4 +90,4 @@ export type UpdatePaymentInput = z.infer<typeof updatePaymentSchema>;
 export type MarkPaymentPaidInput = z.infer<typeof markPaymentPaidSchema>;
 export type CancelPaymentInput = z.infer<typeof cancelPaymentSchema>;
 export type CreatePaymentScheduleInput = z.infer<typeof createPaymentScheduleSchema>;
-export type PaymentListFilters = z
+export type PaymentListFilters = z.infer<typeof listPaymentsQuerySchema>;

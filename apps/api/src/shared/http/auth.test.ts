@@ -63,4 +63,6 @@ describe("auth middleware", () => {
     await requireAuth()(request, reply);
 
     expect(reply.code).toHaveBeenCalledWith(401);
-    expect(reply.send).toHaveBeenCalledWith(
+    expect(reply.send).toHaveBeenCalledWith({ message: "Invalid token" });
+  });
+});

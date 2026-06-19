@@ -201,4 +201,17 @@ export function createPaymentsService(repository: PaymentsRepository) {
       });
     },
 
-    async cancel(id: string, input: CancelPaymentInput) 
+    async cancel(id: string, input: CancelPaymentInput) {
+      const payment = await repository.findById(id);
+      if (!payment) throw new PaymentNotFoundError();
+      if (payment.status === "canceled") throw new PaymentStatusError("Payment is already canceled");
+
+      return repository.update(id, {
+        status: "canceled",
+        canceledAt: new Date(),
+        cancelReason: input.cancelReason,
+        notes: input.notes ?? payment.notes
+      });
+    }
+  };
+}

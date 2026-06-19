@@ -53,4 +53,7 @@ export const caseImportRepository = {
         return item;
       }),
       importedMovements: imported.movementCount,
-      skippedMovements: draft.movements.length - imported.
+      skippedMovements: draft.movements.length - imported.movementCount
+    };
+  }
+};
