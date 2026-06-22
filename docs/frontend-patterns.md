@@ -27,6 +27,7 @@ Keep this stack lean. Add shadcn/Radix components only when a screen needs them;
 - Do not use `==` or `!=`; use strict equality.
 - Do not duplicate API business rules in frontend-only code. Move shared contracts or pure validation to `packages/shared` when both API and web need them.
 - Every component must be responsive to mobiles, 70% of the effort for computers and 30% for mobiles
+- Always run npm run typecheck to assert TS is running without errors
 
 ## File Organization
 
