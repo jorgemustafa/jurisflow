@@ -25,6 +25,8 @@ import {
 } from "./case-import-batch.service.js";
 import { caseParamsSchema, createCaseSchema, listCasesQuerySchema, updateCaseSchema } from "./cases.schemas.js";
 import { casesRepository } from "./cases.repository.js";
+import { caseSyncRepository } from "./case-sync.repository.js";
+import { CaseSyncCaseNotFoundError, CaseSyncMissingCnjError, createCaseSyncService } from "./case-sync.service.js";
 import { DataJudCaseNotFoundError, DataJudConfigError, DataJudRequestError, fetchDataJudCase } from "./datajud.client.js";
 import {
   CaseClientError,
@@ -40,6 +42,7 @@ const casesService = createCasesService(casesRepository);
 const timelineService = createCaseTimelineService(caseTimelineRepository);
 const caseImportService = createCaseImportService(caseImportRepository, { fetchCase: fetchDataJudCase });
 const caseImportBatchService = createCaseImportBatchService(caseImportBatchRepository, { fetchCase: fetchDataJudCase });
+const caseSyncService = createCaseSyncService(caseSyncRepository, { fetchCase: fetchDataJudCase });
 
 function handleCaseError(error: unknown, reply: FastifyReply) {
   if (error instanceof ZodError) return reply.code(400).send({ message: "Invalid case data", issues: error.issues });
@@ -56,6 +59,8 @@ function handleCaseError(error: unknown, reply: FastifyReply) {
   if (error instanceof CaseImportBatchStateError) return reply.code(409).send({ message: error.message });
   if (error instanceof CaseImportItemStateError) return reply.code(409).send({ message: error.message });
   if (error instanceof CaseImportBatchEmptyError) return reply.code(400).send({ message: error.message });
+  if (error instanceof CaseSyncCaseNotFoundError) return reply.code(404).send({ message: error.message });
+  if (error instanceof CaseSyncMissingCnjError) return reply.code(409).send({ message: error.message, field: "cnjNumber" });
   if (error instanceof CaseImportDuplicateError) {
     return reply.code(409).send({ message: error.message, field: "cnjNumber", existingCaseId: error.existingCase.id });
   }
@@ -132,6 +137,32 @@ export async function casesRoutes(app: FastifyInstance) {
     try {
       const { batchId } = caseImportBatchParamsSchema.parse(request.params);
       return await caseImportBatchService.confirm(batchId);
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.post("/sync", async (request, reply) => {
+    try {
+      return await caseSyncService.syncAllActive({ trigger: "manual", triggeredByUserId: request.user?.id ?? null });
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.post("/:id/sync", async (request, reply) => {
+    try {
+      const { id } = caseParamsSchema.parse(request.params);
+      return await caseSyncService.syncCase(id, { trigger: "manual", triggeredByUserId: request.user?.id ?? null });
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.get("/:id/sync-runs", async (request, reply) => {
+    try {
+      const { id } = caseParamsSchema.parse(request.params);
+      return await caseSyncService.listRuns(id);
     } catch (error) {
       return handleCaseError(error, reply);
     }

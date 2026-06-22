@@ -38,6 +38,8 @@ model User {
   oabState     String?    @db.VarChar(2)
   cases        Case[]
   timelineEvents CaseTimelineEvent[]
+  syncRunsTriggered CaseSyncRun[]
+  notifications Notification[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
@@ -66,6 +68,9 @@ model Case {
   documents           Document[]
   timelineEvents      CaseTimelineEvent[]
   deadlines           CaseDeadline[]
+  syncRuns            CaseSyncRun[]
+  notifications       Notification[]
+  lastSyncedAt        DateTime?
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
@@ -189,6 +194,52 @@ model CaseImportItem {
   @@index([batchId])
   @@index([status])
   @@index([cnjNumber])
+}
+
+model CaseSyncRun {
+  id                String          @id @default(uuid())
+  caseId            String
+  triggeredByUserId String?
+  trigger           CaseSyncTrigger
+  status            CaseSyncStatus
+  newMovements      Int             @default(0)
+  errorMessage      String?
+  startedAt         DateTime        @default(now())
+  finishedAt        DateTime?
+  case              Case            @relation(fields: [caseId], references: [id])
+  triggeredByUser   User?           @relation(fields: [triggeredByUserId], references: [id])
+
+  @@index([caseId, startedAt])
+  @@index([trigger, startedAt])
+}
+
+model Notification {
+  id           String    @id @default(uuid())
+  userId       String
+  caseId       String
+  title        String
+  body         String?
+  newMovements Int       @default(0)
+  readAt       DateTime?
+  user         User      @relation(fields: [userId], references: [id])
+  case         Case      @relation(fields: [caseId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([caseId])
+}
+
+enum CaseSyncTrigger {
+  MANUAL
+  SCHEDULED
+}
+
+enum CaseSyncStatus {
+  SUCCESS
+  NO_CHANGES
+  FAILED
 }
 
 enum ClientType {

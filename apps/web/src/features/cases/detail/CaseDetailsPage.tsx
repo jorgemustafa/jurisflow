@@ -1,11 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, RefreshCw } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
-import { createCaseTimelineEvent, getCase, listCaseTimeline, type CaseTimelineEventFormData, type CaseTimelineEventType } from "src/services/cases.js";
+import {
+  createCaseTimelineEvent,
+  getCase,
+  listCaseSyncRuns,
+  listCaseTimeline,
+  syncCase,
+  type CaseTimelineEventFormData,
+  type CaseTimelineEventType
+} from "src/services/cases.js";
 import { ApiError } from "src/services/http.js";
 import { fieldValue, formatDate, formatMoney } from "src/utils/format.js";
 import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea, labelTimelineType } from "src/features/cases/utils/caseLabels.js";
+import { labelSyncStatus, labelSyncTrigger, syncStatusBadgeClass } from "src/features/cases/utils/caseSyncLabels.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
 import { DeadlineList } from "src/features/deadlines/DeadlineList.js";
 import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
@@ -37,14 +46,38 @@ export const CaseDetailsPage = () => {
   const [deadlineForm, setDeadlineForm] = useState<DeadlineFormData>(emptyDeadlineForm);
   const [timelineError, setTimelineError] = useState("");
   const [deadlineError, setDeadlineError] = useState("");
+  const [syncFeedback, setSyncFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const queryClient = useQueryClient();
   const legalCase = useQuery({ queryKey: ["case", id], queryFn: () => getCase(id), enabled: Boolean(id) });
   const timeline = useQuery({ queryKey: ["case-timeline", id], queryFn: () => listCaseTimeline(id), enabled: Boolean(id) });
+  const syncRuns = useQuery({ queryKey: ["case-sync-runs", id], queryFn: () => listCaseSyncRuns(id), enabled: Boolean(id) });
   const documents = useQuery({ queryKey: ["documents", "case", id], queryFn: () => listDocuments({ caseId: id }), enabled: Boolean(id) });
   const deadlines = useQuery({
     queryKey: ["deadlines", "case", id],
     queryFn: () => listDeadlines({ caseId: id, status: "all", alertWindowDays: "7" }),
     enabled: Boolean(id)
+  });
+  const syncMutation = useMutation({
+    mutationFn: () => syncCase(id),
+    onSuccess: async (result) => {
+      if (result.status === "failed") {
+        setSyncFeedback({ kind: "error", message: result.errorMessage ?? "Não foi possível atualizar o processo." });
+      } else if (result.newMovements > 0) {
+        const label = result.newMovements === 1 ? "1 novo andamento" : `${result.newMovements} novos andamentos`;
+        setSyncFeedback({ kind: "success", message: `${label} importado(s) do DataJud.` });
+      } else {
+        setSyncFeedback({ kind: "success", message: "Processo já está atualizado. Nenhuma novidade no DataJud." });
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["case-timeline", id] }),
+        queryClient.invalidateQueries({ queryKey: ["case-sync-runs", id] }),
+        queryClient.invalidateQueries({ queryKey: ["case", id] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] })
+      ]);
+    },
+    onError: (failure) => {
+      setSyncFeedback({ kind: "error", message: failure instanceof ApiError ? failure.message : "Não foi possível atualizar o processo." });
+    }
   });
   const createTimelineMutation = useMutation({
     mutationFn: (data: CaseTimelineEventFormData) => createCaseTimelineEvent(id, data),
@@ -114,6 +147,12 @@ export const CaseDetailsPage = () => {
           <Link className="button" to="/cases">
             Voltar
           </Link>
+          {item.cnjNumber ? (
+            <button className="button" type="button" disabled={syncMutation.isPending} onClick={() => syncMutation.mutate()}>
+              <RefreshCw size={18} className={syncMutation.isPending ? "spin" : undefined} />
+              {syncMutation.isPending ? "Atualizando..." : "Atualizar processo"}
+            </button>
+          ) : null}
           <Link className="button primary" to={`/clients/${item.clientId}`}>
             Ver cliente
           </Link>
@@ -123,6 +162,8 @@ export const CaseDetailsPage = () => {
           </Link>
         </div>
       </header>
+
+      {syncFeedback ? <p className={syncFeedback.kind === "success" ? "alert success" : "alert"}>{syncFeedback.message}</p> : null}
 
       <section className="details-grid">
         <ClientDetailItem label="Status" value={labelCaseStatus(item.status)} />
@@ -180,6 +221,41 @@ export const CaseDetailsPage = () => {
             onUpdate={(deadlineId, data) => updateDeadlineMutation.mutateAsync({ deadlineId, data }).then(() => undefined)}
             onStatusChange={(deadlineId, status) => deadlineStatusMutation.mutateAsync({ deadlineId, status }).then(() => undefined)}
           />
+        ) : null}
+      </section>
+
+      <section className="panel timeline-panel">
+        <h2>Histórico de atualizações</h2>
+        {syncRuns.isLoading ? <p>Carregando histórico de atualizações...</p> : null}
+        {syncRuns.isError ? <p className="alert">Não foi possível carregar o histórico de atualizações.</p> : null}
+        {syncRuns.data?.length === 0 ? <p className="empty">Nenhuma sincronização registrada ainda.</p> : null}
+        {syncRuns.data?.length ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Origem</th>
+                  <th>Resultado</th>
+                  <th>Novos andamentos</th>
+                  <th>Detalhe</th>
+                </tr>
+              </thead>
+              <tbody>
+                {syncRuns.data.map((run) => (
+                  <tr key={run.id}>
+                    <td>{formatDate(run.startedAt)}</td>
+                    <td>{labelSyncTrigger(run.trigger)}</td>
+                    <td>
+                      <span className={`badge ${syncStatusBadgeClass(run.status)}`}>{labelSyncStatus(run.status)}</span>
+                    </td>
+                    <td>{run.newMovements}</td>
+                    <td>{run.status === "failed" ? run.errorMessage ?? "Falha na sincronização" : run.triggeredByUserName ?? "Rotina automática"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : null}
       </section>
 

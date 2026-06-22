@@ -1033,3 +1033,263 @@ tr:last-child td {
   color: #62748a;
   font-size: 13px;
 }
+
+/* Notifications + process sync */
+
+.side-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.todo-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notifications-bell {
+  position: relative;
+  display: inline-flex;
+}
+
+.notifications-bell-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-height: 32px;
+  border: 1px solid #cad3dd;
+  border-radius: 6px;
+  color: #1f2933;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.notifications-bell-button:hover {
+  background: #f4f6f8;
+}
+
+.notifications-bell-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.notifications-popover {
+  position: fixed;
+  top: 64px;
+  right: 16px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(560px, calc(100vh - 88px));
+  overflow: hidden;
+  border: 1px solid #dde3ea;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(19, 34, 53, 0.22);
+}
+
+.notifications-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.notifications-popover-header strong {
+  font-size: 16px;
+}
+
+.notifications-popover-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  color: #0f766e;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notifications-popover-action:disabled {
+  color: #9aa6b2;
+  cursor: not-allowed;
+}
+
+.notifications-popover-body {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.notifications-popover-empty {
+  margin: 0;
+  padding: 24px 16px;
+  color: #62748a;
+  text-align: center;
+}
+
+.notifications-popover-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notifications-popover-row:hover {
+  background: #f4f8f7;
+}
+
+.notifications-popover-row.is-unread {
+  background: #eef6f5;
+}
+
+.notifications-popover-dot {
+  width: 9px;
+  height: 9px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: #0f766e;
+}
+
+.notifications-popover-dot[data-read="true"] {
+  background: #cad3dd;
+}
+
+.notifications-popover-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.notifications-popover-main strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.notifications-popover-main small {
+  color: #52616f;
+  overflow-wrap: anywhere;
+}
+
+.notifications-popover-main time {
+  color: #8a96a3;
+  font-size: 12px;
+}
+
+.notifications-popover-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #edf1f5;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.notifications-popover-footer:hover {
+  background: #f4f8f7;
+}
+
+.notifications-tabs {
+  margin-bottom: 18px;
+}
+
+.notifications-list {
+  display: grid;
+  gap: 8px;
+}
+
+.notification-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-row:hover {
+  border-color: #0f766e;
+  background: #f4f8f7;
+}
+
+.notification-unread {
+  border-left: 3px solid #0f766e;
+}
+
+.notification-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #0f766e;
+}
+
+.notification-dot[aria-hidden="true"] {
+  background: #cad3dd;
+}
+
+.notification-main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.notification-main strong {
+  overflow-wrap: anywhere;
+}
+
+.notification-main small {
+  color: #52616f;
+}
+
+.notification-row time {
+  color: #62748a;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

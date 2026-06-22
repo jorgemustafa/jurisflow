@@ -27,10 +27,11 @@ export function configureAuthHandlers(handlers: typeof authHandlers) {
 async function fetchApi(path: string, init?: AppRequestInit) {
   const token = init?.skipAuth ? null : authHandlers?.getAccessToken();
   const { skipAuth: _skipAuth, skipRefresh: _skipRefresh, ...fetchInit } = init ?? {};
+  const hasBody = fetchInit.body !== undefined && fetchInit.body !== null;
 
   return fetch(`${API_URL}${path}`, {
     headers: {
-      "Content-Type": "application/json",
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...fetchInit.headers
     },

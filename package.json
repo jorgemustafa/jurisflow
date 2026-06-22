@@ -23,6 +23,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:migrate": "prisma migrate dev",
     "seed:demo": "tsx scripts/seed-demo-data.ts",
+    "seed:notifications": "tsx scripts/seed-notifications.ts",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },

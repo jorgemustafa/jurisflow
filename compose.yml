@@ -11,6 +11,8 @@ services:
       DATAJUD_API_KEY: ${DATAJUD_API_KEY:-}
       JWT_SECRET: jurisflow-development-secret
       WEB_ORIGIN: http://localhost:5173
+      ENABLE_SYNC_SCHEDULER: ${ENABLE_SYNC_SCHEDULER:-true}
+      SYNC_DAILY_TIME: ${SYNC_DAILY_TIME:-06:00}
     ports:
       - "3333:3333"
     volumes:

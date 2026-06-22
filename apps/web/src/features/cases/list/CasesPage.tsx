@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
-import { listCases, type CaseFilters } from "src/services/cases.js";
+import { listCases, syncAllCases, type CaseFilters } from "src/services/cases.js";
+import { ApiError } from "src/services/http.js";
 import { CasesTable } from "src/features/cases/list/CasesTable.js";
 
 const defaultFilters: CaseFilters = {
@@ -14,9 +16,27 @@ const defaultFilters: CaseFilters = {
 
 export const CasesPage = () => {
   const [filters, setFilters] = useState(defaultFilters);
+  const [syncFeedback, setSyncFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
+  const queryClient = useQueryClient();
   const cases = useQuery({
     queryKey: ["cases", filters],
     queryFn: () => listCases(filters)
+  });
+  const syncAllMutation = useMutation({
+    mutationFn: syncAllCases,
+    onSuccess: async (result) => {
+      setSyncFeedback({
+        kind: "success",
+        message: `${result.total} processo(s) verificado(s): ${result.updated} atualizado(s), ${result.newMovements} novo(s) andamento(s), ${result.failed} com falha.`
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cases"] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] })
+      ]);
+    },
+    onError: (failure) => {
+      setSyncFeedback({ kind: "error", message: failure instanceof ApiError ? failure.message : "Não foi possível atualizar os processos." });
+    }
   });
 
   return (
@@ -26,10 +46,18 @@ export const CasesPage = () => {
           <span>Processos</span>
           <h1>Gestão de processos</h1>
         </div>
-        <Link className="button primary" to="/cases/import">
-          Importar processo
-        </Link>
+        <div className="actions">
+          <button className="button" type="button" disabled={syncAllMutation.isPending} onClick={() => syncAllMutation.mutate()}>
+            <RefreshCw size={18} className={syncAllMutation.isPending ? "spin" : undefined} />
+            {syncAllMutation.isPending ? "Atualizando..." : "Atualizar todos"}
+          </button>
+          <Link className="button primary" to="/cases/import">
+            Importar processo
+          </Link>
+        </div>
       </header>
+
+      {syncFeedback ? <p className={syncFeedback.kind === "success" ? "alert success" : "alert"}>{syncFeedback.message}</p> : null}
 
       <section className="toolbar cases-toolbar">
         <input

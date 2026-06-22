@@ -199,3 +199,46 @@ export const previewCaseImport = (data: { cnjNumber: string; courtCode: string }
 export const confirmCaseImport = (data: { cnjNumber: string; courtCode: string; clientId: string }) => {
   return request<CaseImportResult>("/cases/import", { method: "POST", body: JSON.stringify(data) });
 };
+
+export type CaseSyncTrigger = "manual" | "scheduled";
+export type CaseSyncStatus = "success" | "no_changes" | "failed";
+
+export type CaseSyncResult = {
+  caseId: string;
+  status: CaseSyncStatus;
+  newMovements: number;
+  errorMessage: string | null;
+};
+
+export type CaseSyncBatchResult = {
+  total: number;
+  updated: number;
+  unchanged: number;
+  failed: number;
+  newMovements: number;
+};
+
+export type CaseSyncRun = {
+  id: string;
+  caseId: string;
+  triggeredByUserId: string | null;
+  triggeredByUserName: string | null;
+  trigger: CaseSyncTrigger;
+  status: CaseSyncStatus;
+  newMovements: number;
+  errorMessage: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+};
+
+export const syncCase = (id: string) => {
+  return request<CaseSyncResult>(`/cases/${id}/sync`, { method: "POST" });
+};
+
+export const syncAllCases = () => {
+  return request<CaseSyncBatchResult>("/cases/sync", { method: "POST" });
+};
+
+export const listCaseSyncRuns = (id: string) => {
+  return request<CaseSyncRun[]>(`/cases/${id}/sync-runs`);
+};
