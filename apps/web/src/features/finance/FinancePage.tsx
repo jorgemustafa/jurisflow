@@ -421,7 +421,6 @@ export const FinancePage = () => {
                 <tr>
                   <th>Cliente</th>
                   <th>Processo</th>
-                  <th>Descrição</th>
                   <th>Parcela</th>
                   <th>Valor</th>
                   <th>Vencimento</th>
@@ -437,10 +436,6 @@ export const FinancePage = () => {
                     <tr key={payment.id} className={overdue ? "overdue-row" : undefined}>
                       <td>{payment.clientName ?? payment.clientId}</td>
                       <td>{payment.caseTitle ?? "—"}</td>
-                      <td>
-                        {payment.description}
-                        {payment.status === "canceled" && payment.notes ? <small className="muted"> · {payment.notes}</small> : null}
-                      </td>
                       <td>
                         {payment.installmentNumber}/{payment.installmentTotal}
                       </td>
