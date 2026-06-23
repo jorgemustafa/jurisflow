@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveCourtFromCnj, formatCnjNumber } from "./cnj.js";
+import { deriveCourtFromCnj, formatCnjNumber } from "../../modules/cases/cnj.js";
 
 describe("deriveCourtFromCnj", () => {
   it("derives state courts (segment 8)", () => {

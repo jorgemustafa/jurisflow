@@ -8,10 +8,14 @@ import {
   type CaseImportBatchRecord,
   type CaseImportItemRecord,
   type NewCaseImportItem
-} from "./case-import-batch.service.js";
-import { CaseImportClientError, type ImportedCaseDraft, type ImportedMovement } from "./case-import.service.js";
-import { DataJudCaseNotFoundError } from "./datajud.client.js";
-import type { CaseRecord } from "./cases.service.js";
+} from "../../modules/cases/case-import-batch.service.js";
+import {
+  CaseImportClientError,
+  type ImportedCaseDraft,
+  type ImportedMovement
+} from "../../modules/cases/case-import.service.js";
+import { DataJudCaseNotFoundError } from "../../modules/cases/datajud.client.js";
+import type { CaseRecord } from "../../modules/cases/cases.service.js";
 
 const now = new Date("2026-06-01T00:00:00.000Z");
 const cnjTjsp = "00000012320268260000";

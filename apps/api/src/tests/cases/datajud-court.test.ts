@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { courtCodeFromCnj, DataJudCourtUnsupportedError } from "./datajud-court.js";
+import { courtCodeFromCnj, DataJudCourtUnsupportedError } from "../../modules/cases/datajud-court.js";
 
 describe("courtCodeFromCnj", () => {
   it("derives state court alias from CNJ (SP)", () => {

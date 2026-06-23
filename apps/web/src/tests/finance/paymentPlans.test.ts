@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Payment } from "src/services/finance.js";
-import { buildPaymentPlanSummaries } from "src/features/finance/utils/paymentPlans.js";
+import { buildPaymentPlanSummaries } from "../../features/finance/utils/paymentPlans.js";
+import type { Payment } from "../../services/finance.js";
 
 const payment = (overrides: Partial<Payment>): Payment => ({
   id: "payment-1",

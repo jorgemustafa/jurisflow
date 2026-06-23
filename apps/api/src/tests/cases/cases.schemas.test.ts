@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCaseSchema, listCasesQuerySchema, updateCaseSchema } from "./cases.schemas.js";
+import { createCaseSchema, listCasesQuerySchema, updateCaseSchema } from "../../modules/cases/cases.schemas.js";
 
 describe("case schemas", () => {
   it("accepts minimal case creation input", () => {

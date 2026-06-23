@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { ClientListFilters, ClientStatus, CreateClientInput, UpdateClientInput } from "./clients.schemas.js";
-import { ClientDocumentConflictError, ClientDocumentTypeError, createClientsService, type ClientRecord } from "./clients.service.js";
+import type { ClientListFilters, ClientStatus, CreateClientInput, UpdateClientInput } from "../../modules/clients/clients.schemas.js";
+import {
+  ClientDocumentConflictError,
+  ClientDocumentTypeError,
+  createClientsService,
+  type ClientRecord
+} from "../../modules/clients/clients.service.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { UserListFilters } from "./users.schemas.js";
-import { UserEmailConflictError, createUsersService, type CreateUserData, type UpdateUserData, type UserRecord } from "./users.service.js";
+import type { UserListFilters } from "../../modules/users/users.schemas.js";
+import {
+  UserEmailConflictError,
+  createUsersService,
+  type CreateUserData,
+  type UpdateUserData,
+  type UserRecord
+} from "../../modules/users/users.service.js";
 import { verifyPassword } from "../../shared/security/password.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");

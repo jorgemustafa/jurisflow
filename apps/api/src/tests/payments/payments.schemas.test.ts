@@ -6,7 +6,7 @@ import {
   listPaymentsQuerySchema,
   markPaymentPaidSchema,
   updatePaymentSchema
-} from "./payments.schemas.js";
+} from "../../modules/payments/payments.schemas.js";
 
 const clientId = "11111111-1111-1111-1111-111111111111";
 

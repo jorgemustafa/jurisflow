@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createClientSchema, listClientsQuerySchema, updateClientSchema } from "./clients.schemas.js";
+import { createClientSchema, listClientsQuerySchema, updateClientSchema } from "../../modules/clients/clients.schemas.js";
 
 describe("client schemas", () => {
   it("normalizes CPF, email, and phone", () => {

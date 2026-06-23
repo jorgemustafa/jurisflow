@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { financeDashboardQuerySchema } from "./finance.schemas.js";
+import { financeDashboardQuerySchema } from "../../modules/finance/finance.schemas.js";
 
 describe("finance dashboard query schema", () => {
   it("accepts a valid YYYY-MM month", () => {

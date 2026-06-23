@@ -1,8 +1,9 @@
 # Backend Testing
 
-Automated tests for the API live next to the code they cover, as `*.test.ts`
-files under `apps/api/src`. They run on [Vitest](https://vitest.dev) in a Node
-environment with globals enabled (`vitest run --environment node --globals`).
+Automated API tests live under `apps/api/src/tests/<domain>/` as `*.test.ts`.
+Frontend tests follow the same pattern under `apps/web/src/tests/<domain>/`.
+They run on [Vitest](https://vitest.dev) in a Node environment with globals
+enabled (`vitest run --environment node --globals`) for the API.
 
 The tests are pure unit tests: services receive in-memory fake repositories, so
 no database or external service is required to run them.

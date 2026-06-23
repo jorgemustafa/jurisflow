@@ -2,7 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { describe, expect, it, vi } from "vitest";
 import { InvalidTokenError } from "../../modules/auth/auth.service.js";
 import type { UserRecord } from "../../modules/users/users.service.js";
-import { createRequireAuth } from "./auth.js";
+import { createRequireAuth } from "../../shared/http/auth.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 

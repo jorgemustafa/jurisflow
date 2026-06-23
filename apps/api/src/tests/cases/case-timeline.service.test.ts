@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { CreateCaseTimelineEventInput } from "./case-timeline.schemas.js";
-import { CaseTimelineCaseNotFoundError, createCaseTimelineService, type CaseTimelineEventRecord } from "./case-timeline.service.js";
+import type { CreateCaseTimelineEventInput } from "../../modules/cases/case-timeline.schemas.js";
+import {
+  CaseTimelineCaseNotFoundError,
+  createCaseTimelineService,
+  type CaseTimelineEventRecord
+} from "../../modules/cases/case-timeline.service.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 

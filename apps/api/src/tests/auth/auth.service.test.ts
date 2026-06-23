@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { createAuthService, InvalidCredentialsError, InvalidTokenError } from "../../modules/auth/auth.service.js";
+import type { UserRecord } from "../../modules/users/users.service.js";
 import { hashPassword, verifyPassword } from "../../shared/security/password.js";
-import { createAuthService, InvalidCredentialsError, InvalidTokenError } from "./auth.service.js";
-import type { UserRecord } from "../users/users.service.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 const secret = "test-secret";

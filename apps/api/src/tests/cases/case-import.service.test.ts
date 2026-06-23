@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { ImportedCaseDraft } from "./case-import.service.js";
-import { CaseImportClientError, CaseImportDuplicateError, createCaseImportService, type ImportedMovement } from "./case-import.service.js";
-import type { CaseRecord } from "./cases.service.js";
+import type { ImportedCaseDraft } from "../../modules/cases/case-import.service.js";
+import {
+  CaseImportClientError,
+  CaseImportDuplicateError,
+  createCaseImportService,
+  type ImportedMovement
+} from "../../modules/cases/case-import.service.js";
+import type { CaseRecord } from "../../modules/cases/cases.service.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 const cnjNumber = "00000012320268260000";

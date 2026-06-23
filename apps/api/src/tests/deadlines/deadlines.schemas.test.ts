@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createDeadlineSchema, listDeadlinesQuerySchema, updateDeadlineSchema } from "./deadlines.schemas.js";
+import {
+  createDeadlineSchema,
+  listDeadlinesQuerySchema,
+  updateDeadlineSchema
+} from "../../modules/deadlines/deadlines.schemas.js";
 
 describe("deadline schemas", () => {
   it("accepts valid deadline creation input", () => {

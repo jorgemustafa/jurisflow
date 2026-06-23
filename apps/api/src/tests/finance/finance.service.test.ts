@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFinanceService, type FinanceDashboard } from "./finance.service.js";
+import { createFinanceService, type FinanceDashboard } from "../../modules/finance/finance.service.js";
 
 function createRepository() {
   const calls: string[] = [];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDocumentSchema, listDocumentsQuerySchema } from "./documents.schemas.js";
+import { createDocumentSchema, listDocumentsQuerySchema } from "../../modules/documents/documents.schemas.js";
 
 describe("document schemas", () => {
   it("accepts valid document metadata", () => {

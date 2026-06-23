@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { CaseListFilters, CreateCaseInput, UpdateCaseInput } from "./cases.schemas.js";
+import type { CaseListFilters, CreateCaseInput, UpdateCaseInput } from "../../modules/cases/cases.schemas.js";
 import {
   CaseClientError,
   CasePendingFinanceError,
   CaseResponsibleUserError,
   createCasesService,
   type CaseRecord
-} from "./cases.service.js";
+} from "../../modules/cases/cases.service.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 

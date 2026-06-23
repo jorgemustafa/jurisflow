@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CreatePaymentData, PaymentRecord } from "./payments.service.js";
+import type { CreatePaymentData, PaymentRecord } from "../../modules/payments/payments.service.js";
 import {
   PaymentCaseError,
   PaymentClientError,
@@ -7,8 +7,8 @@ import {
   PaymentStatusError,
   buildInstallments,
   createPaymentsService
-} from "./payments.service.js";
-import type { PaymentListFilters } from "./payments.schemas.js";
+} from "../../modules/payments/payments.service.js";
+import type { PaymentListFilters } from "../../modules/payments/payments.schemas.js";
 
 const now = new Date("2026-05-14T12:00:00.000Z");
 

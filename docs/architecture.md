@@ -45,13 +45,17 @@ modules/<domain>/
   <domain>.service.ts
   <domain>.repository.ts
   <domain>.schemas.ts
-  <domain>.test.ts
+
+tests/<domain>/
+  <domain>.schemas.test.ts
+  <domain>.service.test.ts
 ```
 
 - Routes handle HTTP concerns and validation.
 - Services hold business rules.
 - Repositories isolate Prisma access.
 - Schemas define input contracts.
+- Tests are centralized by application and grouped by business domain.
 
 ## Authentication Pattern
 

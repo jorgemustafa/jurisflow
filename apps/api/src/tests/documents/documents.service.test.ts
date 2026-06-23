@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { CreateDocumentInput, DocumentListFilters } from "./documents.schemas.js";
-import { createDocumentsService, DocumentCaseError, DocumentClientError, type DocumentRecord } from "./documents.service.js";
+import type { CreateDocumentInput, DocumentListFilters } from "../../modules/documents/documents.schemas.js";
+import {
+  createDocumentsService,
+  DocumentCaseError,
+  DocumentClientError,
+  type DocumentRecord
+} from "../../modules/documents/documents.service.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 

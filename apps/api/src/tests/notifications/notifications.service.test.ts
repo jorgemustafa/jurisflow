@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createNotificationsService, NotificationNotFoundError, type NotificationRecord } from "./notifications.service.js";
+import {
+  createNotificationsService,
+  NotificationNotFoundError,
+  type NotificationRecord
+} from "../../modules/notifications/notifications.service.js";
 
 const record = (overrides: Partial<NotificationRecord> = {}): NotificationRecord => ({
   id: "notification-1",

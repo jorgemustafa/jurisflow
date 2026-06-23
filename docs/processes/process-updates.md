@@ -210,8 +210,8 @@ npm run build
 
 Os testes de regra de negócio cobertos por este subsistema:
 
-- `apps/api/src/modules/cases/datajud-court.test.ts` — derivação de tribunal por CNJ.
-- `apps/api/src/modules/cases/case-sync.service.test.ts` — sincronização, histórico e
+- `apps/api/src/tests/cases/datajud-court.test.ts` — derivação de tribunal por CNJ.
+- `apps/api/src/tests/cases/case-sync.service.test.ts` — sincronização, histórico e
   notificação (com repositório mockado).
-- `apps/api/src/modules/notifications/notifications.service.test.ts` — listagem, contagem
+- `apps/api/src/tests/notifications/notifications.service.test.ts` — listagem, contagem
   e escopo por usuário.

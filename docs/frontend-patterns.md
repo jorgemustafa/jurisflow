@@ -49,6 +49,8 @@ apps/web/src/
     <domain>/
   lib/
   services/
+  tests/
+    <domain>/
   utils/
   styles.css
 ```
@@ -193,6 +195,8 @@ Avoid duplicating business rules separately in the UI. If both API and web need 
 ## Tests
 
 Add or update tests when a frontend change introduces business rules, branching behavior, or user-facing logic that can regress.
+
+Place frontend tests under `apps/web/src/tests/<domain>/`, mirroring the feature domain without mixing test files into production folders.
 
 Do not add shallow tests that only assert components render without validating behavior. Prefer tests that cover actual rules, transformations, or workflows.
 

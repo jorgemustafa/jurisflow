@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createCaseTimelineEventSchema, listCaseTimelineQuerySchema } from "./case-timeline.schemas.js";
+import {
+  createCaseTimelineEventSchema,
+  listCaseTimelineQuerySchema
+} from "../../modules/cases/case-timeline.schemas.js";
 
 describe("case timeline schemas", () => {
   it("accepts a minimal timeline event", () => {

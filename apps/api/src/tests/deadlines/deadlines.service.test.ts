@@ -1,6 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CreateDeadlineInput, DeadlineListFilters, DeadlineStatus, UpdateDeadlineInput } from "./deadlines.schemas.js";
-import { createDeadlinesService, DeadlineCaseNotFoundError, DeadlineNotFoundError, type DeadlineRecord } from "./deadlines.service.js";
+import type {
+  CreateDeadlineInput,
+  DeadlineListFilters,
+  DeadlineStatus,
+  UpdateDeadlineInput
+} from "../../modules/deadlines/deadlines.schemas.js";
+import {
+  createDeadlinesService,
+  DeadlineCaseNotFoundError,
+  DeadlineNotFoundError,
+  type DeadlineRecord
+} from "../../modules/deadlines/deadlines.service.js";
 
 const now = new Date("2026-05-25T12:00:00.000Z");
 

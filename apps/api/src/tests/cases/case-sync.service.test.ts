@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ImportedCaseDraft, ImportedMovement } from "./case-import.service.js";
+import type { ImportedCaseDraft, ImportedMovement } from "../../modules/cases/case-import.service.js";
 import {
   CaseSyncCaseNotFoundError,
   CaseSyncMissingCnjError,
@@ -8,7 +8,7 @@ import {
   type CaseSyncStatus,
   type CaseSyncTrigger,
   type SyncableCase
-} from "./case-sync.service.js";
+} from "../../modules/cases/case-sync.service.js";
 
 type RecordRunInput = {
   caseId: string;
