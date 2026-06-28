@@ -59,12 +59,9 @@ docker compose version
 ### 4. Enviar o código para a VM
 
 ```bash
-# opção A: clonar do GitHub (configure uma deploy key ou use HTTPS)
+# clonar do GitHub (configure uma deploy key ou use HTTPS)
 git clone git@github.com:jorgemustafa/jurisflow.git
 cd jurisflow
-
-# opção B: copiar do seu computador via scp (sem .git/node_modules)
-# rsync -av --exclude node_modules --exclude .git ./jurisflow ubuntu@SEU_IP:~/
 ```
 
 ### 5. Configurar produção
@@ -75,7 +72,6 @@ Crie o arquivo **`.env`** na raiz (substitua `SEU_IP_PUBLICO` e os tokens):
 DATABASE_URL="postgresql://postgres:postgres@postgres:5432/jurisflow?schema=public"
 JWT_SECRET="cole-aqui-um-segredo-forte"
 DATAJUD_API_KEY="sua-chave-datajud"
-ESCAVADOR_TOKEN="seu-token-escavador"
 ```
 
 Gere um `JWT_SECRET` forte:
