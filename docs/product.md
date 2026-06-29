@@ -63,6 +63,9 @@ Secondary users:
 - Track receivables, fees, due dates, payments, installments, overdue amounts, and cancellations.
 - Connect financial records to clients and cases when applicable.
 - Make it easy to understand what needs action.
+- Require an immutable financial agreement when a case is created or imported.
+- Register the configurable entry as received at creation and derive monthly installments from the remaining balance and fixed installment value.
+- Carry unpaid installments into later month views while preserving and showing their original competence; mark them overdue only after their due date passes.
 
 ### Documents
 

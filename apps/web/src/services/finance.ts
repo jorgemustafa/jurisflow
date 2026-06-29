@@ -1,3 +1,4 @@
+import type { PaymentMethod } from "@jurisflow/shared";
 import { request, searchParams } from "src/services/http.js";
 
 export type FinancePaymentSummary = {
@@ -27,16 +28,19 @@ export type FinanceDashboard = {
 };
 
 export const getFinanceDashboard = (month: string) => {
-  return request<FinanceDashboard>(`/finance/dashboard${searchParams({ month })}`);
+  return request<FinanceDashboard>(
+    `/finance/dashboard${searchParams({ month })}`,
+  );
 };
 
 export type PaymentStatus = "pending" | "paid" | "canceled";
-export type PaymentMethod = "pix" | "cash" | "bank_transfer" | "credit_card" | "debit_card" | "boleto" | "other";
+export type { PaymentMethod };
 
 export type Payment = {
   id: string;
   clientId: string;
   caseId: string | null;
+  paymentScheduleId: string | null;
   source: "generated" | "manual";
   description: string;
   amountCents: number;
@@ -56,14 +60,23 @@ export type Payment = {
 export type PaymentFilters = {
   month?: string;
   status: PaymentStatus | "all";
+  caseId?: string;
 };
 
 export const listPayments = (filters: PaymentFilters) => {
-  return request<Payment[]>(`/payments${searchParams({ month: filters.month ?? "", status: filters.status })}`);
+  return request<Payment[]>(
+    `/payments${searchParams({ month: filters.month ?? "", status: filters.status, caseId: filters.caseId ?? "" })}`,
+  );
 };
 
-export const markPaymentPaid = (id: string, data: { paidAt: string; paymentMethod: PaymentMethod }) => {
-  return request<Payment>(`/payments/${id}/paid`, { method: "PATCH", body: JSON.stringify(data) });
+export const markPaymentPaid = (
+  id: string,
+  data: { paidAt: string; paymentMethod: PaymentMethod },
+) => {
+  return request<Payment>(`/payments/${id}/paid`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 };
 
 export type CreatePaymentData = {
@@ -84,13 +97,22 @@ export type UpdatePaymentData = {
 };
 
 export const createPayment = (data: CreatePaymentData) => {
-  return request<Payment>("/payments", { method: "POST", body: JSON.stringify(data) });
+  return request<Payment>("/payments", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 
 export const updatePayment = (id: string, data: UpdatePaymentData) => {
-  return request<Payment>(`/payments/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  return request<Payment>(`/payments/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 };
 
 export const cancelPayment = (id: string, data: { cancelReason: string }) => {
-  return request<Payment>(`/payments/${id}/cancel`, { method: "PATCH", body: JSON.stringify(data) });
+  return request<Payment>(`/payments/${id}/cancel`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 };

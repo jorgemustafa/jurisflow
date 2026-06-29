@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CreatePaymentData, PaymentRecord } from "../../modules/payments/payments.service.js";
 import {
   PaymentCaseError,
-  PaymentScheduleError,
   PaymentStatusError,
-  buildInstallments,
   createPaymentsService,
   isOverdue
 } from "../../modules/payments/payments.service.js";
@@ -36,7 +34,7 @@ function payment(overrides: Partial<PaymentRecord> = {}): PaymentRecord {
   };
 }
 
-function createRepository(options: { existingSchedule?: boolean; caseClientId?: string } = {}) {
+function createRepository(options: { caseClientId?: string } = {}) {
   const payments: PaymentRecord[] = [];
 
   return {
@@ -51,10 +49,7 @@ function createRepository(options: { existingSchedule?: boolean; caseClientId?: 
       return id === "client-1" ? { id } : null;
     },
     async findCaseById(id: string) {
-      return id === "case-1" ? { id, clientId: options.caseClientId ?? "client-1", totalFeeAmountCents: null } : null;
-    },
-    async hasGeneratedSchedule(_caseId: string) {
-      return options.existingSchedule ?? false;
+      return id === "case-1" ? { id, clientId: options.caseClientId ?? "client-1", totalFeeAmountCents: 100000 } : null;
     },
     async create(data: CreatePaymentData) {
       const item = payment({
@@ -69,20 +64,6 @@ function createRepository(options: { existingSchedule?: boolean; caseClientId?: 
       });
       payments.push(item);
       return item;
-    },
-    async createCaseSchedule(_caseId: string, _totalFeeAmountCents: number, data: CreatePaymentData[]) {
-      for (const item of data) {
-        payments.push(
-          payment({
-            id: `payment-${payments.length + 1}`,
-            ...item,
-            caseId: item.caseId ?? null,
-            paymentScheduleId: item.paymentScheduleId ?? null,
-            status: "pending"
-          })
-        );
-      }
-      return payments;
     },
     async update(id: string, data: Partial<PaymentRecord>) {
       const item = payments.find((current) => current.id === id);
@@ -129,30 +110,6 @@ describe("payments service", () => {
         dueDate: new Date("2026-06-10T12:00:00.000Z")
       })
     ).rejects.toBeInstanceOf(PaymentCaseError);
-  });
-
-  it("generates monthly installments and puts rounding remainder in the last one", () => {
-    const installments = buildInstallments("case-1", "client-1", {
-      totalFeeAmountCents: 10000,
-      installmentCount: 3,
-      firstDueDate: new Date("2026-01-31T12:00:00.000Z")
-    });
-
-    expect(installments.map((item) => item.amountCents)).toEqual([3333, 3333, 3334]);
-    expect(installments.map((item) => item.dueDate.toISOString().slice(0, 10))).toEqual(["2026-01-31", "2026-02-28", "2026-03-31"]);
-    expect(new Set(installments.map((item) => item.paymentScheduleId)).size).toBe(1);
-  });
-
-  it("prevents more than one generated schedule per case", async () => {
-    const service = createPaymentsService(createRepository({ existingSchedule: true }));
-
-    await expect(
-      service.createCaseSchedule("case-1", {
-        totalFeeAmountCents: 100000,
-        installmentCount: 1,
-        firstDueDate: new Date("2026-06-10T12:00:00.000Z")
-      })
-    ).rejects.toBeInstanceOf(PaymentScheduleError);
   });
 
   it("computes overdue from pending status and due date", () => {

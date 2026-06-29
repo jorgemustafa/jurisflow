@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   cancelPaymentSchema,
   createPaymentSchema,
-  createPaymentScheduleSchema,
   listPaymentsQuerySchema,
   markPaymentPaidSchema,
   updatePaymentSchema
@@ -79,29 +78,6 @@ describe("cancelPaymentSchema", () => {
   it("accepts a valid reason", () => {
     const parsed = cancelPaymentSchema.parse({ cancelReason: "Lançamento duplicado" });
     expect(parsed.cancelReason).toBe("Lançamento duplicado");
-  });
-});
-
-describe("createPaymentScheduleSchema", () => {
-  it("accepts a single installment full payment", () => {
-    const parsed = createPaymentScheduleSchema.parse({
-      totalFeeAmountCents: 100000,
-      installmentCount: 1,
-      firstDueDate: "2026-06-10"
-    });
-    expect(parsed.installmentCount).toBe(1);
-  });
-
-  it("rejects an installment count below one", () => {
-    expect(() =>
-      createPaymentScheduleSchema.parse({ totalFeeAmountCents: 100000, installmentCount: 0, firstDueDate: "2026-06-10" })
-    ).toThrow();
-  });
-
-  it("rejects a non-positive total fee", () => {
-    expect(() =>
-      createPaymentScheduleSchema.parse({ totalFeeAmountCents: -1, installmentCount: 2, firstDueDate: "2026-06-10" })
-    ).toThrow();
   });
 });
 

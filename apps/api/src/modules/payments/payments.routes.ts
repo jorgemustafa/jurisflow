@@ -5,8 +5,6 @@ import { parseBody } from "../../shared/http/validate.js";
 import { paymentsRepository } from "./payments.repository.js";
 import {
   cancelPaymentSchema,
-  casePaymentScheduleParamsSchema,
-  createPaymentScheduleSchema,
   createPaymentSchema,
   listPaymentsQuerySchema,
   markPaymentPaidSchema,
@@ -17,7 +15,6 @@ import {
   PaymentCaseError,
   PaymentClientError,
   PaymentNotFoundError,
-  PaymentScheduleError,
   PaymentStatusError,
   createPaymentsService
 } from "./payments.service.js";
@@ -29,7 +26,6 @@ function handlePaymentError(error: unknown, reply: FastifyReply) {
   if (error instanceof PaymentNotFoundError) return reply.code(404).send({ message: error.message });
   if (error instanceof PaymentClientError) return reply.code(400).send({ message: error.message, field: "clientId" });
   if (error instanceof PaymentCaseError) return reply.code(400).send({ message: error.message, field: "caseId" });
-  if (error instanceof PaymentScheduleError) return reply.code(409).send({ message: error.message });
   if (error instanceof PaymentStatusError) return reply.code(400).send({ message: error.message });
   throw error;
 }
@@ -81,13 +77,4 @@ export async function paymentsRoutes(app: FastifyInstance) {
     }
   });
 
-  app.post("/cases/:id/payments/schedule", async (request, reply) => {
-    try {
-      const { id } = casePaymentScheduleParamsSchema.parse(request.params);
-      const payments = await paymentsService.createCaseSchedule(id, parseBody(createPaymentScheduleSchema, request.body));
-      return reply.code(201).send(payments);
-    } catch (error) {
-      return handlePaymentError(error, reply);
-    }
-  });
 }

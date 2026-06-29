@@ -61,7 +61,7 @@ model Case {
   description         String?
   openedAt            DateTime?
   closedAt            DateTime?
-  totalFeeAmountCents Int?
+  totalFeeAmountCents Int
   client              Client     @relation(fields: [clientId], references: [id])
   responsibleUser     User?      @relation(fields: [responsibleUserId], references: [id])
   payments            Payment[]
@@ -187,6 +187,7 @@ model CaseImportItem {
   status       CaseImportItemStatus @default(PENDING)
   errorMessage String?
   draft        Json?
+  financeData  Json?
   clientId     String?
   caseId       String?
   batch        CaseImportBatch      @relation(fields: [batchId], references: [id])

@@ -58,21 +58,18 @@ lives in the `payments` module (installment generation, status rules) and the
 
 ### `payments` module
 
-- `payments.rules.test.ts` — installment generation (single full payment;
-  sum of installments equals the total; even split with no remainder; correct
-  `x/y` numbering), create guards (unknown client, unknown case), edit
-  restrictions by status and source (paid can only correct `paidAt`; canceled
-  can only edit notes / cancel reason; pending receipts must use the paid
-  action; pending manual amounts are editable), mark-as-paid behavior (defaults
-  `paidAt` to now, refuses canceled payments, throws when not found), and cancel
-  rules (sets `canceledAt` + reason, keeps notes, refuses double cancel).
+- `payments.rules.test.ts` — paid entry plus fixed installment generation,
+  smaller final installment, total preservation, end-of-month dates, next-month
+  validation, generated-payment immutability, and manual cancellation rules.
+- `payments.repository.test.ts` — monthly query scope for current competence,
+  carried overdue payments, and late receipts by `paidAt`.
 - `payments.schemas.test.ts` — request validation for creating, updating,
-  marking paid, canceling, and scheduling payments, plus the list query
+  marking paid and canceling payments, plus the list query
   defaults and transforms.
-- `payments.service.test.ts` — the pre-existing service tests (manual
-  client-only payment, case/client ownership, monthly installments with
-  end-of-month due dates, one-schedule-per-case lock, overdue computation,
-  generated-amount lock, mark paid, cancel).
+- `payments.service.test.ts` — manual client-only payment, case/client
+  ownership, overdue computation, generated-payment lock, mark paid, and cancel.
+- Web finance tests cover plan summaries, entry exclusion from installment
+  progress, manual-payment exclusion, and metrics by competence and receipt date.
 
 > Note: a few finance rules are enforced at the database layer in
 > `finance.repository.ts` (canceled payments excluded from totals via the

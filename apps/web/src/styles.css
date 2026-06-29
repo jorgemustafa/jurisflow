@@ -1012,6 +1012,51 @@ tr:last-child td {
   background: #0f766e;
 }
 
+.finance-form-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #dde3ea;
+  border-radius: 10px;
+}
+
+.finance-form-section legend {
+  padding: 0 8px;
+  font-weight: 700;
+}
+
+.competence-badge {
+  display: block;
+  margin-top: 4px;
+  color: #b54708;
+  font-weight: 700;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover td {
+  background: #f8fafc;
+}
+
+.expand-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.expanded-payment-row > td {
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.case-payments-panel h2 {
+  margin-top: 0;
+}
+
 .alert.success {
   color: #0f5f3e;
 }

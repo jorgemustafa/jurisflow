@@ -4,12 +4,19 @@ import {
   CaseImportClientError,
   CaseImportDuplicateError,
   createCaseImportService,
-  type ImportedMovement
+  type ImportedMovement,
 } from "../../modules/cases/case-import.service.js";
 import type { CaseRecord } from "../../modules/cases/cases.service.js";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 const cnjNumber = "00000012320268260000";
+const finance = {
+  totalFeeAmountCents: 150000,
+  entryAmountCents: 20000,
+  installmentAmountCents: 50000,
+  firstDueDate: "2026-02-10",
+  entryPaymentMethod: "pix" as const,
+};
 
 function caseRecord(overrides: Partial<CaseRecord> = {}): CaseRecord {
   return {
@@ -29,24 +36,28 @@ function caseRecord(overrides: Partial<CaseRecord> = {}): CaseRecord {
     description: null,
     openedAt: null,
     closedAt: null,
-    totalFeeAmountCents: null,
+    totalFeeAmountCents: 150000,
     createdAt: now,
     updatedAt: now,
-    ...overrides
+    ...overrides,
   };
 }
 
-const movement = (overrides: Partial<ImportedMovement> = {}): ImportedMovement => ({
+const movement = (
+  overrides: Partial<ImportedMovement> = {},
+): ImportedMovement => ({
   externalId: "1-2026-01-01T00:00:00.000Z",
   sourceHash: "hash-1",
   type: "other",
   title: "Conclusos para decisão",
   description: null,
   occurredAt: now,
-  ...overrides
+  ...overrides,
 });
 
-const draft = (movements: ImportedMovement[] = [movement()]): ImportedCaseDraft => ({
+const draft = (
+  movements: ImportedMovement[] = [movement()],
+): ImportedCaseDraft => ({
   cnjNumber,
   title: `Procedimento - ${cnjNumber}`,
   court: "TJSP",
@@ -54,23 +65,32 @@ const draft = (movements: ImportedMovement[] = [movement()]): ImportedCaseDraft 
   division: "1 Vara",
   description: "Assunto",
   openedAt: now,
-  movements
+  movements,
 });
 
-function createRepository(options: { duplicate?: boolean; inactiveClient?: boolean } = {}) {
+function createRepository(
+  options: { duplicate?: boolean; inactiveClient?: boolean } = {},
+) {
   return {
     importedMovements: [] as ImportedMovement[],
     async findClientById(id: string) {
       if (id !== "client-1") return null;
-      return { id, status: options.inactiveClient ? "inactive" : "active" } as const;
+      return {
+        id,
+        status: options.inactiveClient ? "inactive" : "active",
+      } as const;
     },
     async findByCnjNumber() {
       return options.duplicate ? caseRecord() : null;
     },
     async importCase(clientId: string, item: ImportedCaseDraft) {
       this.importedMovements = item.movements;
-      return { case: caseRecord({ clientId, title: item.title }), importedMovements: item.movements.length, skippedMovements: 0 };
-    }
+      return {
+        case: caseRecord({ clientId, title: item.title }),
+        importedMovements: item.movements.length,
+        skippedMovements: 0,
+      };
+    },
   };
 }
 
@@ -78,12 +98,16 @@ describe("case import service", () => {
   it("returns duplicate data on preview without fetching DataJud", async () => {
     const repository = createRepository({ duplicate: true });
     let fetched = false;
-    const service = createCaseImportService(repository, {
-      async fetchCase() {
-        fetched = true;
-        return draft();
-      }
-    });
+    const service = createCaseImportService(
+      repository,
+      {
+        async fetchCase() {
+          fetched = true;
+          return draft();
+        },
+      },
+      { now: () => now },
+    );
 
     const preview = await service.preview({ cnjNumber, courtCode: "tjsp" });
 
@@ -93,35 +117,72 @@ describe("case import service", () => {
   });
 
   it("blocks confirming a duplicated CNJ", async () => {
-    const service = createCaseImportService(createRepository({ duplicate: true }), {
-      async fetchCase() {
-        return draft();
-      }
-    });
+    const service = createCaseImportService(
+      createRepository({ duplicate: true }),
+      {
+        async fetchCase() {
+          return draft();
+        },
+      },
+      { now: () => now },
+    );
 
-    await expect(service.confirm({ clientId: "client-1", cnjNumber, courtCode: "tjsp" })).rejects.toBeInstanceOf(CaseImportDuplicateError);
+    await expect(
+      service.confirm({
+        clientId: "client-1",
+        cnjNumber,
+        courtCode: "tjsp",
+        finance,
+      }),
+    ).rejects.toBeInstanceOf(CaseImportDuplicateError);
   });
 
   it("blocks importing into inactive clients", async () => {
-    const service = createCaseImportService(createRepository({ inactiveClient: true }), {
-      async fetchCase() {
-        return draft();
-      }
-    });
+    const service = createCaseImportService(
+      createRepository({ inactiveClient: true }),
+      {
+        async fetchCase() {
+          return draft();
+        },
+      },
+      { now: () => now },
+    );
 
-    await expect(service.confirm({ clientId: "client-1", cnjNumber, courtCode: "tjsp" })).rejects.toBeInstanceOf(CaseImportClientError);
+    await expect(
+      service.confirm({
+        clientId: "client-1",
+        cnjNumber,
+        courtCode: "tjsp",
+        finance,
+      }),
+    ).rejects.toBeInstanceOf(CaseImportClientError);
   });
 
   it("deduplicates imported movements by source hash", async () => {
     const repository = createRepository();
-    const service = createCaseImportService(repository, {
-      async fetchCase() {
-        return draft([movement(), movement({ externalId: "same-content" }), movement({ sourceHash: "hash-2" })]);
-      }
+    const service = createCaseImportService(
+      repository,
+      {
+        async fetchCase() {
+          return draft([
+            movement(),
+            movement({ externalId: "same-content" }),
+            movement({ sourceHash: "hash-2" }),
+          ]);
+        },
+      },
+      { now: () => now },
+    );
+
+    await service.confirm({
+      clientId: "client-1",
+      cnjNumber,
+      courtCode: "tjsp",
+      finance,
     });
 
-    await service.confirm({ clientId: "client-1", cnjNumber, courtCode: "tjsp" });
-
-    expect(repository.importedMovements.map((item) => item.sourceHash)).toEqual(["hash-1", "hash-2"]);
+    expect(repository.importedMovements.map((item) => item.sourceHash)).toEqual(
+      ["hash-1", "hash-2"],
+    );
   });
 });

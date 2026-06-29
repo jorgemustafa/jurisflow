@@ -1,3 +1,4 @@
+import { caseFinanceSchema } from "@jurisflow/shared";
 import { z } from "zod";
 
 export const caseTypeSchema = z.enum(["judicial", "extrajudicial"]);
@@ -67,7 +68,8 @@ export const createCaseSchema = z
     division: optionalText(120),
     description: optionalText(2000),
     openedAt: optionalDate,
-    closedAt: optionalDate
+    closedAt: optionalDate,
+    finance: caseFinanceSchema
   })
   .superRefine((data, context) => validateCnjForType(data.caseType, data.cnjNumber, context));
 

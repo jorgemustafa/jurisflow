@@ -1,3 +1,4 @@
+import { caseFinanceSchema } from "@jurisflow/shared";
 import { z } from "zod";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
@@ -23,9 +24,10 @@ export const caseImportItemParamsSchema = z.object({
 export const updateCaseImportItemSchema = z
   .object({
     clientId: z.string().uuid().nullable().optional(),
-    status: z.enum(["pending", "discarded"]).optional()
+    status: z.enum(["pending", "discarded"]).optional(),
+    finance: caseFinanceSchema.optional()
   })
-  .refine((data) => data.clientId !== undefined || data.status !== undefined, "At least one field must be provided");
+  .refine((data) => data.clientId !== undefined || data.status !== undefined || data.finance !== undefined, "At least one field must be provided");
 
 export type CreateCaseImportBatchInput = z.infer<typeof createCaseImportBatchSchema>;
 export type UpdateCaseImportItemInput = z.infer<typeof updateCaseImportItemSchema>;

@@ -1,4 +1,6 @@
 import { prisma } from "../apps/api/src/shared/db/prisma.js";
+import { writePayment } from "../apps/api/src/modules/payments/payments.repository.js";
+import { buildCasePayments } from "../apps/api/src/modules/payments/payments.service.js";
 import { hashPassword } from "../apps/api/src/shared/security/password.js";
 
 const count = 15;
@@ -18,7 +20,7 @@ const names = [
   "Lucas Almeida",
   "Marina Teixeira",
   "Nicolas Barros",
-  "Olivia Mendes"
+  "Olivia Mendes",
 ];
 
 const caseTitles = [
@@ -36,14 +38,32 @@ const caseTitles = [
   "Investigacao defensiva",
   "Pedido de revogacao de prisao",
   "Memoriais defensivos",
-  "Sustentacao oral"
+  "Sustentacao oral",
 ];
 
 const statuses = ["ACTIVE", "ON_HOLD", "CLOSED", "CANCELED"] as const;
-const stages = ["INITIAL", "HEARING_SCHEDULED", "WAITING_DECISION", "APPEAL", "ENFORCEMENT"] as const;
-const methods = ["PIX", "CASH", "BANK_TRANSFER", "CREDIT_CARD", "DEBIT_CARD", "BOLETO", "OTHER"] as const;
-const timelineTypes = ["NOTE", "HEARING", "PETITION", "DECISION", "STATUS_CHANGE", "OTHER"] as const;
-const deadlineStatuses = ["PENDING", "PENDING", "PENDING", "DONE", "CANCELED"] as const;
+const stages = [
+  "INITIAL",
+  "HEARING_SCHEDULED",
+  "WAITING_DECISION",
+  "APPEAL",
+  "ENFORCEMENT",
+] as const;
+const timelineTypes = [
+  "NOTE",
+  "HEARING",
+  "PETITION",
+  "DECISION",
+  "STATUS_CHANGE",
+  "OTHER",
+] as const;
+const deadlineStatuses = [
+  "PENDING",
+  "PENDING",
+  "PENDING",
+  "DONE",
+  "CANCELED",
+] as const;
 
 const timelineTitles = [
   "Cliente enviou documentos",
@@ -51,13 +71,16 @@ const timelineTitles = [
   "Petição protocolada",
   "Decisão publicada",
   "Status do processo revisado",
-  "Contato com cartório"
+  "Contato com cartório",
 ];
 
-const pad = (value: number, length: number) => String(value).padStart(length, "0");
+const pad = (value: number, length: number) =>
+  String(value).padStart(length, "0");
 const date = (monthOffset: number, day: number) => {
   const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthOffset, day));
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthOffset, day),
+  );
 };
 
 async function seed() {
@@ -69,18 +92,28 @@ async function seed() {
         where: { email: `demo.user.${index + 1}@jurisflow.local` },
         update: {
           name,
-          role: index % 5 === 0 ? "ADMIN" : index % 4 === 0 ? "ASSISTANT" : "LAWYER",
-          status: "ACTIVE"
+          role:
+            index % 5 === 0
+              ? "ADMIN"
+              : index % 4 === 0
+                ? "ASSISTANT"
+                : "LAWYER",
+          status: "ACTIVE",
         },
         create: {
           name,
           email: `demo.user.${index + 1}@jurisflow.local`,
           passwordHash,
-          role: index % 5 === 0 ? "ADMIN" : index % 4 === 0 ? "ASSISTANT" : "LAWYER",
-          status: "ACTIVE"
-        }
-      })
-    )
+          role:
+            index % 5 === 0
+              ? "ADMIN"
+              : index % 4 === 0
+                ? "ASSISTANT"
+                : "LAWYER",
+          status: "ACTIVE",
+        },
+      }),
+    ),
   );
 
   const clients = await Promise.all(
@@ -93,7 +126,7 @@ async function seed() {
           phone: `1198${pad(index + 1, 7)}`,
           email: `demo.client.${index + 1}@jurisflow.local`,
           address: `Rua Demo ${index + 1}, ${100 + index}`,
-          notes: "[DEMO] Cliente criado para testes locais."
+          notes: "[DEMO] Cliente criado para testes locais.",
         },
         create: {
           type: index % 3 === 0 ? "COMPANY" : "INDIVIDUAL",
@@ -103,10 +136,10 @@ async function seed() {
           phone: `1198${pad(index + 1, 7)}`,
           email: `demo.client.${index + 1}@jurisflow.local`,
           address: `Rua Demo ${index + 1}, ${100 + index}`,
-          notes: "[DEMO] Cliente criado para testes locais."
-        }
-      })
-    )
+          notes: "[DEMO] Cliente criado para testes locais.",
+        },
+      }),
+    ),
   );
 
   const cases = await Promise.all(
@@ -126,8 +159,10 @@ async function seed() {
           division: `${index + 1}a Vara Criminal`,
           description: "Processo de demonstracao para testes de fluxo.",
           openedAt: date(-index, 5),
-          closedAt: statuses[index % statuses.length] === "CLOSED" ? date(0, 20) : null,
-          totalFeeAmountCents: 300000 + index * 50000
+          closedAt:
+            statuses[index % statuses.length] === "CLOSED" ? date(0, 20) : null,
+          totalFeeAmountCents: 300000 + index * 50000,
+          createdAt: date(0, 5),
         },
         create: {
           clientId: client.id,
@@ -144,39 +179,55 @@ async function seed() {
           division: `${index + 1}a Vara Criminal`,
           description: "Processo de demonstracao para testes de fluxo.",
           openedAt: date(-index, 5),
-          closedAt: statuses[index % statuses.length] === "CLOSED" ? date(0, 20) : null,
-          totalFeeAmountCents: 300000 + index * 50000
-        }
-      })
-    )
+          closedAt:
+            statuses[index % statuses.length] === "CLOSED" ? date(0, 20) : null,
+          totalFeeAmountCents: 300000 + index * 50000,
+          createdAt: date(0, 5),
+        },
+      }),
+    ),
   );
 
-  await prisma.payment.deleteMany({ where: { description: { startsWith: "[DEMO]" } } });
-  await prisma.document.deleteMany({ where: { name: { startsWith: "[DEMO]" } } });
-  await prisma.caseTimelineEvent.deleteMany({ where: { title: { startsWith: "[DEMO]" } } });
-  await prisma.caseDeadline.deleteMany({ where: { title: { startsWith: "[DEMO]" } } });
+  await prisma.payment.deleteMany({
+    where: { description: { startsWith: "[DEMO]" } },
+  });
+  await prisma.document.deleteMany({
+    where: { name: { startsWith: "[DEMO]" } },
+  });
+  await prisma.caseTimelineEvent.deleteMany({
+    where: { title: { startsWith: "[DEMO]" } },
+  });
+  await prisma.caseDeadline.deleteMany({
+    where: { title: { startsWith: "[DEMO]" } },
+  });
+
+  const generatedPayments = cases.flatMap((item, index) => {
+    const totalFeeAmountCents = 300000 + index * 50000;
+    const entryAmountCents = 50000 + (index % 3) * 25000;
+    const installmentAmountCents = 50000 + (index % 4) * 25000;
+    const firstDueDate = date(1, 10 + (index % 12))
+      .toISOString()
+      .slice(0, 10);
+    return buildCasePayments(
+      item.id,
+      item.clientId,
+      {
+        totalFeeAmountCents,
+        entryAmountCents,
+        installmentAmountCents,
+        firstDueDate,
+        entryPaymentMethod: "pix",
+      },
+      item.createdAt,
+    ).map((payment) => ({
+      ...payment,
+      description: `[DEMO] ${payment.description}`,
+      notes: "[DEMO] Cronograma financeiro completo.",
+    }));
+  });
 
   await prisma.payment.createMany({
-    data: cases.map((item, index) => {
-      const paid = index % 4 === 0;
-      const canceled = index % 11 === 0;
-      return {
-        clientId: item.clientId,
-        caseId: item.id,
-        source: index % 2 === 0 ? "GENERATED" : "MANUAL",
-        description: `[DEMO] Honorarios ${index + 1}`,
-        amountCents: 75000 + index * 12500,
-        dueDate: date(index % 6 === 0 ? -1 : index % 4, 10 + (index % 12)),
-        paidAt: paid ? date(0, 12 + (index % 10)) : null,
-        paymentMethod: paid ? methods[index % methods.length] : null,
-        status: canceled ? "CANCELED" : paid ? "PAID" : "PENDING",
-        installmentNumber: (index % 5) + 1,
-        installmentTotal: 5,
-        notes: "[DEMO] Pagamento criado para validar a tela financeira.",
-        canceledAt: canceled ? date(0, 15) : null,
-        cancelReason: canceled ? "Registro de teste cancelado" : null
-      };
-    })
+    data: generatedPayments.map(writePayment),
   });
 
   await prisma.document.createMany({
@@ -185,43 +236,51 @@ async function seed() {
       caseId: item.id,
       name: `[DEMO] Documento ${index + 1}.pdf`,
       path: `demo/client-${index + 1}/documento-${index + 1}.pdf`,
-      mimeType: "application/pdf"
-    }))
+      mimeType: "application/pdf",
+    })),
   });
 
   await prisma.caseTimelineEvent.createMany({
     data: cases.flatMap((item, caseIndex) =>
       [0, 1, 2].map((eventIndex) => {
-        const type = timelineTypes[(caseIndex + eventIndex) % timelineTypes.length];
+        const type =
+          timelineTypes[(caseIndex + eventIndex) % timelineTypes.length];
         return {
           caseId: item.id,
           createdByUserId: users[(caseIndex + eventIndex) % users.length].id,
           type,
           title: `[DEMO] ${timelineTitles[(caseIndex + eventIndex) % timelineTitles.length]}`,
           description: `[DEMO] Registro de andamento para validar a linha do tempo do processo ${item.title}.`,
-          occurredAt: date(-eventIndex, 8 + ((caseIndex + eventIndex) % 18))
+          occurredAt: date(-eventIndex, 8 + ((caseIndex + eventIndex) % 18)),
         };
-      })
-    )
+      }),
+    ),
   });
 
   await prisma.caseDeadline.createMany({
     data: cases.flatMap((item, index) =>
       [0, 1].map((deadlineIndex) => {
-        const status = deadlineStatuses[(index + deadlineIndex) % deadlineStatuses.length];
+        const status =
+          deadlineStatuses[(index + deadlineIndex) % deadlineStatuses.length];
         return {
           caseId: item.id,
           title: `[DEMO] ${deadlineIndex === 0 ? "Protocolar manifestação" : "Conferir publicação"}`,
-          description: "[DEMO] Prazo criado para validar alertas de vencimento.",
-          dueAt: date(index % 4 === 0 ? -1 : deadlineIndex, 6 + ((index + deadlineIndex) % 18)),
+          description:
+            "[DEMO] Prazo criado para validar alertas de vencimento.",
+          dueAt: date(
+            index % 4 === 0 ? -1 : deadlineIndex,
+            6 + ((index + deadlineIndex) % 18),
+          ),
           status,
-          completedAt: status === "DONE" ? date(0, 12) : null
+          completedAt: status === "DONE" ? date(0, 12) : null,
         };
-      })
-    )
+      }),
+    ),
   });
 
-  console.log(`Seeded ${count} users, clients, cases, payments, documents, timeline events, and deadlines.`);
+  console.log(
+    `Seeded ${count} users, clients, cases, payments, documents, timeline events, and deadlines.`,
+  );
   console.log("Demo login: demo.user.1@jurisflow.local / demo1234");
 }
 

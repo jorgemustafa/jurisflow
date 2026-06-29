@@ -1,4 +1,17 @@
-import type { CaseListFilters, CaseStage, CaseStatus, CaseType, CreateCaseInput, LegalArea, UpdateCaseInput } from "./cases.schemas.js";
+import { randomUUID } from "node:crypto";
+import {
+  buildCasePayments,
+  type CreatePaymentData,
+} from "../payments/payments.service.js";
+import type {
+  CaseListFilters,
+  CaseStage,
+  CaseStatus,
+  CaseType,
+  CreateCaseInput,
+  LegalArea,
+  UpdateCaseInput,
+} from "./cases.schemas.js";
 
 export type CaseRecord = {
   id: string;
@@ -17,22 +30,38 @@ export type CaseRecord = {
   description: string | null;
   openedAt: Date | null;
   closedAt: Date | null;
-  totalFeeAmountCents: number | null;
+  totalFeeAmountCents: number;
   createdAt: Date;
   updatedAt: Date;
 };
 
 type ClientRef = { id: string; status: "active" | "inactive" };
-type UserRef = { id: string; status: "active" | "inactive"; role: "admin" | "lawyer" | "assistant" };
+type UserRef = {
+  id: string;
+  status: "active" | "inactive";
+  role: "admin" | "lawyer" | "assistant";
+};
+
+export type CreateCaseRecordData = Omit<CreateCaseInput, "finance"> & {
+  id: string;
+  totalFeeAmountCents: number;
+  createdAt: Date;
+};
 
 type CasesRepository = {
   list(filters: CaseListFilters): Promise<CaseRecord[]>;
   findById(id: string): Promise<CaseRecord | null>;
   findClientById(id: string): Promise<ClientRef | null>;
   findUserById(id: string): Promise<UserRef | null>;
-  findByCnjNumber(cnjNumber: string, excludeId?: string): Promise<CaseRecord | null>;
+  findByCnjNumber(
+    cnjNumber: string,
+    excludeId?: string,
+  ): Promise<CaseRecord | null>;
   hasPendingFinance(caseId: string): Promise<boolean>;
-  create(data: CreateCaseInput): Promise<CaseRecord>;
+  create(
+    data: CreateCaseRecordData,
+    payments: CreatePaymentData[],
+  ): Promise<CaseRecord>;
   update(id: string, data: UpdateCaseInput): Promise<CaseRecord>;
 };
 
@@ -72,30 +101,46 @@ export class CasePendingFinanceError extends Error {
   }
 }
 
-const isClosedStatus = (status: CaseStatus) => status === "closed" || status === "canceled";
+const isClosedStatus = (status: CaseStatus) =>
+  status === "closed" || status === "canceled";
 
-export function createCasesService(repository: CasesRepository) {
+export function createCasesService(
+  repository: CasesRepository,
+  options: { now?: () => Date } = {},
+) {
+  const now = options.now ?? (() => new Date());
   async function ensureActiveClient(clientId: string) {
     const client = await repository.findClientById(clientId);
     if (!client) throw new CaseClientError("Client not found");
-    if (client.status !== "active") throw new CaseClientError("Client must be active");
+    if (client.status !== "active")
+      throw new CaseClientError("Client must be active");
   }
 
   async function ensureResponsibleUser(userId: string | null | undefined) {
     if (!userId) return;
     const user = await repository.findUserById(userId);
-    if (!user || user.status !== "active" || !["lawyer", "admin"].includes(user.role)) {
+    if (
+      !user ||
+      user.status !== "active" ||
+      !["lawyer", "admin"].includes(user.role)
+    ) {
       throw new CaseResponsibleUserError();
     }
   }
 
-  async function ensureUniqueCnj(cnjNumber: string | null | undefined, excludeId?: string) {
+  async function ensureUniqueCnj(
+    cnjNumber: string | null | undefined,
+    excludeId?: string,
+  ) {
     if (!cnjNumber) return;
     const existing = await repository.findByCnjNumber(cnjNumber, excludeId);
     if (existing) throw new CaseCnjConflictError();
   }
 
-  function ensureCnjAllowed(caseType: CaseType, cnjNumber: string | null | undefined) {
+  function ensureCnjAllowed(
+    caseType: CaseType,
+    cnjNumber: string | null | undefined,
+  ) {
     if (caseType === "extrajudicial" && cnjNumber) throw new CaseCnjTypeError();
   }
 
@@ -111,37 +156,57 @@ export function createCasesService(repository: CasesRepository) {
     },
 
     async create(input: CreateCaseInput) {
+      const { finance, ...caseInput } = input;
       const data = {
-        ...input,
+        ...caseInput,
         caseType: input.caseType ?? "judicial",
-        status: input.status ?? "active"
+        status: input.status ?? "active",
+        id: randomUUID(),
+        totalFeeAmountCents: finance.totalFeeAmountCents,
+        createdAt: now(),
       };
 
       await ensureActiveClient(input.clientId);
       await ensureResponsibleUser(input.responsibleUserId);
       await ensureUniqueCnj(input.cnjNumber);
       ensureCnjAllowed(data.caseType, input.cnjNumber);
-      return repository.create(data);
+      const payments = buildCasePayments(
+        data.id,
+        input.clientId,
+        finance,
+        data.createdAt,
+      );
+      return repository.create(data, payments);
     },
 
     async update(id: string, input: UpdateCaseInput) {
       const current = await repository.findById(id);
       if (!current) throw new CaseNotFoundError();
 
-      if (input.clientId && input.clientId !== current.clientId) await ensureActiveClient(input.clientId);
-      if (input.responsibleUserId !== undefined) await ensureResponsibleUser(input.responsibleUserId);
+      if (input.clientId && input.clientId !== current.clientId)
+        throw new CaseClientError(
+          "Case client is fixed by the financial agreement",
+        );
+      if (input.responsibleUserId !== undefined)
+        await ensureResponsibleUser(input.responsibleUserId);
 
       const nextType = input.caseType ?? current.caseType;
-      const nextCnj = input.cnjNumber === undefined ? current.cnjNumber : input.cnjNumber;
+      const nextCnj =
+        input.cnjNumber === undefined ? current.cnjNumber : input.cnjNumber;
 
       ensureCnjAllowed(nextType, nextCnj);
       if (nextCnj !== current.cnjNumber) await ensureUniqueCnj(nextCnj, id);
 
-      if (input.status && isClosedStatus(input.status) && !isClosedStatus(current.status) && (await repository.hasPendingFinance(id))) {
+      if (
+        input.status &&
+        isClosedStatus(input.status) &&
+        !isClosedStatus(current.status) &&
+        (await repository.hasPendingFinance(id))
+      ) {
         throw new CasePendingFinanceError();
       }
 
       return repository.update(id, input);
-    }
+    },
   };
 }

@@ -14,33 +14,32 @@ There is no `CaseFee` table in v1. This is intentional: a separate fee table is 
 
 ## Core Rules
 
-- `Case.totalFeeAmountCents` stores the agreed case value when known.
+- `Case.totalFeeAmountCents` stores the legally agreed case value and is required.
 - `Payment` rows represent the actual collection schedule and payment history.
 - A payment always belongs to a client.
 - A payment can optionally belong to a case.
 - Client-only payments are allowed for general consultations, old balances, or administrative fees.
 - If `caseId` is provided, the case must belong to the same client.
-- A case can be created without finance data.
-- If a case is created with finance data, `totalFeeAmountCents`, `installmentCount`, and `firstDueDate` are required together.
-- A payment schedule can also be generated later for an existing case if no generated schedule exists for that case.
+- Every manual or imported case requires `totalFeeAmountCents`, `entryAmountCents`, `installmentAmountCents`, `firstDueDate`, and `entryPaymentMethod`.
+- Case, paid entry, installments, and imported movements are created atomically per case.
 - A case can have at most one generated payment schedule in v1.
 - The reason for locking one generated schedule is to avoid building renegotiation implicitly. Renegotiation needs clear rules for existing pending payments, paid payments, canceled payments, due dates, and audit history.
-- `Case.totalFeeAmountCents` is locked after generated payments exist. Direct edits are blocked to avoid corrupting finance data.
+- `Case.totalFeeAmountCents` and every generated payment contract field are immutable after creation.
+- The case client is immutable because the agreement and generated payments are bound to that client.
 - Manual payments do not mutate `Case.totalFeeAmountCents`.
 - Pending finance linked to a case blocks closing or canceling that case.
 
 ## Installments
 
-- `installmentCount` is required whenever a total case fee is used to generate payments.
-- `installmentCount = 1` means full payment in one installment.
-- `installmentCount > 1` splits the total into monthly installments.
+- The entry is configurable, included in the agreed total, and stored as generated payment `0/N`, paid at case creation.
+- The remaining balance is `totalFeeAmountCents - entryAmountCents`.
+- The number of monthly installments is `ceil(balance / installmentAmountCents)`.
+- The final installment contains only the remaining balance and can be lower than the chosen installment amount.
+- `firstDueDate` must be in the calendar month immediately after case creation.
 - Due dates repeat monthly on the same day as `firstDueDate`.
 - If a future month does not have that day, the due date falls on the last day of that month.
-- Payment amounts are split evenly.
-- Rounding remainder goes into the last installment.
 - Sum of generated payments must equal `Case.totalFeeAmountCents`.
-- Every payment has `installmentNumber` and `installmentTotal`.
-- One full payment uses `installmentNumber = 1` and `installmentTotal = 1`.
+- Monthly installments use `1/N` through `N/N`; the paid entry is excluded from installment progress.
 
 ## Payment Status
 
@@ -85,7 +84,10 @@ Manual payments use:
 
 - Payment is atomic. No partial payments in v1.
 - User can pay current and future installments early by marking each payment as paid.
-- Finance UI shows month-scoped payment rows and lets users mark pending rows as received.
+- Finance UI shows payments due in the selected month, pending payments from prior competence months, and payments received in the selected month.
+- Overdue payments keep their original `dueDate`, remain visible in subsequent months until received, and display their original competence month.
+- Prior-competence payments are marked overdue only when `dueDate` is before today; selecting a future month cannot make a future payment overdue.
+- Late payments appear in their receipt month using `paidAt`, while retaining the original competence badge.
 - Finance UI shows a process-level installment summary with total agreed value, split count, paid installments, pending installments, paid amount, and pending amount.
 - `paidAt` is required when status becomes `PAID`.
 - UI defaults `paidAt` to today.
@@ -96,7 +98,7 @@ Manual payments use:
 
 ### Edit Pending Payment
 
-Allowed for `PENDING` payments:
+Allowed for manual `PENDING` payments:
 
 - `dueDate`
 - `description`
@@ -104,11 +106,11 @@ Allowed for `PENDING` payments:
 
 Manual pending payments can also edit `amountCents`.
 
-Generated pending payments cannot edit `amountCents` because that would silently change the agreed schedule and become a renegotiation flow.
+Generated payments can only register receipt and update internal notes. Amount, due date, description, numbering, case total, and schedule are fixed.
 
 ### Paid Payment Corrections
 
-Allowed for `PAID` payments:
+Allowed for manual `PAID` payments:
 
 - correct `paidAt`
 - cancel payment
@@ -131,6 +133,7 @@ Not allowed:
 - Canceled payments are hidden by default.
 - Canceled payments do not count as receivable or paid revenue.
 - After cancellation, only `cancelReason` and `notes` can be edited.
+- Generated entries and installments cannot be canceled because cancellation would break the legally agreed total.
 
 ## Payment Method
 
@@ -194,23 +197,20 @@ POST   /payments
 PATCH  /payments/:id
 PATCH  /payments/:id/paid
 PATCH  /payments/:id/cancel
-POST   /cases/:id/payments/schedule
 GET    /finance/dashboard?month=YYYY-MM
 ```
 
-`POST /cases` can also optionally accept a payment schedule during case creation.
+`POST /cases` requires the nested finance contract and creates the complete schedule atomically.
 
 ## Testing Decisions
 
 Tests should cover business behavior, not implementation details:
 
-- Generate one installment for full payment.
-- Generate multiple monthly installments.
+- Generate a paid entry plus monthly installments from total, entry, and fixed installment amount.
 - Move end-of-month due dates to the last day when needed.
-- Keep rounding remainder in the last installment.
-- Prevent more than one generated schedule per case.
-- Require `installmentCount` and `firstDueDate` with total case fee.
-- Lock `Case.totalFeeAmountCents` after generated payments exist.
+- Keep a smaller remainder in the final installment.
+- Require complete finance data on manual and imported case creation.
+- Lock the case total and all generated payment contract fields.
 - Allow manual client-only payments.
 - Validate case belongs to client when `caseId` is provided.
 - Compute overdue from `status` and `dueDate`.
@@ -219,6 +219,8 @@ Tests should cover business behavior, not implementation details:
 - Restrict edits by payment status and source.
 - Require cancel reason when canceling.
 - Exclude canceled payments from dashboard totals.
+- Carry pending overdue payments into following month views without changing their due dates.
+- Include late receipts in the `paidAt` month without duplicating rows.
 - Include active and on-hold cases in running cases.
 
 ## Out of Scope

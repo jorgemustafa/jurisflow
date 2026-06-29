@@ -17,6 +17,7 @@ import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea, labelTi
 import { labelSyncStatus, labelSyncTrigger, syncStatusBadgeClass } from "src/features/cases/utils/caseSyncLabels.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
 import { DeadlineList } from "src/features/deadlines/DeadlineList.js";
+import { CasePaymentsPanel } from "src/features/finance/CasePaymentsPanel.js";
 import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
 import { listDocuments } from "src/services/documents.js";
 import { createDeadline, listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
@@ -182,6 +183,10 @@ export const CaseDetailsPage = () => {
         <ClientDetailItem label="Responsável" value={fieldValue(item.responsibleUserId)} />
         <ClientDetailItem label="Criado em" value={formatDate(item.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(item.updatedAt)} />
+      </section>
+
+      <section className="panel">
+        <CasePaymentsPanel caseId={item.id} />
       </section>
 
       <section className="panel">

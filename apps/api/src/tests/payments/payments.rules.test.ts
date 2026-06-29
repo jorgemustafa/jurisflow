@@ -1,16 +1,23 @@
 import { describe, expect, it } from "vitest";
-import type { CreatePaymentData, PaymentRecord } from "../../modules/payments/payments.service.js";
-import {
-  PaymentCaseError,
-  PaymentClientError,
-  PaymentNotFoundError,
-  PaymentStatusError,
-  buildInstallments,
-  createPaymentsService
-} from "../../modules/payments/payments.service.js";
 import type { PaymentListFilters } from "../../modules/payments/payments.schemas.js";
+import {
+  PaymentClientError,
+  PaymentScheduleError,
+  PaymentStatusError,
+  buildCasePayments,
+  createPaymentsService,
+  type CreatePaymentData,
+  type PaymentRecord,
+} from "../../modules/payments/payments.service.js";
 
-const now = new Date("2026-05-14T12:00:00.000Z");
+const now = new Date("2026-06-05T12:00:00.000Z");
+const finance = {
+  totalFeeAmountCents: 150000,
+  entryAmountCents: 20000,
+  installmentAmountCents: 50000,
+  firstDueDate: "2026-07-31",
+  entryPaymentMethod: "pix" as const,
+};
 
 function payment(overrides: Partial<PaymentRecord> = {}): PaymentRecord {
   return {
@@ -21,7 +28,7 @@ function payment(overrides: Partial<PaymentRecord> = {}): PaymentRecord {
     source: "manual",
     description: "Honorários",
     amountCents: 100000,
-    dueDate: new Date("2026-06-10T12:00:00.000Z"),
+    dueDate: new Date("2026-07-10T12:00:00.000Z"),
     paidAt: null,
     paymentMethod: null,
     status: "pending",
@@ -32,13 +39,12 @@ function payment(overrides: Partial<PaymentRecord> = {}): PaymentRecord {
     cancelReason: null,
     createdAt: now,
     updatedAt: now,
-    ...overrides
+    ...overrides,
   };
 }
 
-function createRepository(options: { existingSchedule?: boolean; caseClientId?: string } = {}) {
+function createRepository() {
   const payments: PaymentRecord[] = [];
-
   return {
     payments,
     async list(_filters: PaymentListFilters) {
@@ -51,218 +57,142 @@ function createRepository(options: { existingSchedule?: boolean; caseClientId?: 
       return id === "client-1" ? { id } : null;
     },
     async findCaseById(id: string) {
-      return id === "case-1" ? { id, clientId: options.caseClientId ?? "client-1", totalFeeAmountCents: null } : null;
-    },
-    async hasGeneratedSchedule(_caseId: string) {
-      return options.existingSchedule ?? false;
+      return id === "case-1"
+        ? { id, clientId: "client-1", totalFeeAmountCents: 150000 }
+        : null;
     },
     async create(data: CreatePaymentData) {
-      const item = payment({ id: `payment-${payments.length + 1}`, ...data, caseId: data.caseId ?? null });
+      const item = payment({
+        ...data,
+        id: `payment-${payments.length + 1}`,
+        caseId: data.caseId ?? null,
+        paymentScheduleId: data.paymentScheduleId ?? null,
+      });
       payments.push(item);
       return item;
-    },
-    async createCaseSchedule(_caseId: string, _totalFeeAmountCents: number, data: CreatePaymentData[]) {
-      for (const item of data) {
-        payments.push(payment({ id: `payment-${payments.length + 1}`, ...item, caseId: item.caseId ?? null }));
-      }
-      return payments;
     },
     async update(id: string, data: Partial<PaymentRecord>) {
       const item = payments.find((current) => current.id === id);
       if (!item) throw new Error("test setup error");
-      Object.assign(item, data, { updatedAt: now });
+      Object.assign(item, data);
       return item;
     },
     seed(item: PaymentRecord) {
       payments.push(item);
-    }
+    },
   };
 }
 
-describe("buildInstallments", () => {
-  it("generates a single full-payment installment when count is 1", () => {
-    const installments = buildInstallments("case-1", "client-1", {
-      totalFeeAmountCents: 250000,
-      installmentCount: 1,
-      firstDueDate: new Date("2026-06-10T12:00:00.000Z")
-    });
+describe("fixed case payment schedule", () => {
+  it("creates a paid entry and fixed installments with a smaller final payment", () => {
+    const payments = buildCasePayments(
+      "case-1",
+      "client-1",
+      finance,
+      now,
+      "schedule-1",
+    );
 
-    expect(installments).toHaveLength(1);
-    expect(installments[0]).toMatchObject({
-      amountCents: 250000,
-      installmentNumber: 1,
-      installmentTotal: 1,
-      source: "generated"
+    expect(payments.map((item) => item.amountCents)).toEqual([
+      20000, 50000, 50000, 30000,
+    ]);
+    expect(
+      payments.map(
+        (item) => `${item.installmentNumber}/${item.installmentTotal}`,
+      ),
+    ).toEqual(["0/3", "1/3", "2/3", "3/3"]);
+    expect(payments[0]).toMatchObject({
+      status: "paid",
+      paymentMethod: "pix",
+      paidAt: now,
+      paymentScheduleId: "schedule-1",
     });
-    expect(installments[0].paymentScheduleId).toBeTruthy();
+    expect(payments.reduce((total, item) => total + item.amountCents, 0)).toBe(
+      finance.totalFeeAmountCents,
+    );
   });
 
-  it("keeps the sum of generated installments equal to the total fee", () => {
-    const installments = buildInstallments("case-1", "client-1", {
-      totalFeeAmountCents: 10000,
-      installmentCount: 3,
-      firstDueDate: new Date("2026-01-15T12:00:00.000Z")
-    });
-
-    const sum = installments.reduce((total, item) => total + item.amountCents, 0);
-    expect(sum).toBe(10000);
+  it("keeps the chosen amount when the balance divides exactly", () => {
+    const payments = buildCasePayments(
+      "case-1",
+      "client-1",
+      { ...finance, entryAmountCents: 50000 },
+      now,
+    );
+    expect(payments.map((item) => item.amountCents)).toEqual([
+      50000, 50000, 50000,
+    ]);
   });
 
-  it("splits evenly with no remainder when the total divides cleanly", () => {
-    const installments = buildInstallments("case-1", "client-1", {
-      totalFeeAmountCents: 9000,
-      installmentCount: 3,
-      firstDueDate: new Date("2026-01-15T12:00:00.000Z")
-    });
-
-    expect(installments.map((item) => item.amountCents)).toEqual([3000, 3000, 3000]);
+  it("repeats the due day and clamps shorter months", () => {
+    const payments = buildCasePayments(
+      "case-1",
+      "client-1",
+      { ...finance, firstDueDate: "2026-07-31" },
+      now,
+    );
+    expect(
+      payments.slice(1).map((item) => item.dueDate.toISOString().slice(0, 10)),
+    ).toEqual(["2026-07-31", "2026-08-31", "2026-09-30"]);
   });
 
-  it("numbers every installment with its position and total", () => {
-    const installments = buildInstallments("case-1", "client-1", {
-      totalFeeAmountCents: 9000,
-      installmentCount: 3,
-      firstDueDate: new Date("2026-01-15T12:00:00.000Z")
-    });
-
-    expect(installments.map((item) => `${item.installmentNumber}/${item.installmentTotal}`)).toEqual(["1/3", "2/3", "3/3"]);
+  it("rejects a first due date outside the next calendar month", () => {
+    expect(() =>
+      buildCasePayments(
+        "case-1",
+        "client-1",
+        { ...finance, firstDueDate: "2026-08-10" },
+        now,
+      ),
+    ).toThrow(PaymentScheduleError);
   });
 });
 
-describe("payments service - create guards", () => {
-  it("rejects payments for a client that does not exist", async () => {
-    const service = createPaymentsService(createRepository());
+describe("fixed generated payments", () => {
+  it("allows notes but blocks contract field changes", async () => {
+    const repository = createRepository();
+    repository.seed(
+      payment({ source: "generated", paymentScheduleId: "schedule-1" }),
+    );
+    const service = createPaymentsService(repository);
 
+    await expect(
+      service.update("payment-1", { amountCents: 90000 }),
+    ).rejects.toBeInstanceOf(PaymentStatusError);
+    await expect(
+      service.update("payment-1", { dueDate: now }),
+    ).rejects.toBeInstanceOf(PaymentStatusError);
+    await expect(
+      service.update("payment-1", { description: "Alterado" }),
+    ).rejects.toBeInstanceOf(PaymentStatusError);
+    await expect(
+      service.update("payment-1", { notes: "Cobrança realizada" }),
+    ).resolves.toMatchObject({ notes: "Cobrança realizada" });
+  });
+
+  it("blocks generated cancellation and preserves manual cancellation", async () => {
+    const repository = createRepository();
+    const service = createPaymentsService(repository);
+    repository.seed(payment({ source: "generated" }));
+    await expect(
+      service.cancel("payment-1", { cancelReason: "Teste" }),
+    ).rejects.toBeInstanceOf(PaymentStatusError);
+
+    repository.payments[0].source = "manual";
+    await expect(
+      service.cancel("payment-1", { cancelReason: "Duplicado" }),
+    ).resolves.toMatchObject({ status: "canceled" });
+  });
+
+  it("rejects manual payments for a missing client", async () => {
+    const service = createPaymentsService(createRepository());
     await expect(
       service.create({
-        clientId: "ghost",
+        clientId: "missing",
         description: "Consulta",
-        amountCents: 50000,
-        dueDate: new Date("2026-06-10T12:00:00.000Z")
-      })
+        amountCents: 1000,
+        dueDate: now,
+      }),
     ).rejects.toBeInstanceOf(PaymentClientError);
-  });
-
-  it("rejects a generated schedule for a case that does not exist", async () => {
-    const service = createPaymentsService(createRepository());
-
-    await expect(
-      service.createCaseSchedule("missing-case", {
-        totalFeeAmountCents: 100000,
-        installmentCount: 2,
-        firstDueDate: new Date("2026-06-10T12:00:00.000Z")
-      })
-    ).rejects.toBeInstanceOf(PaymentCaseError);
-  });
-});
-
-describe("payments service - edit restrictions by status and source", () => {
-  it("allows correcting paidAt on a paid payment", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ status: "paid", paidAt: now }));
-    const service = createPaymentsService(repository);
-
-    const updated = await service.update("payment-1", { paidAt: new Date("2026-05-01T12:00:00.000Z") });
-    expect(updated.paidAt).toEqual(new Date("2026-05-01T12:00:00.000Z"));
-  });
-
-  it("blocks editing amount, due date, or description on a paid payment", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ status: "paid", paidAt: now }));
-    const service = createPaymentsService(repository);
-
-    await expect(service.update("payment-1", { amountCents: 1 })).rejects.toBeInstanceOf(PaymentStatusError);
-    await expect(service.update("payment-1", { dueDate: now })).rejects.toBeInstanceOf(PaymentStatusError);
-    await expect(service.update("payment-1", { description: "novo" })).rejects.toBeInstanceOf(PaymentStatusError);
-  });
-
-  it("allows editing notes and cancel reason on a canceled payment", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ status: "canceled", canceledAt: now, cancelReason: "duplicado" }));
-    const service = createPaymentsService(repository);
-
-    const updated = await service.update("payment-1", { notes: "ajuste", cancelReason: "duplicado corrigido" });
-    expect(updated.notes).toBe("ajuste");
-    expect(updated.cancelReason).toBe("duplicado corrigido");
-  });
-
-  it("blocks editing financial fields on a canceled payment", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ status: "canceled", canceledAt: now }));
-    const service = createPaymentsService(repository);
-
-    await expect(service.update("payment-1", { amountCents: 1 })).rejects.toBeInstanceOf(PaymentStatusError);
-    await expect(service.update("payment-1", { dueDate: now })).rejects.toBeInstanceOf(PaymentStatusError);
-    await expect(service.update("payment-1", { paidAt: now })).rejects.toBeInstanceOf(PaymentStatusError);
-  });
-
-  it("forces pending receipts to go through the paid action", async () => {
-    const repository = createRepository();
-    repository.seed(payment());
-    const service = createPaymentsService(repository);
-
-    await expect(service.update("payment-1", { paidAt: now })).rejects.toBeInstanceOf(PaymentStatusError);
-  });
-
-  it("allows editing the amount of a pending manual payment", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ source: "manual" }));
-    const service = createPaymentsService(repository);
-
-    const updated = await service.update("payment-1", { amountCents: 80000 });
-    expect(updated.amountCents).toBe(80000);
-  });
-});
-
-describe("payments service - mark paid", () => {
-  it("defaults paidAt to the current time when omitted", async () => {
-    const repository = createRepository();
-    repository.seed(payment());
-    const service = createPaymentsService(repository);
-
-    const before = Date.now();
-    const paid = await service.markPaid("payment-1", { paymentMethod: "pix" });
-    const after = Date.now();
-
-    expect(paid.status).toBe("paid");
-    expect(paid.paidAt).toBeInstanceOf(Date);
-    expect((paid.paidAt as Date).getTime()).toBeGreaterThanOrEqual(before);
-    expect((paid.paidAt as Date).getTime()).toBeLessThanOrEqual(after);
-  });
-
-  it("refuses to mark a canceled payment as paid", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ status: "canceled", canceledAt: now }));
-    const service = createPaymentsService(repository);
-
-    await expect(service.markPaid("payment-1", { paymentMethod: "pix" })).rejects.toBeInstanceOf(PaymentStatusError);
-  });
-
-  it("throws when the payment does not exist", async () => {
-    const service = createPaymentsService(createRepository());
-    await expect(service.markPaid("nope", { paymentMethod: "pix" })).rejects.toBeInstanceOf(PaymentNotFoundError);
-  });
-});
-
-describe("payments service - cancel", () => {
-  it("sets canceledAt and the cancel reason, keeping existing notes", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ notes: "obs original" }));
-    const service = createPaymentsService(repository);
-
-    const canceled = await service.cancel("payment-1", { cancelReason: "Acordo desfeito" });
-
-    expect(canceled.status).toBe("canceled");
-    expect(canceled.cancelReason).toBe("Acordo desfeito");
-    expect(canceled.canceledAt).toBeInstanceOf(Date);
-    expect(canceled.notes).toBe("obs original");
-  });
-
-  it("refuses to cancel an already canceled payment", async () => {
-    const repository = createRepository();
-    repository.seed(payment({ status: "canceled", canceledAt: now }));
-    const service = createPaymentsService(repository);
-
-    await expect(service.cancel("payment-1", { cancelReason: "outra vez" })).rejects.toBeInstanceOf(PaymentStatusError);
   });
 });
