@@ -13,6 +13,7 @@ import { createClient, getClient, updateClient } from "src/services/clients.js";
 import { ApiError } from "src/services/http.js";
 import { FieldError } from "src/features/clients/form/FieldError.js";
 import { emptyClientForm } from "src/features/clients/form/utils/clientFormDefaults.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 type ClientFormProps = {
   clientId?: string;
@@ -68,7 +69,7 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
     mutation.mutate(data);
   };
 
-  if (isEdit && client.isLoading) return <p>Carregando cliente...</p>;
+  if (isEdit && client.isLoading) return <LoadingState label="Carregando cliente" />;
 
   return (
     <>

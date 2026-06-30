@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { listCases, syncAllCases, type CaseFilters } from "src/services/cases.js";
 import { ApiError } from "src/services/http.js";
 import { CasesTable } from "src/features/cases/list/CasesTable.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 const defaultFilters: CaseFilters = {
   q: "",
@@ -99,7 +100,7 @@ export const CasesPage = () => {
         </select>
       </section>
 
-      {cases.isLoading ? <p>Carregando processos...</p> : null}
+      {cases.isLoading ? <LoadingState label="Carregando processos" variant="table" columns={8} /> : null}
       {cases.isError ? <p className="alert">Não foi possível carregar os processos.</p> : null}
       {cases.data ? <CasesTable cases={cases.data} /> : null}
     </>

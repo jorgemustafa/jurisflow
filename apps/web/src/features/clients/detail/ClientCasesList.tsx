@@ -6,7 +6,6 @@ import { labelCaseStatus, labelCaseType, labelLegalArea } from "src/features/cas
 export const ClientCasesList = ({ cases }: { cases: LegalCase[] }) => {
   return (
     <section className="panel">
-      <h2>Processos do cliente</h2>
       {cases.length === 0 ? (
         <p className="empty-inline">Nenhum processo vinculado a este cliente.</p>
       ) : (

@@ -21,6 +21,8 @@ import { CasePaymentsPanel } from "src/features/finance/CasePaymentsPanel.js";
 import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
 import { listDocuments } from "src/services/documents.js";
 import { createDeadline, listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
+import { Tabs } from "src/components/ui/Tabs.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
 const optionalMoney = (value: number | null) => (value === null ? "Não informado" : formatMoney(value));
@@ -43,6 +45,7 @@ const emptyDeadlineForm = (): DeadlineFormData => ({
 
 export const CaseDetailsPage = () => {
   const { id = "" } = useParams();
+  const [tab, setTab] = useState<"details" | "payments" | "documents" | "deadlines" | "sync" | "timeline">("details");
   const [timelineForm, setTimelineForm] = useState<CaseTimelineEventFormData>(emptyTimelineForm);
   const [deadlineForm, setDeadlineForm] = useState<DeadlineFormData>(emptyDeadlineForm);
   const [timelineError, setTimelineError] = useState("");
@@ -123,7 +126,7 @@ export const CaseDetailsPage = () => {
     }
   });
 
-  if (legalCase.isLoading) return <p>Carregando processo...</p>;
+  if (legalCase.isLoading) return <LoadingState label="Carregando processo" />;
   if (legalCase.isError || !legalCase.data) return <p className="alert">Processo não encontrado.</p>;
 
   const item = legalCase.data;
@@ -166,7 +169,21 @@ export const CaseDetailsPage = () => {
 
       {syncFeedback ? <p className={syncFeedback.kind === "success" ? "alert success" : "alert"}>{syncFeedback.message}</p> : null}
 
-      <section className="details-grid">
+      <Tabs
+        ariaLabel="Seções do processo"
+        tabs={[
+          { value: "details", label: "Dados" },
+          { value: "payments", label: "Pagamentos" },
+          { value: "documents", label: "Documentos" },
+          { value: "deadlines", label: "Prazos" },
+          { value: "sync", label: "Atualizações" },
+          { value: "timeline", label: "Andamentos" }
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+
+      {tab === "details" ? <section className="details-grid">
         <ClientDetailItem label="Status" value={labelCaseStatus(item.status)} />
         <ClientDetailItem label="Tipo" value={labelCaseType(item.caseType)} />
         <ClientDetailItem label="CNJ" value={fieldValue(item.cnjNumber)} />
@@ -183,21 +200,19 @@ export const CaseDetailsPage = () => {
         <ClientDetailItem label="Responsável" value={fieldValue(item.responsibleUserId)} />
         <ClientDetailItem label="Criado em" value={formatDate(item.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(item.updatedAt)} />
-      </section>
+      </section> : null}
 
-      <section className="panel">
+      {tab === "payments" ? <section className="panel">
         <CasePaymentsPanel caseId={item.id} />
-      </section>
+      </section> : null}
 
-      <section className="panel">
-        <h2>Documentos</h2>
-        {documents.isLoading ? <p>Carregando documentos do processo...</p> : null}
+      {tab === "documents" ? <section className="panel">
+        {documents.isLoading ? <LoadingState label="Carregando documentos do processo" variant="table" columns={4} /> : null}
         {documents.isError ? <p className="alert">Não foi possível carregar os documentos do processo.</p> : null}
         {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
-      </section>
+      </section> : null}
 
-      <section className="panel timeline-panel">
-        <h2>Prazos</h2>
+      {tab === "deadlines" ? <section className="panel timeline-panel">
         <form className="deadline-form" onSubmit={submitDeadline}>
           <input
             placeholder="Título do prazo"
@@ -217,7 +232,7 @@ export const CaseDetailsPage = () => {
           </button>
         </form>
         {deadlineError ? <p className="alert">{deadlineError}</p> : null}
-        {deadlines.isLoading ? <p>Carregando prazos...</p> : null}
+        {deadlines.isLoading ? <LoadingState label="Carregando prazos" variant="table" columns={6} /> : null}
         {deadlines.isError ? <p className="alert">Não foi possível carregar os prazos do processo.</p> : null}
         {deadlines.data ? (
           <DeadlineList
@@ -227,11 +242,10 @@ export const CaseDetailsPage = () => {
             onStatusChange={(deadlineId, status) => deadlineStatusMutation.mutateAsync({ deadlineId, status }).then(() => undefined)}
           />
         ) : null}
-      </section>
+      </section> : null}
 
-      <section className="panel timeline-panel">
-        <h2>Histórico de atualizações</h2>
-        {syncRuns.isLoading ? <p>Carregando histórico de atualizações...</p> : null}
+      {tab === "sync" ? <section className="panel timeline-panel">
+        {syncRuns.isLoading ? <LoadingState label="Carregando histórico de atualizações" variant="table" columns={5} /> : null}
         {syncRuns.isError ? <p className="alert">Não foi possível carregar o histórico de atualizações.</p> : null}
         {syncRuns.data?.length === 0 ? <p className="empty">Nenhuma sincronização registrada ainda.</p> : null}
         {syncRuns.data?.length ? (
@@ -262,10 +276,9 @@ export const CaseDetailsPage = () => {
             </table>
           </div>
         ) : null}
-      </section>
+      </section> : null}
 
-      <section className="panel timeline-panel">
-        <h2>Andamentos</h2>
+      {tab === "timeline" ? <section className="panel timeline-panel">
         <form className="timeline-form" onSubmit={submitTimeline}>
           <select
             value={timelineForm.type}
@@ -299,25 +312,27 @@ export const CaseDetailsPage = () => {
           </button>
         </form>
         {timelineError ? <p className="alert">{timelineError}</p> : null}
-        {timeline.isLoading ? <p>Carregando andamentos...</p> : null}
+        {timeline.isLoading ? <LoadingState label="Carregando andamentos" variant="list" /> : null}
         {timeline.isError ? <p className="alert">Não foi possível carregar os andamentos.</p> : null}
         {timeline.data?.length === 0 ? <p className="empty">Nenhum andamento registrado.</p> : null}
         {timeline.data?.length ? (
-          <div className="timeline-list">
-            {timeline.data.map((event) => (
-              <article className="timeline-item" key={event.id}>
-                <div>
-                  <span>{labelTimelineType(event.type)}</span>
-                  <strong>{event.title}</strong>
-                  {event.description ? <p>{event.description}</p> : null}
-                  <small>{event.externalSource === "datajud" ? "DataJud" : event.createdByUserName ?? "Usuário não informado"}</small>
-                </div>
-                <time>{formatDate(event.occurredAt)}</time>
-              </article>
-            ))}
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Tipo</th><th>Andamento</th><th>Origem</th><th>Data</th></tr></thead>
+              <tbody>
+                {timeline.data.map((event) => (
+                  <tr key={event.id}>
+                    <td>{labelTimelineType(event.type)}</td>
+                    <td className="table-text-cell"><strong>{event.title}</strong>{event.description ? <small>{event.description}</small> : null}</td>
+                    <td>{event.externalSource === "datajud" ? "DataJud" : event.createdByUserName ?? "Usuário não informado"}</td>
+                    <td>{formatDate(event.occurredAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : null}
-      </section>
+      </section> : null}
     </>
   );
 };

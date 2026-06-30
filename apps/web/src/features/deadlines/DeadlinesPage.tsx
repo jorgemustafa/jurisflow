@@ -3,6 +3,7 @@ import { useState } from "react";
 import { DeadlineList } from "src/features/deadlines/DeadlineList.js";
 import { listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFilters, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
 import { ApiError } from "src/services/http.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 const defaultFilters: DeadlineFilters = {
   q: "",
@@ -65,7 +66,7 @@ export const DeadlinesPage = () => {
         />
       </section>
 
-      {deadlines.isLoading ? <p>Carregando prazos...</p> : null}
+      {deadlines.isLoading ? <LoadingState label="Carregando prazos" variant="table" columns={6} /> : null}
       {deadlines.isError ? <p className="alert">Não foi possível carregar os prazos.</p> : null}
       {deadlineError ? <p className="alert">{deadlineError}</p> : null}
       {deadlines.data ? (

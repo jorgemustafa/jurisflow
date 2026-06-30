@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { listClients } from "src/services/clients.js";
 import { ClientsTable } from "src/features/clients/list/ClientsTable.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 export const ClientsPage = () => {
   const [filters, setFilters] = useState({ q: "", status: "active", type: "all" });
@@ -43,7 +44,7 @@ export const ClientsPage = () => {
         </select>
       </section>
 
-      {clients.isLoading ? <p>Carregando clientes...</p> : null}
+      {clients.isLoading ? <LoadingState label="Carregando clientes" variant="table" columns={6} /> : null}
       {clients.isError ? <p className="alert">Não foi possível carregar os clientes.</p> : null}
       {clients.data ? <ClientsTable clients={clients.data} /> : null}
     </>

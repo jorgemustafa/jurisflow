@@ -9,6 +9,8 @@ import { Metric } from "src/features/finance/Metric.js";
 import { currentMonth } from "src/features/finance/utils/currentMonth.js";
 import { DashboardBarChart } from "src/features/dashboard/DashboardBarChart.js";
 import { DashboardDonutChart } from "src/features/dashboard/DashboardDonutChart.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
+import { MonthPicker } from "src/components/ui/MonthPicker.js";
 
 const percent = (value: number, total: number) => (total > 0 ? `${Math.round((value / total) * 100)}%` : "0%");
 
@@ -53,10 +55,10 @@ export const DashboardPage = () => {
           <span>Escritório jurídico</span>
           <h1>Visão geral</h1>
         </div>
-        <input className="month-input" type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
+        <MonthPicker value={month} onChange={setMonth} />
       </header>
 
-      {isLoading ? <p>Carregando visão geral...</p> : null}
+      {isLoading ? <LoadingState label="Carregando indicadores" variant="metrics" items={6} /> : null}
       {isError ? <p className="alert">Não foi possível carregar a visão geral.</p> : null}
 
       {!isLoading && !isError ? (

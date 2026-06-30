@@ -20,6 +20,7 @@ import {
   type CreateCaseData,
 } from "src/services/cases.js";
 import { ApiError } from "src/services/http.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 const caseFormSchema = z.object({
   clientId: z.string().uuid(),
@@ -208,7 +209,7 @@ export const CaseForm = (props: CaseFormProps) => {
     mutation.mutate({ ...caseData, finance: finance.data });
   };
 
-  if (legalCase.isLoading) return <p>Carregando processo...</p>;
+  if (legalCase.isLoading) return <LoadingState label="Carregando processo" />;
   if (legalCase.isError)
     return <p className="alert">Processo não encontrado.</p>;
 

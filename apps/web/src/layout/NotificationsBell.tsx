@@ -10,6 +10,7 @@ import {
   type Notification
 } from "src/services/notifications.js";
 import { formatDate } from "src/utils/format.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 export const NotificationsBell = () => {
   const [open, setOpen] = useState(false);
@@ -91,10 +92,10 @@ export const NotificationsBell = () => {
           </header>
 
           <div className="notifications-popover-body">
-            {notifications.isLoading ? <p className="notifications-popover-empty">Carregando...</p> : null}
+            {notifications.isLoading ? <LoadingState label="Carregando notificações" variant="list" items={2} /> : null}
             {notifications.isError ? <p className="notifications-popover-empty">Não foi possível carregar as notificações.</p> : null}
             {notifications.data?.length === 0 ? <p className="notifications-popover-empty">Nenhuma notificação por aqui.</p> : null}
-            {notifications.data?.map((item) => (
+            {notifications.data?.slice(0, 5).map((item) => (
               <button
                 key={item.id}
                 type="button"

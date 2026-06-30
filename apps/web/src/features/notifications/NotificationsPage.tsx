@@ -10,6 +10,8 @@ import {
   type NotificationStatus
 } from "src/services/notifications.js";
 import { formatDate } from "src/utils/format.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
+import { Tabs } from "src/components/ui/Tabs.js";
 
 const tabs: { value: NotificationStatus; label: string }[] = [
   { value: "all", label: "Todas" },
@@ -67,20 +69,9 @@ export const NotificationsPage = () => {
         </button>
       </header>
 
-      <div className="chip-row notifications-tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            className={`chip ${status === tab.value ? "chip-active" : ""}`}
-            onClick={() => setStatus(tab.value)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs ariaLabel="Filtros de notificações" tabs={tabs} value={status} onChange={setStatus} />
 
-      {notifications.isLoading ? <p>Carregando notificações...</p> : null}
+      {notifications.isLoading ? <LoadingState label="Carregando notificações" variant="list" /> : null}
       {notifications.isError ? <p className="alert">Não foi possível carregar as notificações.</p> : null}
       {notifications.data?.length === 0 ? (
         <p className="empty">
@@ -89,22 +80,24 @@ export const NotificationsPage = () => {
       ) : null}
 
       {notifications.data?.length ? (
-        <div className="notifications-list">
-          {notifications.data.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`notification-row ${item.readAt ? "" : "notification-unread"}`}
-              onClick={() => openNotification(item)}
-            >
-              <span className="notification-dot" aria-hidden={item.readAt ? "true" : undefined} />
-              <span className="notification-main">
-                <strong>{item.title}</strong>
-                {item.body ? <small>{item.body}</small> : null}
-              </span>
-              <time>{formatDate(item.createdAt)}</time>
-            </button>
-          ))}
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Status</th><th>Notificação</th><th>Data</th></tr></thead>
+            <tbody>
+              {notifications.data.map((item) => (
+                <tr className={item.readAt ? undefined : "notification-unread"} key={item.id}>
+                  <td><span className="notification-dot" aria-hidden={item.readAt ? "true" : undefined} /></td>
+                  <td className="table-text-cell">
+                    <button className="notification-table-button" type="button" onClick={() => openNotification(item)}>
+                      <strong>{item.title}</strong>
+                      {item.body ? <small>{item.body}</small> : null}
+                    </button>
+                  </td>
+                  <td>{formatDate(item.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : null}
     </>

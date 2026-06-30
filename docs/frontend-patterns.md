@@ -142,6 +142,15 @@ components/ui/
 
 Do not wrap every HTML element. Add a primitive when it creates consistency or removes repeated styling.
 
+### Loading and section navigation
+
+- Every asynchronous screen must show the shared spinner while its primary data is loading.
+- Tables must preserve their layout with a table skeleton, and KPI groups must use metric skeletons; do not show zero-value KPIs before data arrives.
+- Screens with independent content sections use tabs so only one section is visible at a time. Keep forms that are steps of one workflow together.
+- Month selectors must show Portuguese month names and keep the API value in `YYYY-MM` format.
+- Authenticated pages occupy the viewport without an outer desktop scrollbar. Long datasets must scroll only inside `.table-wrap`; compact page spacing before introducing another scroll region.
+- Notification previews show at most five items; the complete history remains available on the notifications table.
+
 Use raw HTML controls only when they are local to one screen and do not duplicate an existing primitive. When the same control styling repeats, promote it to `components/ui/`.
 
 ## Exports

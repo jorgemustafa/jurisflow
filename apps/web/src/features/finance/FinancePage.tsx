@@ -8,6 +8,9 @@ import {
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { LoadingState } from "src/components/ui/LoadingState.js";
+import { MonthPicker } from "src/components/ui/MonthPicker.js";
+import { Tabs } from "src/components/ui/Tabs.js";
 import { CasePaymentsPanel } from "src/features/finance/CasePaymentsPanel.js";
 import { Metric } from "src/features/finance/Metric.js";
 import { PaymentsTable } from "src/features/finance/PaymentsTable.js";
@@ -25,22 +28,9 @@ import {
 } from "src/services/finance.js";
 import { ApiError } from "src/services/http.js";
 import { formatMoney } from "src/utils/format.js";
+import { monthLabel, moveMonth } from "src/utils/month.js";
 
 const today = () => new Date().toISOString().slice(0, 10);
-
-const moveMonth = (month: string, delta: number) => {
-  const [year, monthNumber] = month.split("-").map(Number);
-  const date = new Date(Date.UTC(year, monthNumber - 1 + delta, 1));
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-};
-
-const monthLabel = (month: string) => {
-  const [year, monthNumber] = month.split("-").map(Number);
-  return new Date(Date.UTC(year, monthNumber - 1, 1)).toLocaleDateString(
-    "pt-BR",
-    { month: "long", year: "numeric", timeZone: "UTC" },
-  );
-};
 
 type StatusFilter = PaymentStatus | "all";
 const emptyNewPayment = {
@@ -54,6 +44,7 @@ const emptyNewPayment = {
 
 export const FinancePage = () => {
   const [month, setMonth] = useState(currentMonth());
+  const [tab, setTab] = useState<"payments" | "plans">("payments");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [showNewPayment, setShowNewPayment] = useState(false);
   const [newPayment, setNewPayment] = useState(emptyNewPayment);
@@ -68,6 +59,7 @@ export const FinancePage = () => {
   const planPayments = useQuery({
     queryKey: ["payments", "plans"],
     queryFn: () => listPayments({ status: "all" }),
+    enabled: tab === "plans",
   });
   const clients = useQuery({
     queryKey: ["clients", "finance"],
@@ -144,7 +136,6 @@ export const FinancePage = () => {
       <header className="page-header row-header">
         <div>
           <span>Financeiro</span>
-          <h1>Pagamentos</h1>
         </div>
         <div className="actions">
           <div className="month-nav">
@@ -156,12 +147,7 @@ export const FinancePage = () => {
             >
               <ChevronLeft size={16} />
             </button>
-            <input
-              className="month-input"
-              type="month"
-              value={month}
-              onChange={(event) => setMonth(event.target.value)}
-            />
+            <MonthPicker value={month} onChange={setMonth} />
             <button
               className="button"
               type="button"
@@ -286,7 +272,7 @@ export const FinancePage = () => {
         </section>
       ) : null}
 
-      <section className="metric-grid finance-metrics">
+      {payments.isLoading ? <LoadingState label="Carregando indicadores financeiros" variant="metrics" items={4} /> : <section className="metric-grid finance-metrics">
         <Metric
           label={`Recebido em ${monthLabel(month)}`}
           value={formatMoney(summary.received)}
@@ -297,12 +283,18 @@ export const FinancePage = () => {
           label="Total previsto no mês"
           value={formatMoney(summary.scheduled)}
         />
-      </section>
+      </section>}
       {error ? <p className="alert">{error}</p> : null}
 
-      <section className="panel">
+      <Tabs
+        ariaLabel="Seções financeiras"
+        tabs={[{ value: "payments", label: "Pagamentos do mês" }, { value: "plans", label: "Parcelas por processo" }]}
+        value={tab}
+        onChange={setTab}
+      />
+
+      {tab === "payments" ? <section className="panel">
         <div className="panel-header">
-          <h2>Pagamentos do mês</h2>
           <div className="chip-row">
             {(
               [
@@ -323,7 +315,7 @@ export const FinancePage = () => {
             ))}
           </div>
         </div>
-        {payments.isLoading ? <p>Carregando pagamentos...</p> : null}
+        {payments.isLoading ? <LoadingState label="Carregando pagamentos" variant="table" columns={7} /> : null}
         {payments.isError ? (
           <p className="alert">Não foi possível carregar os pagamentos.</p>
         ) : null}
@@ -334,13 +326,10 @@ export const FinancePage = () => {
             empty="Nenhum pagamento encontrado para o mês selecionado."
           />
         ) : null}
-      </section>
+      </section> : null}
 
-      <section className="panel">
-        <h2>Parcelas por processo</h2>
-        {planPayments.isLoading ? (
-          <p>Carregando parcelas dos processos...</p>
-        ) : null}
+      {tab === "plans" ? <section className="panel">
+        {planPayments.isLoading ? <LoadingState label="Carregando parcelas dos processos" variant="table" columns={6} /> : null}
         {planPayments.isError ? (
           <p className="alert">
             Não foi possível carregar o resumo de parcelas.
@@ -414,7 +403,6 @@ export const FinancePage = () => {
                         <td colSpan={6}>
                           <CasePaymentsPanel
                             caseId={plan.caseId}
-                            title={false}
                           />
                         </td>
                       </tr>
@@ -427,7 +415,7 @@ export const FinancePage = () => {
         ) : !planPayments.isLoading ? (
           <p className="empty-inline">Nenhum plano de parcelas cadastrado.</p>
         ) : null}
-      </section>
+      </section> : null}
     </>
   );
 };

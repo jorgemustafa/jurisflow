@@ -24,6 +24,7 @@ import {
   parseMoney,
 } from "src/features/finance/utils/money.js";
 import { fieldValue } from "src/utils/format.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 const nextMonthDate = () => {
@@ -403,6 +404,7 @@ export const ImportCasePage = () => {
         {error ? <p className="alert">{error}</p> : null}
       </section>
 
+      {batch.isLoading ? <LoadingState label="Carregando revisão da importação" variant="table" columns={7} /> : null}
       {batch.data ? (
         <section className="panel">
           <h2>Revisão da importação</h2>
