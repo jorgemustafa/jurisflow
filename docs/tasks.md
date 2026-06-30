@@ -1,11 +1,5 @@
 # Tasks
 
-## frontend improvements
-- [x] Add spinnerload for all screens
-- [x] Add skeletons for all tables and kpis
-- [x] For screens with multiple tables or sections, replace with tabs instead
-- [x] Traduzir month pickers
-
 ## v2 Milestones
 
 - [ ] Setup GH workflows (CI/CD)
