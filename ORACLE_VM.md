@@ -145,6 +145,49 @@ reboot da VM. Para um backup automático diário, adicione ao `crontab -e`:
 0 3 * * * cd ~/jurisflow && docker compose exec -T postgres pg_dump -U postgres jurisflow > ~/backups/jurisflow_$(date +\%F).sql
 ```
 
+### 8. Deploy automático pelo GitHub Actions
+
+O workflow `.github/workflows/ci.yml` executa lint, typecheck, testes, build e
+validação Docker em pull requests e pushes para `main` ou `develop`. Somente
+um push para `main` atualiza a VM, depois que todos esses checks passam.
+
+Na VM, deixe o clone na branch de deploy e confirme que o acesso ao GitHub
+funciona sem interação:
+
+```bash
+cd ~/jurisflow
+git checkout main
+git pull --ff-only origin main
+```
+
+Para repositório privado, adicione uma deploy key somente leitura ao repositório
+e mantenha a chave privada correspondente em `~/.ssh` na VM. A chave usada pelo
+workflow para entrar na VM é outra credencial e deve autorizar acesso ao usuário
+de deploy no `~/.ssh/authorized_keys` da VM.
+
+No GitHub, crie o Environment `oracle-vm` e configure:
+
+| Tipo | Nome | Valor |
+| --- | --- | --- |
+| Secret | `ORACLE_VM_HOST` | IP ou hostname público da VM |
+| Secret | `ORACLE_VM_USER` | Usuário SSH, normalmente `ubuntu` |
+| Secret | `ORACLE_VM_SSH_KEY` | Chave privada que acessa a VM |
+| Secret | `ORACLE_VM_KNOWN_HOSTS` | Linha verificada do host em formato `known_hosts` |
+| Variable | `ORACLE_VM_DEPLOY_PATH` | Caminho absoluto do clone, por exemplo `/home/ubuntu/jurisflow` |
+
+Obtenha a linha de `known_hosts` em uma máquina confiável e confira a
+fingerprint com a chave SSH da VM antes de salvar o secret:
+
+```bash
+ssh-keyscan -H SEU_IP_PUBLICO
+```
+
+O `.env` e o `compose.override.yml` da seção 5 permanecem apenas na VM. Em
+cada deploy, o workflow avança `main` exatamente até o commit validado pelo
+CI, valida a configuração, recria os containers e exige respostas bem-sucedidas
+da API e do web. Falha em qualquer etapa marca o deploy como falho. Deploys
+concorrentes são serializados e não interrompem uma atualização em andamento.
+
 ### Notas
 
 - **Vite host check**: se a página abrir em branco com erro de *blocked host*,

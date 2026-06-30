@@ -1,14 +1,19 @@
-name: CI
+name: CI/CD
 
 on:
   pull_request:
   push:
     branches:
+      - develop
       - main
+
+permissions:
+  contents: read
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jurisflow?schema=public
       JWT_SECRET: ci-only-secret
@@ -46,3 +51,52 @@ jobs:
 
       - name: Build Docker images
         run: docker compose build
+
+  deploy:
+    name: Deploy to Oracle VM
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: oracle-vm
+    concurrency:
+      group: oracle-vm-deploy
+      cancel-in-progress: false
+    env:
+      ORACLE_VM_HOST: ${{ secrets.ORACLE_VM_HOST }}
+      ORACLE_VM_USER: ${{ secrets.ORACLE_VM_USER }}
+      ORACLE_VM_SSH_KEY: ${{ secrets.ORACLE_VM_SSH_KEY }}
+      ORACLE_VM_KNOWN_HOSTS: ${{ secrets.ORACLE_VM_KNOWN_HOSTS }}
+      ORACLE_VM_DEPLOY_PATH: ${{ vars.ORACLE_VM_DEPLOY_PATH }}
+
+    steps:
+      - name: Validate deploy configuration
+        run: |
+          test -n "$ORACLE_VM_HOST"
+          test -n "$ORACLE_VM_USER"
+          test -n "$ORACLE_VM_SSH_KEY"
+          test -n "$ORACLE_VM_KNOWN_HOSTS"
+          test -n "$ORACLE_VM_DEPLOY_PATH"
+
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$ORACLE_VM_SSH_KEY" > ~/.ssh/oracle_vm
+          printf '%s\n' "$ORACLE_VM_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/oracle_vm ~/.ssh/known_hosts
+
+      - name: Deploy main
+        run: |
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -i ~/.ssh/oracle_vm \
+            "$ORACLE_VM_USER@$ORACLE_VM_HOST" \
+            "bash -s -- '$ORACLE_VM_DEPLOY_PATH' '$GITHUB_SHA'" <<'DEPLOY'
+          set -euo pipefail
+          cd "$1"
+          git fetch origin main
+          git checkout main
+          git merge --ff-only "$2"
+          docker compose config --quiet
+          docker compose up -d --build --remove-orphans
+          curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:3333/health
+          curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:5173/
+          DEPLOY
