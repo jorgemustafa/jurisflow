@@ -148,8 +148,9 @@ reboot da VM. Para um backup automático diário, adicione ao `crontab -e`:
 ### 8. Deploy automático pelo GitHub Actions
 
 O workflow `.github/workflows/ci.yml` executa lint, typecheck, testes, build e
-validação Docker em pull requests e pushes para `main` ou `develop`. Somente
-um push para `main` atualiza a VM, depois que todos esses checks passam.
+validação Docker em jobs paralelos nos pull requests e pushes para `main` ou
+`develop`. Somente um push para `main` atualiza a VM, depois que todos esses
+checks passam.
 
 Na VM, deixe o clone na branch de deploy e confirme que o acesso ao GitHub
 funciona sem interação:

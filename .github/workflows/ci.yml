@@ -11,9 +11,22 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  quality:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Lint
+            command: npm run lint
+          - name: Typecheck
+            command: npm run typecheck
+          - name: Tests
+            command: npm test
+          - name: Build
+            command: npm run build
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jurisflow?schema=public
       JWT_SECRET: ci-only-secret
@@ -34,17 +47,16 @@ jobs:
       - name: Generate Prisma client
         run: npm run prisma:generate
 
-      - name: Lint
-        run: npm run lint
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.command }}
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Validate Docker Compose
         run: docker compose config
@@ -55,7 +67,9 @@ jobs:
   deploy:
     name: Deploy to Oracle VM
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: validate
+    needs:
+      - quality
+      - docker
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: oracle-vm
