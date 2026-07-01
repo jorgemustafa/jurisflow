@@ -77,7 +77,7 @@ export async function casesRoutes(app: FastifyInstance) {
 
   app.get("/", async (request, reply) => {
     try {
-      return casesService.list(listCasesQuerySchema.parse(request.query));
+      return await casesService.list(listCasesQuerySchema.parse(request.query));
     } catch (error) {
       return handleCaseError(error, reply);
     }
@@ -85,7 +85,7 @@ export async function casesRoutes(app: FastifyInstance) {
 
   app.post("/import/preview", async (request, reply) => {
     try {
-      return caseImportService.preview(parseBody(previewCaseImportSchema, request.body));
+      return await caseImportService.preview(parseBody(previewCaseImportSchema, request.body));
     } catch (error) {
       return handleCaseError(error, reply);
     }
@@ -173,7 +173,7 @@ export async function casesRoutes(app: FastifyInstance) {
   app.get("/:id", async (request, reply) => {
     try {
       const { id } = caseParamsSchema.parse(request.params);
-      return casesService.get(id);
+      return await casesService.get(id);
     } catch (error) {
       return handleCaseError(error, reply);
     }
@@ -182,7 +182,7 @@ export async function casesRoutes(app: FastifyInstance) {
   app.get("/:id/timeline", async (request, reply) => {
     try {
       const { id } = caseParamsSchema.parse(request.params);
-      return timelineService.list(id);
+      return await timelineService.list(id);
     } catch (error) {
       return handleCaseError(error, reply);
     }
@@ -210,7 +210,7 @@ export async function casesRoutes(app: FastifyInstance) {
   app.patch("/:id", async (request, reply) => {
     try {
       const { id } = caseParamsSchema.parse(request.params);
-      return casesService.update(id, parseBody(updateCaseSchema, request.body));
+      return await casesService.update(id, parseBody(updateCaseSchema, request.body));
     } catch (error) {
       return handleCaseError(error, reply);
     }

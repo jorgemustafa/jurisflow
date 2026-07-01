@@ -17,7 +17,7 @@ export async function caseTimelineRoutes(app: FastifyInstance) {
 
   app.get("/", async (request, reply) => {
     try {
-      return timelineService.listAll(listCaseTimelineQuerySchema.parse(request.query));
+      return await timelineService.listAll(listCaseTimelineQuerySchema.parse(request.query));
     } catch (error) {
       return handleTimelineError(error, reply);
     }

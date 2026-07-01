@@ -35,7 +35,7 @@ export async function paymentsRoutes(app: FastifyInstance) {
 
   app.get("/payments", async (request, reply) => {
     try {
-      return paymentsService.list(listPaymentsQuerySchema.parse(request.query));
+      return await paymentsService.list(listPaymentsQuerySchema.parse(request.query));
     } catch (error) {
       return handlePaymentError(error, reply);
     }
@@ -53,7 +53,7 @@ export async function paymentsRoutes(app: FastifyInstance) {
   app.patch("/payments/:id", async (request, reply) => {
     try {
       const { id } = paymentParamsSchema.parse(request.params);
-      return paymentsService.update(id, parseBody(updatePaymentSchema, request.body));
+      return await paymentsService.update(id, parseBody(updatePaymentSchema, request.body));
     } catch (error) {
       return handlePaymentError(error, reply);
     }
@@ -62,7 +62,7 @@ export async function paymentsRoutes(app: FastifyInstance) {
   app.patch("/payments/:id/paid", async (request, reply) => {
     try {
       const { id } = paymentParamsSchema.parse(request.params);
-      return paymentsService.markPaid(id, parseBody(markPaymentPaidSchema, request.body));
+      return await paymentsService.markPaid(id, parseBody(markPaymentPaidSchema, request.body));
     } catch (error) {
       return handlePaymentError(error, reply);
     }
@@ -71,7 +71,7 @@ export async function paymentsRoutes(app: FastifyInstance) {
   app.patch("/payments/:id/cancel", async (request, reply) => {
     try {
       const { id } = paymentParamsSchema.parse(request.params);
-      return paymentsService.cancel(id, parseBody(cancelPaymentSchema, request.body));
+      return await paymentsService.cancel(id, parseBody(cancelPaymentSchema, request.body));
     } catch (error) {
       return handlePaymentError(error, reply);
     }
