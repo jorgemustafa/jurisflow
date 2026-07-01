@@ -225,6 +225,11 @@ Approved as the base Case Management model.
 - Case, paid entry, generated installments, and imported movements are persisted atomically per case.
 - `totalFeeAmountCents` cannot be edited after creation. Renegotiation is outside v1.
 
+### Case Import Batch Rules
+
+- Import batch items keep system-managed creation and update timestamps for auditability.
+- Batch items are returned in creation order so the review keeps the submitted CNJ order.
+
 ### Case Indexes
 
 - Unique index on `cnjNumber`.

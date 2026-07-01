@@ -191,6 +191,8 @@ model CaseImportItem {
   clientId     String?
   caseId       String?
   batch        CaseImportBatch      @relation(fields: [batchId], references: [id])
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
 
   @@index([batchId])
   @@index([status])
