@@ -20,7 +20,7 @@ export async function documentsRoutes(app: FastifyInstance) {
 
   app.get("/", async (request, reply) => {
     try {
-      return documentsService.list(listDocumentsQuerySchema.parse(request.query));
+      return await documentsService.list(listDocumentsQuerySchema.parse(request.query));
     } catch (error) {
       return handleDocumentError(error, reply);
     }

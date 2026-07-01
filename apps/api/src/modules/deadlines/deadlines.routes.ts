@@ -27,7 +27,7 @@ export async function deadlinesRoutes(app: FastifyInstance) {
 
   app.get("/deadlines", async (request, reply) => {
     try {
-      return deadlinesService.list(listDeadlinesQuerySchema.parse(request.query));
+      return await deadlinesService.list(listDeadlinesQuerySchema.parse(request.query));
     } catch (error) {
       return handleDeadlineError(error, reply);
     }
@@ -47,7 +47,7 @@ export async function deadlinesRoutes(app: FastifyInstance) {
     try {
       const { id } = deadlineParamsSchema.parse(request.params);
       const { status } = parseBody(updateDeadlineStatusSchema, request.body);
-      return deadlinesService.updateStatus(id, status);
+      return await deadlinesService.updateStatus(id, status);
     } catch (error) {
       return handleDeadlineError(error, reply);
     }
@@ -56,7 +56,7 @@ export async function deadlinesRoutes(app: FastifyInstance) {
   app.patch("/deadlines/:id", async (request, reply) => {
     try {
       const { id } = deadlineParamsSchema.parse(request.params);
-      return deadlinesService.update(id, parseBody(updateDeadlineSchema, request.body));
+      return await deadlinesService.update(id, parseBody(updateDeadlineSchema, request.body));
     } catch (error) {
       return handleDeadlineError(error, reply);
     }
