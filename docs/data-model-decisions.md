@@ -214,6 +214,7 @@ Approved as the base Case Management model.
 - `cnjNumber` is optional for judicial cases.
 - `cnjNumber` is prohibited for extrajudicial cases.
 - `cnjNumber` must be valid and unique when present.
+- Empty optional classifications such as `stage` and `legalArea` are omitted on creation and cleared with `null` on update.
 - Importing a judicial case by CNJ is blocked when another case already has the same `cnjNumber`.
 - Imported judicial cases are created only after a user manually selects an active client.
 - DataJud import is an assistive public-data workflow; users must review the preview before confirming the case.

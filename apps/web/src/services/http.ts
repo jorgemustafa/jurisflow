@@ -7,6 +7,92 @@ export class ApiError extends Error {
   }
 }
 
+type ApiIssue = {
+  code?: string;
+  message?: string;
+  path?: unknown[];
+  minimum?: number;
+  maximum?: number;
+  validation?: string;
+};
+
+const backendMessages: Record<string, string> = {
+  "Invalid email or password": "Email ou senha inválidos.",
+  "Invalid token": "Sua sessão expirou. Entre novamente.",
+  "Client not found": "Cliente não encontrado.",
+  "Client must be active": "O cliente precisa estar ativo.",
+  "Client document already exists": "Já existe um cliente com este documento.",
+  "Document is invalid for client type": "O documento não é válido para o tipo de cliente.",
+  "Case not found": "Processo não encontrado.",
+  "Case must belong to the selected client": "O processo deve pertencer ao cliente selecionado.",
+  "Case must belong to the payment client": "O processo deve pertencer ao cliente do pagamento.",
+  "Case CNJ already exists": "Já existe um processo com este número CNJ.",
+  "Case already imported": "Este processo já foi importado.",
+  "CNJ is only allowed for judicial cases": "O número CNJ só pode ser informado em processos judiciais.",
+  "Case has pending finance": "O processo possui valores financeiros pendentes.",
+  "Responsible user must be an active lawyer or admin": "O responsável deve ser um advogado ou administrador ativo.",
+  "Deadline not found": "Prazo não encontrado.",
+  "Payment not found": "Pagamento não encontrado.",
+  "First due date must be in the next calendar month": "O primeiro vencimento deve ser no próximo mês.",
+  "Generated payments only allow notes to be updated": "Em pagamentos gerados, apenas as observações podem ser alteradas.",
+  "Paid payments can only correct paidAt or be canceled": "Pagamentos recebidos só permitem corrigir a data ou cancelar.",
+  "Canceled payments can only edit cancel reason and notes": "Pagamentos cancelados só permitem alterar o motivo e as observações.",
+  "Use the paid action to register a payment receipt": "Use a ação Receber para registrar o pagamento.",
+  "Canceled payment cannot be marked as paid": "Um pagamento cancelado não pode ser recebido.",
+  "Generated payments cannot be canceled": "Pagamentos gerados não podem ser cancelados.",
+  "Payment is already canceled": "O pagamento já está cancelado.",
+  "Case has no CNJ number to sync": "O processo não possui número CNJ para atualização.",
+  "Case not found in DataJud": "Processo não encontrado no DataJud.",
+  "DataJud request failed": "Falha ao consultar o DataJud.",
+  "DATAJUD_API_KEY is not configured": "A integração com o DataJud não está configurada.",
+  "Import batch not found": "Lote de importação não encontrado.",
+  "Import item not found": "Item de importação não encontrado.",
+  "Import batch is not open": "O lote de importação não está aberto.",
+  "Import item cannot be updated in its current status": "O item não pode ser alterado no status atual.",
+  "Only pending items can be discarded": "Apenas itens pendentes podem ser descartados.",
+  "Only discarded items can be restored": "Apenas itens descartados podem ser restaurados.",
+  "Only pending items can be linked to a client": "Apenas itens pendentes podem ser vinculados a um cliente.",
+  "Only pending items can receive finance data": "Apenas itens pendentes podem receber dados financeiros.",
+  "No items are ready to import; fill client and finance data for at least one pending item": "Preencha cliente e financeiro de ao menos um item pendente.",
+};
+
+export const backendErrorMessage = (message: string | null, fallback: string) =>
+  (message && backendMessages[message]) || fallback;
+
+export const issueMessage = (issue: ApiIssue) => {
+  const translated = issue.message ? backendMessages[issue.message] : undefined;
+  if (translated) return translated;
+  if (issue.code === "invalid_enum_value") return "Selecione uma opção válida.";
+  if (issue.code === "invalid_date") return "Informe uma data válida.";
+  if (issue.code === "invalid_string") {
+    if (issue.validation === "email") return "Informe um email válido.";
+    if (issue.validation === "uuid") return "Selecione um registro válido.";
+    return "Informe um valor válido.";
+  }
+  if (issue.code === "too_small" && issue.minimum !== undefined)
+    return `Informe ao menos ${issue.minimum} caracteres.`;
+  if (issue.code === "too_big" && issue.maximum !== undefined)
+    return `Informe no máximo ${issue.maximum} caracteres.`;
+  if (issue.code === "invalid_type") return "Campo obrigatório ou inválido.";
+  return "Valor inválido.";
+};
+
+export const responseErrorMessage = (
+  status: number,
+  body: { message?: string; issues?: ApiIssue[] } | null,
+) => {
+  if (body?.issues?.length) return issueMessage(body.issues[0]);
+  if (body?.message && backendMessages[body.message])
+    return backendMessages[body.message];
+  if (status >= 500) return "Ocorreu um erro interno. Tente novamente.";
+  if (status === 401) return "Email ou senha inválidos.";
+  if (status === 403) return "Você não tem permissão para esta operação.";
+  if (status === 404) return "Registro não encontrado.";
+  if (status === 409)
+    return "Não foi possível concluir devido ao estado atual do registro.";
+  return "Dados inválidos. Revise os campos.";
+};
+
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3333";
 
 type AppRequestInit = RequestInit & {
@@ -57,12 +143,14 @@ export const request = async <T>(path: string, init?: AppRequestInit): Promise<T
     if (Array.isArray(body?.issues)) {
       for (const issue of body.issues) {
         const field = issue.path?.[0];
-        if (field) fieldErrors[field] = issue.message;
+        if (field) fieldErrors[field] = issueMessage(issue);
       }
     }
 
-    if (body?.field) fieldErrors[body.field] = body.message;
-    throw new ApiError(body?.message ?? "Erro inesperado", fieldErrors);
+    if (body?.field)
+      fieldErrors[body.field] =
+        backendMessages[body.message] ?? responseErrorMessage(response.status, body);
+    throw new ApiError(responseErrorMessage(response.status, body), fieldErrors);
   }
 
   return response.json() as Promise<T>;

@@ -82,6 +82,15 @@ export type CaseFormData = {
 
 export type CreateCaseData = CaseFormData & { finance: CaseFinanceInput };
 
+export const caseFormPayload = <T extends CaseFormData>(
+  data: T,
+  emptyValue: null | undefined,
+) => ({
+  ...data,
+  stage: data.stage || emptyValue,
+  legalArea: data.legalArea || emptyValue,
+});
+
 export type CaseTimelineEvent = {
   id: string;
   caseId: string;
@@ -149,14 +158,14 @@ export const getCase = (id: string) => {
 export const createCase = (data: CreateCaseData) => {
   return request<LegalCase>("/cases", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(caseFormPayload(data, undefined)),
   });
 };
 
 export const updateCase = (id: string, data: CaseFormData) => {
   return request<LegalCase>(`/cases/${id}`, {
     method: "PATCH",
-    body: JSON.stringify(data),
+    body: JSON.stringify(caseFormPayload(data, null)),
   });
 };
 
