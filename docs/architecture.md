@@ -80,4 +80,13 @@ Current auth documentation lives in `docs/authentication.md`.
 
 - `web`: React/Vite development server exposed on port `5173`.
 - `api`: Fastify development server exposed on port `3333`.
-- `postgres`: PostgreSQL exposed on port `5432`.
+- `postgres`: PostgreSQL exposed on host port `5433`.
+
+## Production Docker Services
+
+Production deployment rules and credential rotation are documented in `docs/production.md`.
+
+- `web`: compiled React application served by Nginx and reverse proxy for `/api`.
+- `api`: compiled Fastify application running as a non-root user with a read-only filesystem.
+- `migrate`: one-shot Prisma migration service that must finish before the API starts.
+- `postgres`: internal-only PostgreSQL with separate administrator and application roles.
