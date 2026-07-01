@@ -11,7 +11,7 @@ import {
   type CaseTimelineEventFormData,
   type CaseTimelineEventType
 } from "src/services/cases.js";
-import { ApiError } from "src/services/http.js";
+import { ApiError, backendErrorMessage } from "src/services/http.js";
 import { fieldValue, formatDate, formatMoney } from "src/utils/format.js";
 import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea, labelTimelineType } from "src/features/cases/utils/caseLabels.js";
 import { labelSyncStatus, labelSyncTrigger, syncStatusBadgeClass } from "src/features/cases/utils/caseSyncLabels.js";
@@ -65,7 +65,13 @@ export const CaseDetailsPage = () => {
     mutationFn: () => syncCase(id),
     onSuccess: async (result) => {
       if (result.status === "failed") {
-        setSyncFeedback({ kind: "error", message: result.errorMessage ?? "Não foi possível atualizar o processo." });
+        setSyncFeedback({
+          kind: "error",
+          message: backendErrorMessage(
+            result.errorMessage,
+            "Não foi possível atualizar o processo.",
+          ),
+        });
       } else if (result.newMovements > 0) {
         const label = result.newMovements === 1 ? "1 novo andamento" : `${result.newMovements} novos andamentos`;
         setSyncFeedback({ kind: "success", message: `${label} importado(s) do DataJud.` });
@@ -269,7 +275,7 @@ export const CaseDetailsPage = () => {
                       <span className={`badge ${syncStatusBadgeClass(run.status)}`}>{labelSyncStatus(run.status)}</span>
                     </td>
                     <td>{run.newMovements}</td>
-                    <td>{run.status === "failed" ? run.errorMessage ?? "Falha na sincronização" : run.triggeredByUserName ?? "Rotina automática"}</td>
+                    <td>{run.status === "failed" ? backendErrorMessage(run.errorMessage, "Falha na sincronização") : run.triggeredByUserName ?? "Rotina automática"}</td>
                   </tr>
                 ))}
               </tbody>

@@ -199,6 +199,9 @@ describe("case import batch service", () => {
     const service = createService(repository, {
       async fetchCase(input) {
         fetchedCourts.push(input.courtCode);
+        await new Promise((resolve) =>
+          setTimeout(resolve, input.courtCode === "tjsp" ? 10 : 0),
+        );
         return draft(input.cnjNumber);
       },
     });
@@ -206,6 +209,10 @@ describe("case import batch service", () => {
     const batch = await service.create({ cnjNumbers: [cnjTjsp, cnjTjrj] });
 
     expect(fetchedCourts.sort()).toEqual(["tjrj", "tjsp"]);
+    expect(batch.items.map((item) => item.cnjNumber)).toEqual([
+      cnjTjsp,
+      cnjTjrj,
+    ]);
     expect(batch.items).toHaveLength(2);
     expect(
       batch.items.every((item) => item.status === "pending" && item.draft),

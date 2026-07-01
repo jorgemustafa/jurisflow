@@ -198,6 +198,7 @@ Use React Hook Form for forms with validation, API field errors, edit/create reu
 - Reuse schemas or pure validation helpers from `@jurisflow/shared` when the rule is a real business contract.
 - Keep backend validation as the authority. Frontend validation improves UX but does not replace API validation.
 - Map API validation errors back into React Hook Form with `setError`.
+- Never render raw backend, Zod, Prisma, or stack-trace messages. Translate known business errors and use a safe Portuguese fallback for unknown failures.
 
 Avoid duplicating business rules separately in the UI. If both API and web need the same rule, move the shared contract or pure helper to `packages/shared`.
 

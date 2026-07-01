@@ -44,7 +44,7 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
         Object.entries(error.fieldErrors).forEach(([field, message]) => {
           form.setError(field as keyof ClientFormData, { message });
         });
-        setGeneralError(Object.keys(error.fieldErrors).length ? "" : error.message);
+        setGeneralError(error.message);
       } else {
         setGeneralError("Não foi possível salvar o cliente.");
       }

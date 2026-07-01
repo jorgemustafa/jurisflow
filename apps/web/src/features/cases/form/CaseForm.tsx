@@ -153,9 +153,7 @@ export const CaseForm = (props: CaseFormProps) => {
         Object.entries(error.fieldErrors).forEach(([field, message]) => {
           form.setError(field as keyof CaseFormData, { message });
         });
-        setGeneralError(
-          Object.keys(error.fieldErrors).length ? "" : error.message,
-        );
+        setGeneralError(error.message);
       } else {
         setGeneralError("Não foi possível salvar o processo.");
       }

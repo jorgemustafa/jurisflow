@@ -214,6 +214,7 @@ Approved as the base Case Management model.
 - `cnjNumber` is optional for judicial cases.
 - `cnjNumber` is prohibited for extrajudicial cases.
 - `cnjNumber` must be valid and unique when present.
+- Empty optional classifications such as `stage` and `legalArea` are omitted on creation and cleared with `null` on update.
 - Importing a judicial case by CNJ is blocked when another case already has the same `cnjNumber`.
 - Imported judicial cases are created only after a user manually selects an active client.
 - DataJud import is an assistive public-data workflow; users must review the preview before confirming the case.
@@ -224,6 +225,11 @@ Approved as the base Case Management model.
 - Finance data is required for manual and imported case creation.
 - Case, paid entry, generated installments, and imported movements are persisted atomically per case.
 - `totalFeeAmountCents` cannot be edited after creation. Renegotiation is outside v1.
+
+### Case Import Batch Rules
+
+- Import batch items keep system-managed creation and update timestamps for auditability.
+- Batch items are returned in creation order so the review keeps the submitted CNJ order.
 
 ### Case Indexes
 
