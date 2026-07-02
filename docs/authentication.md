@@ -1,6 +1,6 @@
 # Authentication
 
-This document explains the current JurisFlow authentication flow for local testing, Postman usage, and implementation details.
+This document explains the current Magistrum authentication flow for local testing, Postman usage, and implementation details.
 
 ## Current Scope
 
@@ -42,6 +42,8 @@ RBAC rules:
 - Only active `admin` users can list, create, update, or view internal users through `/users`.
 - Invalid, missing, expired, refresh-token, or inactive-user access attempts return `401`.
 - Authenticated users without the required role return `403`.
+- Invalid login credentials and invalid or expired tokens return `401`; malformed authentication payloads return `400`.
+- Unexpected server or configuration failures return `500` and are not reported as credential errors.
 
 Forgot password rules:
 
@@ -74,6 +76,19 @@ Password rules:
 - Maximum length: 128 characters.
 - Password is optional on user create/update because the minimal user model can exist before auth is fully configured.
 
+## Create A User From The Terminal
+
+The terminal command writes through Prisma while reusing the same validation,
+email uniqueness, and password hashing rules as the API:
+
+```bash
+npm run user:create -- --name "Dra. Gabriela" --email "gabriela@magistrum.test" --password "password123" --role lawyer
+```
+
+`--role` accepts `admin`, `lawyer`, or `assistant` and defaults to `lawyer`.
+Lawyers may also receive `--oab-number "123456" --oab-state "SP"`. The command
+requires `DATABASE_URL` and rejects duplicate emails and invalid input.
+
 ## Set A Password
 
 Create a new user with a password:
@@ -86,7 +101,7 @@ Content-Type: application/json
 ```json
 {
   "name": "Dra. Ana",
-  "email": "ana@jurisflow.test",
+  "email": "ana@magistrum.test",
   "role": "lawyer",
   "password": "password123"
 }
@@ -131,7 +146,7 @@ Content-Type: application/json
 ```json
 {
   "name": "Dra. Ana",
-  "email": "ana@jurisflow.test",
+  "email": "ana@magistrum.test",
   "role": "lawyer",
   "password": "password123"
 }
@@ -159,7 +174,7 @@ Content-Type: application/json
 
 ```json
 {
-  "email": "ana@jurisflow.test",
+  "email": "ana@magistrum.test",
   "password": "password123"
 }
 ```
@@ -171,7 +186,7 @@ Success response:
   "user": {
     "id": "<user-id>",
     "name": "Dra. Ana",
-    "email": "ana@jurisflow.test",
+    "email": "ana@magistrum.test",
     "role": "lawyer",
     "status": "active",
     "createdAt": "...",
@@ -266,7 +281,7 @@ Access token payload has:
 ```json
 {
   "sub": "<user-id>",
-  "email": "ana@jurisflow.test",
+  "email": "ana@magistrum.test",
   "role": "lawyer",
   "type": "access"
 }

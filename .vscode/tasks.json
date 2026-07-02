@@ -17,8 +17,8 @@
         "cwd": "${workspaceFolder}",
         "env": {
           "API_PORT": "3333",
-          "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/jurisflow?schema=public",
-          "JWT_SECRET": "jurisflow-development-secret",
+          "DATABASE_URL": "postgresql://postgres:postgres@localhost:5433/magistrum?schema=public",
+          "JWT_SECRET": "magistrum-development-secret",
           "WEB_ORIGIN": "http://localhost:5173"
         }
       },

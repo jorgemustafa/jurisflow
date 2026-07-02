@@ -2,6 +2,7 @@ import type { Payment } from "src/services/finance.js";
 
 export type PaymentPlanSummary = {
   id: string;
+  caseId: string;
   clientName: string;
   caseTitle: string;
   totalCents: number;
@@ -13,33 +14,56 @@ export type PaymentPlanSummary = {
   canceledInstallments: number;
 };
 
-export const buildPaymentPlanSummaries = (payments: Payment[]): PaymentPlanSummary[] => {
+export const buildPaymentPlanSummaries = (
+  payments: Payment[],
+): PaymentPlanSummary[] => {
   const groups = new Map<string, Payment[]>();
 
-  for (const payment of payments) {
-    const key = payment.caseId ?? `client-${payment.clientId}`;
-    groups.set(key, [...(groups.get(key) ?? []), payment]);
+  for (const payment of payments.filter(
+    (item) =>
+      item.source === "generated" && item.caseId && item.paymentScheduleId,
+  )) {
+    groups.set(payment.paymentScheduleId as string, [
+      ...(groups.get(payment.paymentScheduleId as string) ?? []),
+      payment,
+    ]);
   }
 
   return Array.from(groups.entries())
     .map(([id, items]) => {
       const first = items[0]!;
-      const activePayments = items.filter((payment) => payment.status !== "canceled");
       const paidPayments = items.filter((payment) => payment.status === "paid");
-      const pendingPayments = items.filter((payment) => payment.status === "pending");
-      const totalFromCase = first.caseTotalFeeAmountCents;
+      const installments = items.filter(
+        (payment) => payment.installmentNumber > 0,
+      );
+      const totalCents =
+        first.caseTotalFeeAmountCents ??
+        items.reduce((total, payment) => total + payment.amountCents, 0);
+      const paidCents = paidPayments.reduce(
+        (total, payment) => total + payment.amountCents,
+        0,
+      );
 
       return {
         id,
+        caseId: first.caseId as string,
         clientName: first.clientName ?? first.clientId,
         caseTitle: first.caseTitle ?? "Sem processo vinculado",
-        totalCents: totalFromCase ?? activePayments.reduce((total, payment) => total + payment.amountCents, 0),
-        paidCents: paidPayments.reduce((total, payment) => total + payment.amountCents, 0),
-        pendingCents: pendingPayments.reduce((total, payment) => total + payment.amountCents, 0),
-        installmentCount: Math.max(...items.map((payment) => payment.installmentTotal)),
-        paidInstallments: paidPayments.length,
-        pendingInstallments: pendingPayments.length,
-        canceledInstallments: items.length - activePayments.length
+        totalCents,
+        paidCents,
+        pendingCents: totalCents - paidCents,
+        installmentCount: Math.max(
+          ...items.map((payment) => payment.installmentTotal),
+        ),
+        paidInstallments: installments.filter(
+          (payment) => payment.status === "paid",
+        ).length,
+        pendingInstallments: installments.filter(
+          (payment) => payment.status === "pending",
+        ).length,
+        canceledInstallments: installments.filter(
+          (payment) => payment.status === "canceled",
+        ).length,
       };
     })
     .sort((left, right) => right.pendingCents - left.pendingCents);

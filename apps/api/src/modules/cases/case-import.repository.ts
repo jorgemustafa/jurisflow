@@ -1,11 +1,21 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../shared/db/prisma.js";
-import type { ImportedCaseDraft } from "./case-import.service.js";
+import { writePayment } from "../payments/payments.repository.js";
+import type {
+  CaseImportCreation,
+  ImportedCaseDraft,
+} from "./case-import.service.js";
 import { casesRepository } from "./cases.repository.js";
 
-export async function createCaseWithMovements(tx: Prisma.TransactionClient, clientId: string, draft: ImportedCaseDraft) {
+export async function createCaseWithMovements(
+  tx: Prisma.TransactionClient,
+  clientId: string,
+  draft: ImportedCaseDraft,
+  creation: CaseImportCreation,
+) {
   const item = await tx.case.create({
     data: {
+      id: creation.id,
       clientId,
       caseType: "JUDICIAL",
       status: "ACTIVE",
@@ -15,8 +25,16 @@ export async function createCaseWithMovements(tx: Prisma.TransactionClient, clie
       jurisdiction: draft.jurisdiction,
       division: draft.division,
       description: draft.description,
-      openedAt: draft.openedAt
-    }
+      openedAt: draft.openedAt,
+      totalFeeAmountCents: creation.totalFeeAmountCents,
+      createdAt: creation.createdAt,
+    },
+  });
+
+  await tx.payment.createMany({
+    data: creation.payments.map(
+      writePayment,
+    ) as Prisma.PaymentCreateManyInput[],
   });
 
   let movementCount = 0;
@@ -30,9 +48,9 @@ export async function createCaseWithMovements(tx: Prisma.TransactionClient, clie
         type: movement.type.toUpperCase() as Prisma.CaseTimelineEventCreateManyInput["type"],
         title: movement.title,
         description: movement.description,
-        occurredAt: movement.occurredAt
+        occurredAt: movement.occurredAt,
       })),
-      skipDuplicates: true
+      skipDuplicates: true,
     });
     movementCount = result.count;
   }
@@ -44,8 +62,14 @@ export const caseImportRepository = {
   findClientById: casesRepository.findClientById,
   findByCnjNumber: casesRepository.findByCnjNumber,
 
-  async importCase(clientId: string, draft: ImportedCaseDraft) {
-    const imported = await prisma.$transaction((tx) => createCaseWithMovements(tx, clientId, draft));
+  async importCase(
+    clientId: string,
+    draft: ImportedCaseDraft,
+    creation: CaseImportCreation,
+  ) {
+    const imported = await prisma.$transaction((tx) =>
+      createCaseWithMovements(tx, clientId, draft, creation),
+    );
 
     return {
       case: await casesRepository.findById(imported.item.id).then((item) => {
@@ -53,4 +77,7 @@ export const caseImportRepository = {
         return item;
       }),
       importedMovements: imported.movementCount,
-      skippedMovements: draft.movements.length - imported.
+      skippedMovements: draft.movements.length - imported.movementCount,
+    };
+  },
+};

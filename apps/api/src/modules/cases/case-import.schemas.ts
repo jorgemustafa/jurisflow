@@ -1,3 +1,4 @@
+import { caseFinanceSchema } from "@magistrum/shared";
 import { z } from "zod";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
@@ -15,7 +16,8 @@ export const previewCaseImportSchema = z.object({
 });
 
 export const confirmCaseImportSchema = previewCaseImportSchema.extend({
-  clientId: z.string().uuid()
+  clientId: z.string().uuid(),
+  finance: caseFinanceSchema
 });
 
 export type PreviewCaseImportInput = z.infer<typeof previewCaseImportSchema>;

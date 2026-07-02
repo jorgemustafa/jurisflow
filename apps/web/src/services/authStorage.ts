@@ -1,6 +1,6 @@
 import type { AuthSession } from "src/services/auth.js";
 
-const storageKey = "jurisflow.auth";
+const storageKey = "magistrum.auth";
 
 export type StoredAuth = Pick<AuthSession, "accessToken" | "refreshToken" | "user">;
 

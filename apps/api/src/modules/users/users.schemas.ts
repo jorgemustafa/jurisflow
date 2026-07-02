@@ -46,4 +46,15 @@ export const updateUserSchema = z
 export const listUsersQuerySchema = z.object({
   q: optionalText(100),
   role: z.union([userRoleSchema, z.literal("all")]).optional(),
-  status: z.enum(["active", "inactive", "all"]).default("act
+  status: z.enum(["active", "inactive", "all"]).default("all")
+});
+
+export const userParamsSchema = z.object({
+  id: z.string().uuid()
+});
+
+export type UserRole = z.infer<typeof userRoleSchema>;
+export type UserStatus = z.infer<typeof userStatusSchema>;
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+export type UserListFilters = z.infer<typeof listUsersQuerySchema>;

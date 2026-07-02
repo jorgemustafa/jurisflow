@@ -38,25 +38,27 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         <nav>
           {appModules.map((module) =>
             module.path === "#" ? (
-              <a href="#" key={module.name} title={isSidebarCollapsed ? module.name : undefined}>
+              <a aria-label={module.name} href="#" key={module.name} title={isSidebarCollapsed ? module.name : undefined}>
                 <module.icon size={18} />
                 <span className="sidebar-link-label">{module.name}</span>
               </a>
             ) : (
-              <NavLink to={module.path} key={module.name} title={isSidebarCollapsed ? module.name : undefined}>
+              <NavLink aria-label={module.name} to={module.path} key={module.name} title={isSidebarCollapsed ? module.name : undefined}>
                 <module.icon size={18} />
                 <span className="sidebar-link-label">{module.name}</span>
               </NavLink>
             )
           )}
         </nav>
-        <Button className="sidebar-logout" title={isSidebarCollapsed ? "Sair" : undefined} variant="outline" type="button" onClick={logout}>
+        <Button aria-label="Sair" className="sidebar-logout" title={isSidebarCollapsed ? "Sair" : undefined} variant="outline" type="button" onClick={logout}>
           <LogOut size={18} />
           <span>Sair</span>
         </Button>
       </aside>
 
-      <section className="workspace">{children}</section>
+      <section className="workspace">
+        <div className="page-content">{children}</div>
+      </section>
 
       <TodoPanel />
     </main>

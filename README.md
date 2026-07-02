@@ -1,4 +1,4 @@
-# JurisFlow
+# Magistrum
 
 A comprehensive law office management system designed to streamline client management, legal cases, payments, appointments, documents, and operational workflows in a centralized platform.
 
@@ -63,6 +63,8 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+npm run prod:config
+npm run prod:up
 ```
 
 ## Docker
@@ -76,4 +78,6 @@ The Docker Compose environment starts:
 
 - `web` on `http://localhost:5173`
 - `api` on `http://localhost:3333`
-- `postgres` on `localhost:5432`
+- `postgres` on `localhost:5433`
+
+Production uses `compose.prod.yml` and an ignored `.env.prod`. See `docs/production.md` before deploying or rotating database credentials.

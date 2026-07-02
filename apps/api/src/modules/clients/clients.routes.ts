@@ -49,7 +49,7 @@ export async function clientsRoutes(app: FastifyInstance) {
   app.get("/", async (request, reply) => {
     try {
       const filters = listClientsQuerySchema.parse(request.query);
-      return clientsService.list(filters);
+      return await clientsService.list(filters);
     } catch (error) {
       return handleClientError(error, reply);
     }
@@ -58,7 +58,7 @@ export async function clientsRoutes(app: FastifyInstance) {
   app.get("/:id", async (request, reply) => {
     try {
       const { id } = parseParams(request.params);
-      return clientsService.get(id);
+      return await clientsService.get(id);
     } catch (error) {
       return handleClientError(error, reply);
     }
@@ -78,7 +78,7 @@ export async function clientsRoutes(app: FastifyInstance) {
     try {
       const { id } = parseParams(request.params);
       const input = parseBody(updateClientSchema, request.body);
-      return clientsService.update(id, input);
+      return await clientsService.update(id, input);
     } catch (error) {
       return handleClientError(error, reply);
     }
@@ -88,7 +88,7 @@ export async function clientsRoutes(app: FastifyInstance) {
     try {
       const { id } = parseParams(request.params);
       const { status } = parseBody(updateClientStatusSchema, request.body);
-      return clientsService.updateStatus(id, status);
+      return await clientsService.updateStatus(id, status);
     } catch (error) {
       return handleClientError(error, reply);
     }

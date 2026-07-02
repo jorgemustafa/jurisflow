@@ -7,6 +7,8 @@ import { listClients } from "src/services/clients.js";
 import { createDocument, listDocuments, type DocumentFilters, type DocumentFormData, type DocumentScope } from "src/services/documents.js";
 import { ApiError } from "src/services/http.js";
 import { formatDate } from "src/utils/format.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
+import { Tabs } from "src/components/ui/Tabs.js";
 
 const emptyForm: DocumentFormData = {
   clientId: "",
@@ -17,6 +19,7 @@ const emptyForm: DocumentFormData = {
 };
 
 export const DocumentsPage = () => {
+  const [tab, setTab] = useState<"list" | "create">("list");
   const [filters, setFilters] = useState<DocumentFilters>({ q: "", scope: "all" });
   const [form, setForm] = useState<DocumentFormData>(emptyForm);
   const [error, setError] = useState("");
@@ -54,7 +57,14 @@ export const DocumentsPage = () => {
         </div>
       </header>
 
-      <section className="panel">
+      <Tabs
+        ariaLabel="Seções de documentos"
+        tabs={[{ value: "list", label: "Documentos" }, { value: "create", label: "Novo documento" }]}
+        value={tab}
+        onChange={setTab}
+      />
+
+      {tab === "create" ? <section className="panel">
         <h2>Novo documento</h2>
         <form className="document-form" onSubmit={submit}>
           <select
@@ -86,9 +96,9 @@ export const DocumentsPage = () => {
           </button>
         </form>
         {error ? <p className="alert">{error}</p> : null}
-      </section>
+      </section> : null}
 
-      <section className="toolbar documents-toolbar">
+      {tab === "list" ? <><section className="toolbar documents-toolbar">
         <input
           placeholder="Buscar por nome, cliente ou processo"
           value={filters.q ?? ""}
@@ -101,7 +111,7 @@ export const DocumentsPage = () => {
         </select>
       </section>
 
-      {documents.isLoading ? <p>Carregando documentos...</p> : null}
+      {documents.isLoading ? <LoadingState label="Carregando documentos" variant="table" columns={5} /> : null}
       {documents.isError ? <p className="alert">Não foi possível carregar os documentos.</p> : null}
       {documents.data?.length === 0 ? (
         <p className="empty">Nenhum documento cadastrado.</p>
@@ -142,7 +152,7 @@ export const DocumentsPage = () => {
             </tbody>
           </table>
         </div>
-      ) : null}
+      ) : null}</> : null}
     </>
   );
 };

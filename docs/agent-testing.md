@@ -5,17 +5,19 @@ Use this guide when adding or updating tests. Tests should protect business beha
 ## Test Stack
 
 - Use Vitest.
-- API tests live near the module they cover.
+- API tests live under `apps/api/src/tests/<domain>/`.
+- Web tests live under `apps/web/src/tests/<domain>/`.
 - Prefer focused schema and service tests before adding broader tests.
 
 Current examples:
 
 ```txt
-apps/api/src/modules/clients/clients.schemas.test.ts
-apps/api/src/modules/clients/clients.service.test.ts
-apps/api/src/modules/cases/cases.schemas.test.ts
-apps/api/src/modules/cases/cases.service.test.ts
-apps/api/src/modules/payments/payments.service.test.ts
+apps/api/src/tests/clients/clients.schemas.test.ts
+apps/api/src/tests/clients/clients.service.test.ts
+apps/api/src/tests/cases/cases.schemas.test.ts
+apps/api/src/tests/cases/cases.service.test.ts
+apps/api/src/tests/payments/payments.service.test.ts
+apps/web/src/tests/finance/paymentPlans.test.ts
 ```
 
 ## Choosing The Test Type
@@ -42,7 +44,7 @@ Use repository or integration tests only when Prisma/database behavior itself ne
 
 ## Service Test Pattern
 
-Keep service tests close to real business rules. Use a small in-memory repository that implements the service dependency contract.
+Keep service tests grouped with their business domain. Use a small in-memory repository that implements the service dependency contract.
 
 ```ts
 function createRepository(seed: ClientRecord[] = []) {
@@ -107,7 +109,7 @@ it("normalizes CPF, email, and phone", () => {
 Run the smallest useful command first while developing, then run the full pre-commit gate before committing.
 
 ```bash
-npm test -w @jurisflow/api
+npm test -w @magistrum/api
 npm test
 npm run typecheck
 ```
@@ -115,7 +117,7 @@ npm run typecheck
 For frontend-only changes, also run:
 
 ```bash
-npm run build -w @jurisflow/web
+npm run build -w @magistrum/web
 ```
 
 ## Pre-Commit Gate

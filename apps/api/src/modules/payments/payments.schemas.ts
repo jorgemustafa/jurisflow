@@ -1,8 +1,9 @@
+import { paymentMethodSchema, type PaymentMethod } from "@magistrum/shared";
 import { z } from "zod";
 
 export const paymentStatusSchema = z.enum(["pending", "paid", "canceled"]);
 export const paymentSourceSchema = z.enum(["generated", "manual"]);
-export const paymentMethodSchema = z.enum(["pix", "cash", "bank_transfer", "credit_card", "debit_card", "boleto", "other"]);
+export { paymentMethodSchema };
 
 const optionalText = (max: number) =>
   z.preprocess((value) => {
@@ -55,13 +56,6 @@ export const cancelPaymentSchema = z.object({
   notes: nullableText(1000)
 });
 
-export const createPaymentScheduleSchema = z.object({
-  totalFeeAmountCents: positiveCents,
-  installmentCount: z.number().int().min(1),
-  firstDueDate: z.coerce.date(),
-  description: optionalText(180)
-});
-
 export const listPaymentsQuerySchema = z.object({
   q: optionalText(100),
   status: z.union([paymentStatusSchema, z.literal("all")]).default("pending"),
@@ -78,16 +72,11 @@ export const paymentParamsSchema = z.object({
   id: z.string().uuid()
 });
 
-export const casePaymentScheduleParamsSchema = z.object({
-  id: z.string().uuid()
-});
-
 export type PaymentStatus = z.infer<typeof paymentStatusSchema>;
 export type PaymentSource = z.infer<typeof paymentSourceSchema>;
-export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+export type { PaymentMethod };
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
 export type UpdatePaymentInput = z.infer<typeof updatePaymentSchema>;
 export type MarkPaymentPaidInput = z.infer<typeof markPaymentPaidSchema>;
 export type CancelPaymentInput = z.infer<typeof cancelPaymentSchema>;
-export type CreatePaymentScheduleInput = z.infer<typeof createPaymentScheduleSchema>;
-export type PaymentListFilters = z
+export type PaymentListFilters = z.infer<typeof listPaymentsQuerySchema>;

@@ -38,6 +38,8 @@ model User {
   oabState     String?    @db.VarChar(2)
   cases        Case[]
   timelineEvents CaseTimelineEvent[]
+  syncRunsTriggered CaseSyncRun[]
+  notifications Notification[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
@@ -59,13 +61,16 @@ model Case {
   description         String?
   openedAt            DateTime?
   closedAt            DateTime?
-  totalFeeAmountCents Int?
+  totalFeeAmountCents Int
   client              Client     @relation(fields: [clientId], references: [id])
   responsibleUser     User?      @relation(fields: [responsibleUserId], references: [id])
   payments            Payment[]
   documents           Document[]
   timelineEvents      CaseTimelineEvent[]
   deadlines           CaseDeadline[]
+  syncRuns            CaseSyncRun[]
+  notifications       Notification[]
+  lastSyncedAt        DateTime?
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
@@ -182,7 +187,162 @@ model CaseImportItem {
   status       CaseImportItemStatus @default(PENDING)
   errorMessage String?
   draft        Json?
+  financeData  Json?
   clientId     String?
   caseId       String?
   batch        CaseImportBatch      @relation(fields: [batchId], references: [id])
- 
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@index([batchId])
+  @@index([status])
+  @@index([cnjNumber])
+}
+
+model CaseSyncRun {
+  id                String          @id @default(uuid())
+  caseId            String
+  triggeredByUserId String?
+  trigger           CaseSyncTrigger
+  status            CaseSyncStatus
+  newMovements      Int             @default(0)
+  errorMessage      String?
+  startedAt         DateTime        @default(now())
+  finishedAt        DateTime?
+  case              Case            @relation(fields: [caseId], references: [id])
+  triggeredByUser   User?           @relation(fields: [triggeredByUserId], references: [id])
+
+  @@index([caseId, startedAt])
+  @@index([trigger, startedAt])
+}
+
+model Notification {
+  id           String    @id @default(uuid())
+  userId       String
+  caseId       String
+  title        String
+  body         String?
+  newMovements Int       @default(0)
+  readAt       DateTime?
+  user         User      @relation(fields: [userId], references: [id])
+  case         Case      @relation(fields: [caseId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([caseId])
+}
+
+enum CaseSyncTrigger {
+  MANUAL
+  SCHEDULED
+}
+
+enum CaseSyncStatus {
+  SUCCESS
+  NO_CHANGES
+  FAILED
+}
+
+enum ClientType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum UserRole {
+  ADMIN
+  LAWYER
+  ASSISTANT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CaseType {
+  JUDICIAL
+  EXTRAJUDICIAL
+}
+
+enum CaseStatus {
+  ACTIVE
+  ON_HOLD
+  CLOSED
+  CANCELED
+}
+
+enum CaseStage {
+  INITIAL
+  HEARING_SCHEDULED
+  WAITING_DECISION
+  APPEAL
+  ENFORCEMENT
+}
+
+enum LegalArea {
+  CIVIL
+  LABOR
+  FAMILY
+  CRIMINAL
+  TAX
+  CONSUMER
+  BUSINESS
+  SOCIAL_SECURITY
+  OTHER
+}
+
+enum PaymentSource {
+  GENERATED
+  MANUAL
+}
+
+enum PaymentMethod {
+  PIX
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+  BOLETO
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+enum CaseDeadlineStatus {
+  PENDING
+  DONE
+  CANCELED
+}
+
+enum CaseTimelineEventType {
+  NOTE
+  HEARING
+  PETITION
+  DECISION
+  STATUS_CHANGE
+  OTHER
+}
+
+enum CaseImportBatchStatus {
+  OPEN
+  COMPLETED
+}
+
+enum CaseImportItemStatus {
+  PENDING
+  DUPLICATE
+  FAILED
+  IMPORTED
+  DISCARDED
+}

@@ -38,3 +38,7 @@ function currentMonth() {
 export function createFinanceService(repository: FinanceRepository) {
   return {
     dashboard(filters: FinanceDashboardFilters) {
+      return repository.dashboard(filters.month ?? currentMonth());
+    }
+  };
+}

@@ -27,6 +27,7 @@ Keep this stack lean. Add shadcn/Radix components only when a screen needs them;
 - Do not use `==` or `!=`; use strict equality.
 - Do not duplicate API business rules in frontend-only code. Move shared contracts or pure validation to `packages/shared` when both API and web need them.
 - Every component must be responsive to mobiles, 70% of the effort for computers and 30% for mobiles
+- Always run npm run typecheck to assert TS is running without errors
 
 ## File Organization
 
@@ -48,6 +49,8 @@ apps/web/src/
     <domain>/
   lib/
   services/
+  tests/
+    <domain>/
   utils/
   styles.css
 ```
@@ -139,6 +142,15 @@ components/ui/
 
 Do not wrap every HTML element. Add a primitive when it creates consistency or removes repeated styling.
 
+### Loading and section navigation
+
+- Every asynchronous screen must show the shared spinner while its primary data is loading.
+- Tables must preserve their layout with a table skeleton, and KPI groups must use metric skeletons; do not show zero-value KPIs before data arrives.
+- Screens with independent content sections use tabs so only one section is visible at a time. Keep forms that are steps of one workflow together.
+- Month selectors must show Portuguese month names and keep the API value in `YYYY-MM` format.
+- Authenticated pages occupy the viewport without an outer desktop scrollbar. Long datasets must scroll only inside `.table-wrap`; compact page spacing before introducing another scroll region.
+- Notification previews show at most five items; the complete history remains available on the notifications table.
+
 Use raw HTML controls only when they are local to one screen and do not duplicate an existing primitive. When the same control styling repeats, promote it to `components/ui/`.
 
 ## Exports
@@ -183,15 +195,18 @@ Use React Hook Form for forms with validation, API field errors, edit/create reu
 - Keep form defaults in feature-specific `.ts` helpers.
 - Keep field error display as a small component when reused across fields.
 - Use Zod schemas through `zodResolver` for client-side validation.
-- Reuse schemas or pure validation helpers from `@jurisflow/shared` when the rule is a real business contract.
+- Reuse schemas or pure validation helpers from `@magistrum/shared` when the rule is a real business contract.
 - Keep backend validation as the authority. Frontend validation improves UX but does not replace API validation.
 - Map API validation errors back into React Hook Form with `setError`.
+- Never render raw backend, Zod, Prisma, or stack-trace messages. Translate known business errors and use a safe Portuguese fallback for unknown failures.
 
 Avoid duplicating business rules separately in the UI. If both API and web need the same rule, move the shared contract or pure helper to `packages/shared`.
 
 ## Tests
 
 Add or update tests when a frontend change introduces business rules, branching behavior, or user-facing logic that can regress.
+
+Place frontend tests under `apps/web/src/tests/<domain>/`, mirroring the feature domain without mixing test files into production folders.
 
 Do not add shallow tests that only assert components render without validating behavior. Prefer tests that cover actual rules, transformations, or workflows.
 

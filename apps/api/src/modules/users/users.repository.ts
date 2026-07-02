@@ -81,4 +81,7 @@ export const usersRepository = {
   },
 
   async updatePasswordHash(id: string, passwordHash: string) {
-    const user = await prisma.user.update({ where: { id }, data: { pass
+    const user = await prisma.user.update({ where: { id }, data: { passwordHash } });
+    return toUserRecord(user as DbUser);
+  }
+};

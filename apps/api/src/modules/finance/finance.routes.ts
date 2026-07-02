@@ -17,7 +17,7 @@ export async function financeRoutes(app: FastifyInstance) {
 
   app.get("/finance/dashboard", async (request, reply) => {
     try {
-      return financeService.dashboard(financeDashboardQuerySchema.parse(request.query));
+      return await financeService.dashboard(financeDashboardQuerySchema.parse(request.query));
     } catch (error) {
       return handleFinanceError(error, reply);
     }

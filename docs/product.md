@@ -1,8 +1,8 @@
-# JurisFlow Product
+# Magistrum Product
 
 ## What Is This?
 
-JurisFlow is a law office management system built to replace operational spreadsheets with one central workspace for clients, legal cases, finance, documents, and daily office workflows.
+Magistrum is a law office management system built to replace operational spreadsheets with one central workspace for clients, legal cases, finance, documents, and daily office workflows.
 
 This first version should focus on clarity, data organization, and repeatable workflows before adding advanced automation.
 
@@ -63,6 +63,9 @@ Secondary users:
 - Track receivables, fees, due dates, payments, installments, overdue amounts, and cancellations.
 - Connect financial records to clients and cases when applicable.
 - Make it easy to understand what needs action.
+- Require an immutable financial agreement when a case is created or imported.
+- Register the configurable entry as received at creation and derive monthly installments from the remaining balance and fixed installment value.
+- Carry unpaid installments into later month views while preserving and showing their original competence; mark them overdue only after their due date passes.
 
 ### Documents
 

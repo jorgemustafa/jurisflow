@@ -1,5 +1,6 @@
 import { Check, ListTodo, PanelRightClose, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
+import { NotificationsBell } from "src/layout/NotificationsBell.js";
 
 type Todo = {
   id: string;
@@ -8,8 +9,8 @@ type Todo = {
   createdAt: string;
 };
 
-const storageKey = "jurisflow.todos";
-const collapsedKey = "jurisflow.todos.collapsed";
+const storageKey = "magistrum.todos";
+const collapsedKey = "magistrum.todos.collapsed";
 
 const loadTodos = (): Todo[] => {
   try {
@@ -72,17 +73,20 @@ export const TodoPanel = () => {
 
   if (collapsed) {
     return (
-      <aside className="todo-panel todo-panel-collapsed" aria-label="Tarefas">
-        <button
-          aria-label="Abrir tarefas"
-          className="todo-toggle"
-          title={`Tarefas${openCount > 0 ? ` (${openCount} aberta${openCount === 1 ? "" : "s"})` : ""}`}
-          type="button"
-          onClick={() => setCollapsed(false)}
-        >
-          <ListTodo size={18} />
-          {openCount > 0 ? <span className="todo-count">{openCount}</span> : null}
-        </button>
+      <aside className="todo-panel todo-panel-collapsed" aria-label="Tarefas e notificações">
+        <div className="side-rail">
+          <NotificationsBell />
+          <button
+            aria-label="Abrir tarefas"
+            className="todo-toggle"
+            title={`Tarefas${openCount > 0 ? ` (${openCount} aberta${openCount === 1 ? "" : "s"})` : ""}`}
+            type="button"
+            onClick={() => setCollapsed(false)}
+          >
+            <ListTodo size={18} />
+            {openCount > 0 ? <span className="todo-count">{openCount}</span> : null}
+          </button>
+        </div>
       </aside>
     );
   }
@@ -93,9 +97,12 @@ export const TodoPanel = () => {
         <strong>
           Tarefas {openCount > 0 ? <span className="todo-count">{openCount}</span> : null}
         </strong>
-        <button aria-label="Recolher tarefas" className="todo-toggle" title="Recolher" type="button" onClick={() => setCollapsed(true)}>
-          <PanelRightClose size={16} />
-        </button>
+        <div className="todo-header-actions">
+          <NotificationsBell />
+          <button aria-label="Recolher tarefas" className="todo-toggle" title="Recolher" type="button" onClick={() => setCollapsed(true)}>
+            <PanelRightClose size={16} />
+          </button>
+        </div>
       </div>
 
       <form className="todo-form" onSubmit={addTodo}>

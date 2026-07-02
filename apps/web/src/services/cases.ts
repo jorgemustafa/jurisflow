@@ -1,10 +1,31 @@
+import type { CaseFinanceInput } from "@magistrum/shared";
 import { request, searchParams } from "src/services/http.js";
 
 export type CaseType = "judicial" | "extrajudicial";
 export type CaseStatus = "active" | "on_hold" | "closed" | "canceled";
-export type CaseStage = "initial" | "hearing_scheduled" | "waiting_decision" | "appeal" | "enforcement";
-export type LegalArea = "civil" | "labor" | "family" | "criminal" | "tax" | "consumer" | "business" | "social_security" | "other";
-export type CaseTimelineEventType = "note" | "hearing" | "petition" | "decision" | "status_change" | "other";
+export type CaseStage =
+  | "initial"
+  | "hearing_scheduled"
+  | "waiting_decision"
+  | "appeal"
+  | "enforcement";
+export type LegalArea =
+  | "civil"
+  | "labor"
+  | "family"
+  | "criminal"
+  | "tax"
+  | "consumer"
+  | "business"
+  | "social_security"
+  | "other";
+export type CaseTimelineEventType =
+  | "note"
+  | "hearing"
+  | "petition"
+  | "decision"
+  | "status_change"
+  | "other";
 
 export type LegalCase = {
   id: string;
@@ -23,7 +44,7 @@ export type LegalCase = {
   description: string | null;
   openedAt: string | null;
   closedAt: string | null;
-  totalFeeAmountCents: number | null;
+  totalFeeAmountCents: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -58,6 +79,17 @@ export type CaseFormData = {
   openedAt: string;
   closedAt: string;
 };
+
+export type CreateCaseData = CaseFormData & { finance: CaseFinanceInput };
+
+export const caseFormPayload = <T extends CaseFormData>(
+  data: T,
+  emptyValue: null | undefined,
+) => ({
+  ...data,
+  stage: data.stage || emptyValue,
+  legalArea: data.legalArea || emptyValue,
+});
 
 export type CaseTimelineEvent = {
   id: string;
@@ -123,20 +155,32 @@ export const getCase = (id: string) => {
   return request<LegalCase>(`/cases/${id}`);
 };
 
-export const createCase = (data: CaseFormData) => {
-  return request<LegalCase>("/cases", { method: "POST", body: JSON.stringify(data) });
+export const createCase = (data: CreateCaseData) => {
+  return request<LegalCase>("/cases", {
+    method: "POST",
+    body: JSON.stringify(caseFormPayload(data, undefined)),
+  });
 };
 
 export const updateCase = (id: string, data: CaseFormData) => {
-  return request<LegalCase>(`/cases/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  return request<LegalCase>(`/cases/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(caseFormPayload(data, null)),
+  });
 };
 
 export const listCaseTimeline = (caseId: string) => {
   return request<CaseTimelineEvent[]>(`/cases/${caseId}/timeline`);
 };
 
-export const createCaseTimelineEvent = (caseId: string, data: CaseTimelineEventFormData) => {
-  return request<CaseTimelineEvent>(`/cases/${caseId}/timeline`, { method: "POST", body: JSON.stringify(data) });
+export const createCaseTimelineEvent = (
+  caseId: string,
+  data: CaseTimelineEventFormData,
+) => {
+  return request<CaseTimelineEvent>(`/cases/${caseId}/timeline`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 
 export const listTimeline = (filters: TimelineFilters) => {
@@ -144,7 +188,12 @@ export const listTimeline = (filters: TimelineFilters) => {
 };
 
 export type CaseImportBatchStatus = "open" | "completed";
-export type CaseImportItemStatus = "pending" | "duplicate" | "failed" | "imported" | "discarded";
+export type CaseImportItemStatus =
+  | "pending"
+  | "duplicate"
+  | "failed"
+  | "imported"
+  | "discarded";
 
 export type CaseImportBatchItem = {
   id: string;
@@ -154,6 +203,7 @@ export type CaseImportBatchItem = {
   status: CaseImportItemStatus;
   errorMessage: string | null;
   draft: CaseImportDraft | null;
+  financeData: CaseFinanceInput | null;
   clientId: string | null;
   caseId: string | null;
   createdAt: string;
@@ -177,25 +227,99 @@ export type CaseImportBatchResult = {
 };
 
 export const createCaseImportBatch = (cnjNumbers: string[]) => {
-  return request<CaseImportBatch>("/cases/import/batches", { method: "POST", body: JSON.stringify({ cnjNumbers }) });
+  return request<CaseImportBatch>("/cases/import/batches", {
+    method: "POST",
+    body: JSON.stringify({ cnjNumbers }),
+  });
 };
 
 export const getCaseImportBatch = (batchId: string) => {
   return request<CaseImportBatch>(`/cases/import/batches/${batchId}`);
 };
 
-export const updateCaseImportItem = (batchId: string, itemId: string, data: { clientId?: string | null; status?: "pending" | "discarded" }) => {
-  return request<CaseImportBatch>(`/cases/import/batches/${batchId}/items/${itemId}`, { method: "PATCH", body: JSON.stringify(data) });
+export const updateCaseImportItem = (
+  batchId: string,
+  itemId: string,
+  data: {
+    clientId?: string | null;
+    status?: "pending" | "discarded";
+    finance?: CaseFinanceInput;
+  },
+) => {
+  return request<CaseImportBatch>(
+    `/cases/import/batches/${batchId}/items/${itemId}`,
+    { method: "PATCH", body: JSON.stringify(data) },
+  );
 };
 
 export const confirmCaseImportBatch = (batchId: string) => {
-  return request<CaseImportBatchResult>(`/cases/import/batches/${batchId}/confirm`, { method: "POST" });
+  return request<CaseImportBatchResult>(
+    `/cases/import/batches/${batchId}/confirm`,
+    { method: "POST" },
+  );
 };
 
-export const previewCaseImport = (data: { cnjNumber: string; courtCode: string }) => {
-  return request<CaseImportPreview>("/cases/import/preview", { method: "POST", body: JSON.stringify(data) });
+export const previewCaseImport = (data: {
+  cnjNumber: string;
+  courtCode: string;
+}) => {
+  return request<CaseImportPreview>("/cases/import/preview", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 
-export const confirmCaseImport = (data: { cnjNumber: string; courtCode: string; clientId: string }) => {
-  return request<CaseImportResult>("/cases/import", { method: "POST", body: JSON.stringify(data) });
+export const confirmCaseImport = (data: {
+  cnjNumber: string;
+  courtCode: string;
+  clientId: string;
+  finance: CaseFinanceInput;
+}) => {
+  return request<CaseImportResult>("/cases/import", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+};
+
+export type CaseSyncTrigger = "manual" | "scheduled";
+export type CaseSyncStatus = "success" | "no_changes" | "failed";
+
+export type CaseSyncResult = {
+  caseId: string;
+  status: CaseSyncStatus;
+  newMovements: number;
+  errorMessage: string | null;
+};
+
+export type CaseSyncBatchResult = {
+  total: number;
+  updated: number;
+  unchanged: number;
+  failed: number;
+  newMovements: number;
+};
+
+export type CaseSyncRun = {
+  id: string;
+  caseId: string;
+  triggeredByUserId: string | null;
+  triggeredByUserName: string | null;
+  trigger: CaseSyncTrigger;
+  status: CaseSyncStatus;
+  newMovements: number;
+  errorMessage: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+};
+
+export const syncCase = (id: string) => {
+  return request<CaseSyncResult>(`/cases/${id}/sync`, { method: "POST" });
+};
+
+export const syncAllCases = () => {
+  return request<CaseSyncBatchResult>("/cases/sync", { method: "POST" });
+};
+
+export const listCaseSyncRuns = (id: string) => {
+  return request<CaseSyncRun[]>(`/cases/${id}/sync-runs`);
 };

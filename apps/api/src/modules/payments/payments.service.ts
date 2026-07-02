@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
+import type { CaseFinanceInput } from "@magistrum/shared";
 import type {
   CancelPaymentInput,
   CreatePaymentInput,
-  CreatePaymentScheduleInput,
   MarkPaymentPaidInput,
   PaymentListFilters,
   PaymentMethod,
   PaymentSource,
   PaymentStatus,
-  UpdatePaymentInput
+  UpdatePaymentInput,
 } from "./payments.schemas.js";
 
 export type PaymentRecord = {
@@ -36,13 +36,20 @@ export type PaymentRecord = {
 };
 
 type ClientRef = { id: string };
-type CaseRef = { id: string; clientId: string; totalFeeAmountCents: number | null };
+type CaseRef = {
+  id: string;
+  clientId: string;
+  totalFeeAmountCents: number;
+};
 
 export type CreatePaymentData = CreatePaymentInput & {
   source: PaymentSource;
   installmentNumber: number;
   installmentTotal: number;
   paymentScheduleId?: string;
+  paidAt?: Date;
+  paymentMethod?: PaymentMethod;
+  status?: PaymentStatus;
 };
 
 type PaymentsRepository = {
@@ -50,9 +57,7 @@ type PaymentsRepository = {
   findById(id: string): Promise<PaymentRecord | null>;
   findClientById(id: string): Promise<ClientRef | null>;
   findCaseById(id: string): Promise<CaseRef | null>;
-  hasGeneratedSchedule(caseId: string): Promise<boolean>;
   create(data: CreatePaymentData): Promise<PaymentRecord>;
-  createCaseSchedule(caseId: string, totalFeeAmountCents: number, payments: CreatePaymentData[]): Promise<PaymentRecord[]>;
   update(id: string, data: Partial<PaymentRecord>): Promise<PaymentRecord>;
 };
 
@@ -86,39 +91,87 @@ export class PaymentStatusError extends Error {
   }
 }
 
-function addMonths(date: Date, months: number) {
+export function addMonths(date: Date, months: number) {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth() + months;
   const day = date.getUTCDate();
   const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  return new Date(Date.UTC(year, month, Math.min(day, lastDay), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()));
+  return new Date(
+    Date.UTC(
+      year,
+      month,
+      Math.min(day, lastDay),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+    ),
+  );
 }
 
-export function buildInstallments(caseId: string, clientId: string, input: CreatePaymentScheduleInput): CreatePaymentData[] {
-  const baseAmount = Math.floor(input.totalFeeAmountCents / input.installmentCount);
-  const remainder = input.totalFeeAmountCents - baseAmount * input.installmentCount;
-  const scheduleId = randomUUID();
-  const baseDescription = input.description ?? "Honorários";
+export function isNextCalendarMonth(reference: Date, date: Date) {
+  const next = addMonths(reference, 1);
+  return (
+    date.getUTCFullYear() === next.getUTCFullYear() &&
+    date.getUTCMonth() === next.getUTCMonth()
+  );
+}
 
-  return Array.from({ length: input.installmentCount }, (_, index) => {
+export function buildCasePayments(
+  caseId: string,
+  clientId: string,
+  finance: CaseFinanceInput,
+  createdAt: Date,
+  scheduleId: string = randomUUID(),
+): CreatePaymentData[] {
+  const firstDueDate = new Date(`${finance.firstDueDate}T12:00:00.000Z`);
+  if (!isNextCalendarMonth(createdAt, firstDueDate))
+    throw new PaymentScheduleError(
+      "First due date must be in the next calendar month",
+    );
+
+  const balance = finance.totalFeeAmountCents - finance.entryAmountCents;
+  const installmentTotal = Math.ceil(balance / finance.installmentAmountCents);
+  const entry: CreatePaymentData = {
+    clientId,
+    caseId,
+    paymentScheduleId: scheduleId,
+    source: "generated",
+    description: "Honorários - Entrada",
+    amountCents: finance.entryAmountCents,
+    dueDate: createdAt,
+    paidAt: createdAt,
+    paymentMethod: finance.entryPaymentMethod,
+    status: "paid",
+    installmentNumber: 0,
+    installmentTotal,
+  };
+
+  const installments = Array.from({ length: installmentTotal }, (_, index) => {
     const installmentNumber = index + 1;
-    const isLast = installmentNumber === input.installmentCount;
-
+    const amountCents = Math.min(
+      finance.installmentAmountCents,
+      balance - index * finance.installmentAmountCents,
+    );
     return {
       clientId,
       caseId,
       paymentScheduleId: scheduleId,
       source: "generated",
-      description: `${baseDescription} - Parcela ${installmentNumber}/${input.installmentCount}`,
-      amountCents: baseAmount + (isLast ? remainder : 0),
-      dueDate: addMonths(input.firstDueDate, index),
+      description: `Honorários - Parcela ${installmentNumber}/${installmentTotal}`,
+      amountCents,
+      dueDate: addMonths(firstDueDate, index),
       installmentNumber,
-      installmentTotal: input.installmentCount
-    };
+      installmentTotal,
+    } satisfies CreatePaymentData;
   });
+
+  return [entry, ...installments];
 }
 
-export function isOverdue(payment: Pick<PaymentRecord, "status" | "dueDate">, now = new Date()) {
+export function isOverdue(
+  payment: Pick<PaymentRecord, "status" | "dueDate">,
+  now = new Date(),
+) {
   return payment.status === "pending" && payment.dueDate < now;
 }
 
@@ -128,12 +181,15 @@ export function createPaymentsService(repository: PaymentsRepository) {
     if (!client) throw new PaymentClientError("Client not found");
   }
 
-  async function ensureCaseBelongsToClient(caseId: string | undefined, clientId: string) {
-    if (!caseId) return null;
+  async function ensureCaseBelongsToClient(
+    caseId: string | undefined,
+    clientId: string,
+  ) {
+    if (!caseId) return;
     const item = await repository.findCaseById(caseId);
     if (!item) throw new PaymentCaseError("Case not found");
-    if (item.clientId !== clientId) throw new PaymentCaseError("Case must belong to the payment client");
-    return item;
+    if (item.clientId !== clientId)
+      throw new PaymentCaseError("Case must belong to the payment client");
   }
 
   return {
@@ -144,61 +200,84 @@ export function createPaymentsService(repository: PaymentsRepository) {
     async create(input: CreatePaymentInput) {
       await ensureClient(input.clientId);
       await ensureCaseBelongsToClient(input.caseId, input.clientId);
-
       return repository.create({
         ...input,
         source: "manual",
         installmentNumber: 1,
-        installmentTotal: 1
+        installmentTotal: 1,
       });
-    },
-
-    async createCaseSchedule(caseId: string, input: CreatePaymentScheduleInput) {
-      const item = await repository.findCaseById(caseId);
-      if (!item) throw new PaymentCaseError("Case not found");
-      if (await repository.hasGeneratedSchedule(caseId)) throw new PaymentScheduleError("Case already has a generated payment schedule");
-
-      const payments = buildInstallments(caseId, item.clientId, input);
-      return repository.createCaseSchedule(caseId, input.totalFeeAmountCents, payments);
     },
 
     async update(id: string, input: UpdatePaymentInput) {
       const payment = await repository.findById(id);
       if (!payment) throw new PaymentNotFoundError();
 
+      if (payment.source === "generated") {
+        if (Object.keys(input).some((key) => key !== "notes"))
+          throw new PaymentStatusError(
+            "Generated payments only allow notes to be updated",
+          );
+        return repository.update(id, input as Partial<PaymentRecord>);
+      }
+
       if (payment.status === "paid") {
-        const forbidden = input.amountCents !== undefined || input.dueDate !== undefined || input.description !== undefined || input.cancelReason !== undefined;
-        if (forbidden) throw new PaymentStatusError("Paid payments can only correct paidAt or be canceled");
+        const forbidden =
+          input.amountCents !== undefined ||
+          input.dueDate !== undefined ||
+          input.description !== undefined ||
+          input.cancelReason !== undefined;
+        if (forbidden)
+          throw new PaymentStatusError(
+            "Paid payments can only correct paidAt or be canceled",
+          );
         return repository.update(id, input as Partial<PaymentRecord>);
       }
       if (payment.status === "canceled") {
         const forbidden =
-          input.amountCents !== undefined || input.dueDate !== undefined || input.description !== undefined || input.paidAt !== undefined;
-        if (forbidden) throw new PaymentStatusError("Canceled payments can only edit cancel reason and notes");
+          input.amountCents !== undefined ||
+          input.dueDate !== undefined ||
+          input.description !== undefined ||
+          input.paidAt !== undefined;
+        if (forbidden)
+          throw new PaymentStatusError(
+            "Canceled payments can only edit cancel reason and notes",
+          );
         return repository.update(id, input as Partial<PaymentRecord>);
       }
-
-      if (input.paidAt !== undefined) {
-        throw new PaymentStatusError("Use the paid action to register a payment receipt");
-      }
-
-      if (payment.source === "generated" && input.amountCents !== undefined) {
-        throw new PaymentStatusError("Generated payment amount is locked");
-      }
-
+      if (input.paidAt !== undefined)
+        throw new PaymentStatusError(
+          "Use the paid action to register a payment receipt",
+        );
       return repository.update(id, input as Partial<PaymentRecord>);
     },
 
     async markPaid(id: string, input: MarkPaymentPaidInput) {
       const payment = await repository.findById(id);
       if (!payment) throw new PaymentNotFoundError();
-      if (payment.status === "canceled") throw new PaymentStatusError("Canceled payment cannot be marked as paid");
-
+      if (payment.status === "canceled")
+        throw new PaymentStatusError(
+          "Canceled payment cannot be marked as paid",
+        );
       return repository.update(id, {
         status: "paid",
         paidAt: input.paidAt ?? new Date(),
-        paymentMethod: input.paymentMethod
+        paymentMethod: input.paymentMethod,
       });
     },
 
-    async cancel(id: string, input: CancelPaymentInput) 
+    async cancel(id: string, input: CancelPaymentInput) {
+      const payment = await repository.findById(id);
+      if (!payment) throw new PaymentNotFoundError();
+      if (payment.source === "generated")
+        throw new PaymentStatusError("Generated payments cannot be canceled");
+      if (payment.status === "canceled")
+        throw new PaymentStatusError("Payment is already canceled");
+      return repository.update(id, {
+        status: "canceled",
+        canceledAt: new Date(),
+        cancelReason: input.cancelReason,
+        notes: input.notes ?? payment.notes,
+      });
+    },
+  };
+}

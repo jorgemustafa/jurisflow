@@ -9,8 +9,12 @@ import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.j
 import { labelClientStatus, labelClientType } from "src/features/clients/utils/clientLabels.js";
 import { DocumentLinksList } from "src/features/documents/DocumentLinksList.js";
 import { listDocuments } from "src/services/documents.js";
+import { useState } from "react";
+import { LoadingState } from "src/components/ui/LoadingState.js";
+import { Tabs } from "src/components/ui/Tabs.js";
 
 export const ClientDetailsPage = () => {
+  const [tab, setTab] = useState<"details" | "cases" | "documents">("details");
   const { id = "" } = useParams();
   const queryClient = useQueryClient();
   const client = useQuery({ queryKey: ["client", id], queryFn: () => getClient(id), enabled: Boolean(id) });
@@ -32,7 +36,7 @@ export const ClientDetailsPage = () => {
     }
   });
 
-  if (client.isLoading) return <p>Carregando cliente...</p>;
+  if (client.isLoading) return <LoadingState label="Carregando cliente" />;
   if (client.isError || !client.data) return <p className="alert">Cliente não encontrado.</p>;
 
   const nextStatus = client.data.status === "active" ? "inactive" : "active";
@@ -59,7 +63,18 @@ export const ClientDetailsPage = () => {
         </div>
       </header>
 
-      <section className="details-grid">
+      <Tabs
+        ariaLabel="Seções do cliente"
+        tabs={[
+          { value: "details", label: "Dados" },
+          { value: "cases", label: "Processos" },
+          { value: "documents", label: "Documentos" }
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+
+      {tab === "details" ? <section className="details-grid">
         <ClientDetailItem label="Status" value={labelClientStatus(client.data.status)} />
         <ClientDetailItem label="Documento" value={fieldValue(client.data.document)} />
         <ClientDetailItem label="Email" value={fieldValue(client.data.email)} />
@@ -68,18 +83,17 @@ export const ClientDetailsPage = () => {
         <ClientDetailItem label="Observações" value={fieldValue(client.data.notes)} />
         <ClientDetailItem label="Criado em" value={formatDate(client.data.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(client.data.updatedAt)} />
-      </section>
+      </section> : null}
 
-      {cases.isLoading ? <p>Carregando processos do cliente...</p> : null}
-      {cases.isError ? <p className="alert">Não foi possível carregar os processos do cliente.</p> : null}
-      {cases.data ? <ClientCasesList cases={cases.data} /> : null}
+      {tab === "cases" && cases.isLoading ? <LoadingState label="Carregando processos do cliente" variant="table" columns={5} /> : null}
+      {tab === "cases" && cases.isError ? <p className="alert">Não foi possível carregar os processos do cliente.</p> : null}
+      {tab === "cases" && cases.data ? <ClientCasesList cases={cases.data} /> : null}
 
-      <section className="panel">
-        <h2>Documentos</h2>
-        {documents.isLoading ? <p>Carregando documentos do cliente...</p> : null}
+      {tab === "documents" ? <section className="panel">
+        {documents.isLoading ? <LoadingState label="Carregando documentos do cliente" variant="table" columns={4} /> : null}
         {documents.isError ? <p className="alert">Não foi possível carregar os documentos do cliente.</p> : null}
         {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
-      </section>
+      </section> : null}
     </>
   );
 };

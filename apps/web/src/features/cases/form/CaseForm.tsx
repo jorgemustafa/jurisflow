@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { caseFinanceSchema, type PaymentMethod } from "@magistrum/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -10,8 +11,16 @@ import { Label } from "src/components/ui/label.js";
 import { Select } from "src/components/ui/select.js";
 import { Textarea } from "src/components/ui/textarea.js";
 import { FieldError } from "src/features/clients/form/FieldError.js";
-import { createCase, getCase, updateCase, type CaseFormData } from "src/services/cases.js";
+import { parseMoney } from "src/features/finance/utils/money.js";
+import {
+  createCase,
+  getCase,
+  updateCase,
+  type CaseFormData,
+  type CreateCaseData,
+} from "src/services/cases.js";
 import { ApiError } from "src/services/http.js";
+import { LoadingState } from "src/components/ui/LoadingState.js";
 
 const caseFormSchema = z.object({
   clientId: z.string().uuid(),
@@ -19,15 +28,37 @@ const caseFormSchema = z.object({
   title: z.string().trim().min(2, "Informe o título").max(255),
   cnjNumber: z.string().max(40),
   status: z.enum(["active", "on_hold", "closed", "canceled"]),
-  stage: z.union([z.enum(["initial", "hearing_scheduled", "waiting_decision", "appeal", "enforcement"]), z.literal("")]),
-  legalArea: z.union([z.enum(["civil", "labor", "family", "criminal", "tax", "consumer", "business", "social_security", "other"]), z.literal("")]),
+  stage: z.union([
+    z.enum([
+      "initial",
+      "hearing_scheduled",
+      "waiting_decision",
+      "appeal",
+      "enforcement",
+    ]),
+    z.literal(""),
+  ]),
+  legalArea: z.union([
+    z.enum([
+      "civil",
+      "labor",
+      "family",
+      "criminal",
+      "tax",
+      "consumer",
+      "business",
+      "social_security",
+      "other",
+    ]),
+    z.literal(""),
+  ]),
   opposingParty: z.string().max(255),
   court: z.string().max(120),
   jurisdiction: z.string().max(120),
   division: z.string().max(120),
   description: z.string().max(2000),
   openedAt: z.string(),
-  closedAt: z.string()
+  closedAt: z.string(),
 });
 
 const emptyCaseForm = (clientId: string): CaseFormData => ({
@@ -44,10 +75,34 @@ const emptyCaseForm = (clientId: string): CaseFormData => ({
   division: "",
   description: "",
   openedAt: "",
-  closedAt: ""
+  closedAt: "",
 });
 
-const dateInputValue = (value: string | null) => (value ? value.slice(0, 10) : "");
+const dateInputValue = (value: string | null) =>
+  value ? value.slice(0, 10) : "";
+const nextMonthDate = () => {
+  const now = new Date();
+  const lastDay = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 2, 0),
+  ).getUTCDate();
+  return new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth() + 1,
+      Math.min(now.getUTCDate(), lastDay),
+    ),
+  )
+    .toISOString()
+    .slice(0, 10);
+};
+
+const emptyFinanceForm = () => ({
+  total: "",
+  entry: "",
+  installment: "",
+  firstDueDate: nextMonthDate(),
+  entryPaymentMethod: "pix" as PaymentMethod,
+});
 
 type CaseFormProps =
   | {
@@ -61,23 +116,33 @@ type CaseFormProps =
 
 export const CaseForm = (props: CaseFormProps) => {
   const isEdit = props.mode === "update";
-  const cancelPath = isEdit ? `/cases/${props.caseId}` : `/clients/${props.clientId}`;
+  const cancelPath = isEdit
+    ? `/cases/${props.caseId}`
+    : `/clients/${props.clientId}`;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [generalError, setGeneralError] = useState("");
+  const [financeForm, setFinanceForm] = useState(emptyFinanceForm);
   const form = useForm<CaseFormData>({
     resolver: zodResolver(caseFormSchema),
-    defaultValues: emptyCaseForm(props.mode === "create" ? props.clientId : "00000000-0000-0000-0000-000000000000")
+    defaultValues: emptyCaseForm(
+      props.mode === "create"
+        ? props.clientId
+        : "00000000-0000-0000-0000-000000000000",
+    ),
   });
   const watchedType = form.watch("caseType");
   const legalCase = useQuery({
     queryKey: ["case", props.mode === "update" ? props.caseId : ""],
     queryFn: () => getCase(props.mode === "update" ? props.caseId : ""),
-    enabled: isEdit
+    enabled: isEdit,
   });
 
   const mutation = useMutation({
-    mutationFn: (data: CaseFormData) => (isEdit ? updateCase(props.caseId, data) : createCase(data)),
+    mutationFn: (data: CaseFormData | CreateCaseData) =>
+      isEdit
+        ? updateCase(props.caseId, data as CaseFormData)
+        : createCase(data as CreateCaseData),
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["cases"] });
       queryClient.setQueryData(["case", saved.id], saved);
@@ -88,11 +153,11 @@ export const CaseForm = (props: CaseFormProps) => {
         Object.entries(error.fieldErrors).forEach(([field, message]) => {
           form.setError(field as keyof CaseFormData, { message });
         });
-        setGeneralError(Object.keys(error.fieldErrors).length ? "" : error.message);
+        setGeneralError(error.message);
       } else {
         setGeneralError("Não foi possível salvar o processo.");
       }
-    }
+    },
   });
 
   useEffect(() => {
@@ -111,17 +176,40 @@ export const CaseForm = (props: CaseFormProps) => {
       division: legalCase.data.division ?? "",
       description: legalCase.data.description ?? "",
       openedAt: dateInputValue(legalCase.data.openedAt),
-      closedAt: dateInputValue(legalCase.data.closedAt)
+      closedAt: dateInputValue(legalCase.data.closedAt),
     });
   }, [form, legalCase.data]);
 
   const submit = (data: CaseFormData) => {
     setGeneralError("");
-    mutation.mutate({ ...data, cnjNumber: data.caseType === "judicial" ? data.cnjNumber : "" });
+    const caseData = {
+      ...data,
+      cnjNumber: data.caseType === "judicial" ? data.cnjNumber : "",
+    };
+    if (isEdit) {
+      mutation.mutate(caseData);
+      return;
+    }
+
+    const finance = caseFinanceSchema.safeParse({
+      totalFeeAmountCents: parseMoney(financeForm.total),
+      entryAmountCents: parseMoney(financeForm.entry),
+      installmentAmountCents: parseMoney(financeForm.installment),
+      firstDueDate: financeForm.firstDueDate,
+      entryPaymentMethod: financeForm.entryPaymentMethod,
+    });
+    if (!finance.success) {
+      setGeneralError(
+        "Informe valor total, entrada, parcela e primeiro vencimento válidos. A entrada deve ser menor que o total.",
+      );
+      return;
+    }
+    mutation.mutate({ ...caseData, finance: finance.data });
   };
 
-  if (legalCase.isLoading) return <p>Carregando processo...</p>;
-  if (legalCase.isError) return <p className="alert">Processo não encontrado.</p>;
+  if (legalCase.isLoading) return <LoadingState label="Carregando processo" />;
+  if (legalCase.isError)
+    return <p className="alert">Processo não encontrado.</p>;
 
   return (
     <>
@@ -152,7 +240,11 @@ export const CaseForm = (props: CaseFormProps) => {
 
         <div className="grid gap-2">
           <Label htmlFor="cnjNumber">CNJ</Label>
-          <Input id="cnjNumber" disabled={watchedType === "extrajudicial"} {...form.register("cnjNumber")} />
+          <Input
+            id="cnjNumber"
+            disabled={watchedType === "extrajudicial"}
+            {...form.register("cnjNumber")}
+          />
           <FieldError message={form.formState.errors.cnjNumber?.message} />
         </div>
 
@@ -235,15 +327,103 @@ export const CaseForm = (props: CaseFormProps) => {
 
         <div className="grid gap-2">
           <Label htmlFor="description">Descrição</Label>
-          <Textarea id="description" rows={5} {...form.register("description")} />
+          <Textarea
+            id="description"
+            rows={5}
+            {...form.register("description")}
+          />
           <FieldError message={form.formState.errors.description?.message} />
         </div>
+
+        {!isEdit ? (
+          <fieldset className="finance-form-section">
+            <legend>Acordo financeiro</legend>
+            <div className="grid gap-2">
+              <Label htmlFor="totalFee">Valor total (R$)</Label>
+              <Input
+                id="totalFee"
+                value={financeForm.total}
+                onChange={(event) =>
+                  setFinanceForm((current) => ({
+                    ...current,
+                    total: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="entryAmount">Entrada (R$)</Label>
+              <Input
+                id="entryAmount"
+                value={financeForm.entry}
+                onChange={(event) =>
+                  setFinanceForm((current) => ({
+                    ...current,
+                    entry: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="installmentAmount">Valor da parcela (R$)</Label>
+              <Input
+                id="installmentAmount"
+                value={financeForm.installment}
+                onChange={(event) =>
+                  setFinanceForm((current) => ({
+                    ...current,
+                    installment: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="firstDueDate">Primeiro vencimento</Label>
+              <Input
+                id="firstDueDate"
+                type="date"
+                value={financeForm.firstDueDate}
+                onChange={(event) =>
+                  setFinanceForm((current) => ({
+                    ...current,
+                    firstDueDate: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="entryPaymentMethod">Forma da entrada</Label>
+              <Select
+                id="entryPaymentMethod"
+                value={financeForm.entryPaymentMethod}
+                onChange={(event) =>
+                  setFinanceForm((current) => ({
+                    ...current,
+                    entryPaymentMethod: event.target.value as PaymentMethod,
+                  }))
+                }
+              >
+                <option value="pix">PIX</option>
+                <option value="cash">Dinheiro</option>
+                <option value="bank_transfer">Transferência</option>
+                <option value="credit_card">Cartão de crédito</option>
+                <option value="debit_card">Cartão de débito</option>
+                <option value="boleto">Boleto</option>
+                <option value="other">Outro</option>
+              </Select>
+            </div>
+          </fieldset>
+        ) : null}
 
         <div className="actions">
           <Button type="submit" disabled={mutation.isPending}>
             Salvar
           </Button>
-          <Button variant="outline" type="button" onClick={() => navigate(cancelPath)}>
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => navigate(cancelPath)}
+          >
             Cancelar
           </Button>
         </div>

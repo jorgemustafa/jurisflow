@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-JurisFlow needs its first complete, usable workflow. Client records are the root of future cases, finance, and documents, so the system needs a reliable way to create, find, update, view, and inactivate clients before expanding into dependent modules.
+Magistrum needs its first complete, usable workflow. Client records are the root of future cases, finance, and documents, so the system needs a reliable way to create, find, update, view, and inactivate clients before expanding into dependent modules.
 
 The current client module is only an initial API slice. It does not yet cover the agreed business rules for individuals and companies, progressive data completion, status handling, detail/edit flows, or the filters needed for daily office use.
 
@@ -14,8 +14,8 @@ The first version should stay small and operational: `type` and `name` are requi
 
 ## User Stories
 
-1. As an office user, I want to create an individual client, so that I can start tracking a person in JurisFlow.
-2. As an office user, I want to create a company client, so that I can start tracking a business in JurisFlow.
+1. As an office user, I want to create an individual client, so that I can start tracking a person in Magistrum.
+2. As an office user, I want to create a company client, so that I can start tracking a business in Magistrum.
 3. As an office user, I want only type and name to be required, so that I can register clients quickly and complete their data later.
 4. As an office user, I want to add CPF or CNPJ when available, so that the client has a stronger identifier.
 5. As an office user, I want CPF and CNPJ to be validated when provided, so that obviously invalid documents do not enter the database.
