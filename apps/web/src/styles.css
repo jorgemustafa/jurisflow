@@ -809,4 +809,5 @@ tr:last-child td {
 
 .timeline-form {
   display: grid;
-  grid-template-columns: 160px 
+  grid-template-columns: 160px;
+}

@@ -41,7 +41,7 @@ export function LoginPage() {
     <main className="auth-shell">
       <section className="auth-panel">
         <header className="page-header">
-          <span>JurisFlow</span>
+          <span>Magistrum</span>
           <h1>Entrar</h1>
           <p>Acesse sua área de trabalho.</p>
         </header>
