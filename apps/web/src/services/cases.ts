@@ -1,4 +1,4 @@
-import type { CaseFinanceInput } from "@jurisflow/shared";
+import type { CaseFinanceInput } from "@magistrum/shared";
 import { request, searchParams } from "src/services/http.js";
 
 export type CaseType = "judicial" | "extrajudicial";

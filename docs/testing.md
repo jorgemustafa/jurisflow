@@ -13,7 +13,7 @@ no database or external service is required to run them.
 Run the whole backend suite (from the repo root):
 
 ```bash
-npm run test -w @jurisflow/api
+npm run test -w @magistrum/api
 ```
 
 Run every workspace that defines tests:
@@ -22,23 +22,23 @@ Run every workspace that defines tests:
 npm test
 ```
 
-Both commands first build `@jurisflow/shared` via the `pretest` hook, so a clean
+Both commands first build `@magistrum/shared` via the `pretest` hook, so a clean
 checkout works without extra setup.
 
 Run a single module by passing a filename filter through to Vitest:
 
 ```bash
 # only the finance dashboard tests
-npm run test -w @jurisflow/api -- finance
+npm run test -w @magistrum/api -- finance
 
 # only the payments tests
-npm run test -w @jurisflow/api -- payments
+npm run test -w @magistrum/api -- payments
 ```
 
 Watch mode while developing (re-runs on file changes):
 
 ```bash
-npx vitest -w @jurisflow/api
+npx vitest -w @magistrum/api
 ```
 
 ## What the finance / payments tests cover

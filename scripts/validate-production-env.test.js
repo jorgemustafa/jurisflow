@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { parseEnv, validateProductionEnv } from "./validate-production-env.mjs";
 
 const validEnv = {
-  POSTGRES_DB: "jurisflow",
-  POSTGRES_ADMIN_USER: "jurisflow_admin",
+  POSTGRES_DB: "magistrum",
+  POSTGRES_ADMIN_USER: "magistrum_admin",
   POSTGRES_ADMIN_PASSWORD: "a".repeat(32),
-  POSTGRES_APP_USER: "jurisflow_app",
+  POSTGRES_APP_USER: "magistrum_app",
   POSTGRES_APP_PASSWORD: "b".repeat(32),
   JWT_SECRET: "c".repeat(64),
   DATAJUD_API_KEY: "configured",
-  APP_ORIGIN: "https://jurisflow.com.br",
+  APP_ORIGIN: "https://magistrum.com.br",
 };
 
 describe("production environment", () => {
@@ -24,7 +24,7 @@ describe("production environment", () => {
       POSTGRES_APP_USER: validEnv.POSTGRES_ADMIN_USER,
       POSTGRES_APP_PASSWORD: "short",
       JWT_SECRET: "short",
-      APP_ORIGIN: "http://jurisflow.example.com/path",
+      APP_ORIGIN: "http://magistrum.example.com/path",
     });
 
     expect(errors).toEqual(
@@ -39,8 +39,8 @@ describe("production environment", () => {
   });
 
   it("parses quoted values and ignores comments", () => {
-    expect(parseEnv('# comment\nPOSTGRES_DB="jurisflow"\nWEB_PORT=8080\n')).toEqual({
-      POSTGRES_DB: "jurisflow",
+    expect(parseEnv('# comment\nPOSTGRES_DB="magistrum"\nWEB_PORT=8080\n')).toEqual({
+      POSTGRES_DB: "magistrum",
       WEB_PORT: "8080",
     });
   });

@@ -1,13 +1,15 @@
+name: magistrum
+
 services:
   api:
     build:
       context: .
       target: development
-    container_name: jurisflow-api
+    container_name: magistrum-api
     command: npm run dev:api
     environment:
       API_PORT: 3333
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-jurisflow}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-magistrum}?schema=public
       DATAJUD_API_KEY: ${DATAJUD_API_KEY:-}
       JWT_SECRET: ${JWT_SECRET:-local-development-only-secret}
       WEB_ORIGIN: http://localhost:5173
@@ -24,10 +26,10 @@ services:
 
   postgres:
     image: postgres:17-alpine
-    container_name: jurisflow-postgres
+    container_name: magistrum-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-jurisflow}
+      POSTGRES_DB: ${POSTGRES_DB:-magistrum}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
@@ -44,7 +46,7 @@ services:
     build:
       context: .
       target: development
-    container_name: jurisflow-web
+    container_name: magistrum-web
     command: npm run dev:web
     environment:
       VITE_API_URL: http://localhost:3333

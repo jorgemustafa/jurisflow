@@ -109,7 +109,7 @@ it("normalizes CPF, email, and phone", () => {
 Run the smallest useful command first while developing, then run the full pre-commit gate before committing.
 
 ```bash
-npm test -w @jurisflow/api
+npm test -w @magistrum/api
 npm test
 npm run typecheck
 ```
@@ -117,7 +117,7 @@ npm run typecheck
 For frontend-only changes, also run:
 
 ```bash
-npm run build -w @jurisflow/web
+npm run build -w @magistrum/web
 ```
 
 ## Pre-Commit Gate

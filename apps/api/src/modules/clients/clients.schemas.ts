@@ -7,7 +7,7 @@ import {
   isValidDocumentForType,
   type ClientStatus,
   type ClientType
-} from "@jurisflow/shared";
+} from "@magistrum/shared";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 

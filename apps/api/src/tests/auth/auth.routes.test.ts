@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { UserRecord } from "../../modules/users/users.service.js";
 
 async function buildAuthApp(user: UserRecord | null = null) {
-  process.env.DATABASE_URL ??= "postgresql://postgres:postgres@localhost:5432/jurisflow";
+  process.env.DATABASE_URL ??= "postgresql://postgres:postgres@localhost:5432/magistrum";
   const [{ createAuthRoutes }, { createAuthService }] = await Promise.all([
     import("../../modules/auth/auth.routes.js"),
     import("../../modules/auth/auth.service.js"),
@@ -32,7 +32,7 @@ describe("auth routes", () => {
     const response = await (await buildAuthApp()).inject({
       method: "POST",
       url: "/auth/login",
-      payload: { email: "missing@jurisflow.test", password: "password123" },
+      payload: { email: "missing@magistrum.test", password: "password123" },
     });
 
     expect(response.statusCode).toBe(401);

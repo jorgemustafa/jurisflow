@@ -1,4 +1,4 @@
-# JurisFlow Architecture
+# Magistrum Architecture
 
 ## Stack
 

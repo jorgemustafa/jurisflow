@@ -1,5 +1,5 @@
 {
-  "name": "@jurisflow/web",
+  "name": "@magistrum/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@jurisflow/shared": "0.1.0",
+    "@magistrum/shared": "0.1.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.3",
     "@tanstack/react-query": "^5.66.0",

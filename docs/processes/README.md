@@ -1,6 +1,6 @@
 # Processos — atualização automática e notificações
 
-Esta pasta documenta o subsistema de atualização de processos do JurisFlow: como os
+Esta pasta documenta o subsistema de atualização de processos do Magistrum: como os
 andamentos são puxados do DataJud (sob demanda e por rotina diária), como o histórico de
 sincronização é guardado e como as notificações chegam ao advogado responsável.
 

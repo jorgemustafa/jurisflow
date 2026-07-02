@@ -1,4 +1,4 @@
-import { caseFinanceSchema } from "@jurisflow/shared";
+import { caseFinanceSchema } from "@magistrum/shared";
 import { z } from "zod";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");

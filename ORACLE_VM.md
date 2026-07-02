@@ -1,6 +1,6 @@
 # Deploy on an Oracle Cloud VM
 
-This guide deploys JurisFlow with the production Compose. A public domain and HTTPS reverse proxy are required before storing real client data.
+This guide deploys Magistrum with the production Compose. A public domain and HTTPS reverse proxy are required before storing real client data.
 
 ## 1. VM and network
 
@@ -16,8 +16,8 @@ Do not expose PostgreSQL `5432`, API `3333`, Vite `5173`, or the internal web po
 Install Docker Engine with the Compose plugin, clone the repository, and create the production environment:
 
 ```bash
-git clone git@github.com:jorgemustafa/jurisflow.git
-cd jurisflow
+git clone git@github.com:jorgemustafa/magistrum.git
+cd magistrum
 cp .env.prod.example .env.prod
 chmod 600 .env.prod
 ```
@@ -80,7 +80,7 @@ Back up the database to protected storage before every upgrade:
 
 ```bash
 docker compose --env-file .env.prod -f compose.prod.yml exec -T postgres \
-  sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > jurisflow-$(date +%F).backup
+  sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > magistrum-$(date +%F).backup
 ```
 
 The exact credential rotation procedure is in `docs/production.md`. Never run `docker compose down -v` against production.

@@ -89,7 +89,7 @@ async function seed() {
   const users = await Promise.all(
     names.map((name, index) =>
       prisma.user.upsert({
-        where: { email: `demo.user.${index + 1}@jurisflow.local` },
+        where: { email: `demo.user.${index + 1}@magistrum.local` },
         update: {
           name,
           role:
@@ -102,7 +102,7 @@ async function seed() {
         },
         create: {
           name,
-          email: `demo.user.${index + 1}@jurisflow.local`,
+          email: `demo.user.${index + 1}@magistrum.local`,
           passwordHash,
           role:
             index % 5 === 0
@@ -124,7 +124,7 @@ async function seed() {
           name: index % 3 === 0 ? `${name} Advocacia Teste` : name,
           status: index % 7 === 0 ? "INACTIVE" : "ACTIVE",
           phone: `1198${pad(index + 1, 7)}`,
-          email: `demo.client.${index + 1}@jurisflow.local`,
+          email: `demo.client.${index + 1}@magistrum.local`,
           address: `Rua Demo ${index + 1}, ${100 + index}`,
           notes: "[DEMO] Cliente criado para testes locais.",
         },
@@ -134,7 +134,7 @@ async function seed() {
           name: index % 3 === 0 ? `${name} Advocacia Teste` : name,
           document: `9000000000${pad(index + 1, 3)}`,
           phone: `1198${pad(index + 1, 7)}`,
-          email: `demo.client.${index + 1}@jurisflow.local`,
+          email: `demo.client.${index + 1}@magistrum.local`,
           address: `Rua Demo ${index + 1}, ${100 + index}`,
           notes: "[DEMO] Cliente criado para testes locais.",
         },
@@ -281,7 +281,7 @@ async function seed() {
   console.log(
     `Seeded ${count} users, clients, cases, payments, documents, timeline events, and deadlines.`,
   );
-  console.log("Demo login: demo.user.1@jurisflow.local / demo1234");
+  console.log("Demo login: demo.user.1@magistrum.local / demo1234");
 }
 
 seed()

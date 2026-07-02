@@ -53,11 +53,11 @@ describe("users service", () => {
   it("creates a lawyer user without requiring a password hash", async () => {
     const service = createUsersService(createRepository());
 
-    const user = await service.create({ name: "Dra. Ana", email: "ana@jurisflow.test", role: "lawyer" });
+    const user = await service.create({ name: "Dra. Ana", email: "ana@magistrum.test", role: "lawyer" });
 
     expect(user).toMatchObject({
       name: "Dra. Ana",
-      email: "ana@jurisflow.test",
+      email: "ana@magistrum.test",
       role: "lawyer",
       status: "active",
       passwordHash: null
@@ -69,7 +69,7 @@ describe("users service", () => {
       {
         id: "user-1",
         name: "Dra. Ana",
-        email: "ana@jurisflow.test",
+        email: "ana@magistrum.test",
         passwordHash: null,
         role: "lawyer",
         status: "active",
@@ -81,7 +81,7 @@ describe("users service", () => {
     ]);
     const service = createUsersService(repository);
 
-    await expect(service.create({ name: "Ana 2", email: "ana@jurisflow.test", role: "lawyer" })).rejects.toBeInstanceOf(
+    await expect(service.create({ name: "Ana 2", email: "ana@magistrum.test", role: "lawyer" })).rejects.toBeInstanceOf(
       UserEmailConflictError
     );
   });
@@ -90,7 +90,7 @@ describe("users service", () => {
     const repository = createRepository();
     const service = createUsersService(repository);
 
-    const user = await service.create({ name: "Dra. Ana", email: "ana@jurisflow.test", password: "password123" });
+    const user = await service.create({ name: "Dra. Ana", email: "ana@magistrum.test", password: "password123" });
 
     expect(user.passwordHash).not.toBe("password123");
     expect(user.passwordHash).toBeTruthy();
@@ -102,7 +102,7 @@ describe("users service", () => {
       {
         id: "user-1",
         name: "Dra. Ana",
-        email: "ana@jurisflow.test",
+        email: "ana@magistrum.test",
         passwordHash: null,
         role: "lawyer",
         status: "active",

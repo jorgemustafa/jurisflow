@@ -10,7 +10,7 @@ function createUser(overrides: Partial<UserRecord> = {}): UserRecord {
   return {
     id: "user-1",
     name: "Dra. Ana",
-    email: "ana@jurisflow.test",
+    email: "ana@magistrum.test",
     passwordHash: null,
     role: "lawyer",
     status: "active",

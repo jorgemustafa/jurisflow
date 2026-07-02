@@ -1,4 +1,4 @@
-import type { PaymentMethod } from "@jurisflow/shared";
+import type { PaymentMethod } from "@magistrum/shared";
 import { request, searchParams } from "src/services/http.js";
 
 export type FinancePaymentSummary = {

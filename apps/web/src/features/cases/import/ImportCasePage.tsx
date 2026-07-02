@@ -2,7 +2,7 @@ import {
   caseFinanceSchema,
   type CaseFinanceInput,
   type PaymentMethod,
-} from "@jurisflow/shared";
+} from "@magistrum/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Search, Trash2 } from "lucide-react";
 import { Fragment, useMemo, useState, type FormEvent } from "react";

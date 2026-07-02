@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-JurisFlow needs a simple finance workflow that helps a criminal law office track agreed case fees, installments, overdue payments, received amounts, and operational dashboard metrics without introducing contract-level complexity too early.
+Magistrum needs a simple finance workflow that helps a criminal law office track agreed case fees, installments, overdue payments, received amounts, and operational dashboard metrics without introducing contract-level complexity too early.
 
 The office usually charges cases in installments, but clients can also pay the full amount at once or pay future installments early. Payments must be reliable enough to support case closing rules and dashboard totals.
 

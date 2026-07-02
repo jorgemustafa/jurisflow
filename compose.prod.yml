@@ -1,4 +1,4 @@
-name: jurisflow-prod
+name: magistrum-prod
 
 services:
   postgres:

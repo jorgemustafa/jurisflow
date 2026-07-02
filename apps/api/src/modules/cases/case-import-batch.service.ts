@@ -1,4 +1,4 @@
-import type { CaseFinanceInput } from "@jurisflow/shared";
+import type { CaseFinanceInput } from "@magistrum/shared";
 import { deriveCourtFromCnj } from "./cnj.js";
 import {
   DataJudCaseNotFoundError,
