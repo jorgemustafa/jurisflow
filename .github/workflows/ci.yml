@@ -28,7 +28,7 @@ jobs:
           - name: Build
             command: npm run build
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/magistrum?schema=public
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jurisflow?schema=public
       JWT_SECRET: ci-only-secret
 
     steps:
