@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-JurisFlow needs a simple way to organize client and case documents without turning document storage into a complex workflow too early.
+Magistrum needs a simple way to organize client and case documents without turning document storage into a complex workflow too early.
 
 Law offices need to quickly attach contracts, IDs, petitions, proofs, receipts, and other files to the right client or case. The first version should prioritize reliable metadata, clear ownership, and retrieval by client/case before adding advanced storage, preview, OCR, templates, or permissions.
 
@@ -58,7 +58,7 @@ The repository should only persist metadata. It should not know whether files ar
 For local development, store files under a configured local directory outside source code, for example:
 
 ```txt
-JURISFLOW_STORAGE_DIR=./storage
+MAGISTRUM_STORAGE_DIR=./storage
 ```
 
 Do not commit uploaded files.

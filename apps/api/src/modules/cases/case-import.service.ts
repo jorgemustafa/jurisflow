@@ -136,7 +136,7 @@ export function createCaseImportService(
   };
 }
 import { randomUUID } from "node:crypto";
-import type { CaseFinanceInput } from "@jurisflow/shared";
+import type { CaseFinanceInput } from "@magistrum/shared";
 import {
   buildCasePayments,
   type CreatePaymentData,

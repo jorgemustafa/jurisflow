@@ -46,7 +46,7 @@ export function LoginPage() {
             <span className="auth-brand-mark">
               <Scale size={24} />
             </span>
-            <strong>JurisFlow</strong>
+            <strong>Magistrum</strong>
           </div>
           <h2>Sua operação jurídica em um só lugar.</h2>
           <p>Organize processos, clientes, prazos e finanças com clareza e segurança.</p>
@@ -59,7 +59,7 @@ export function LoginPage() {
             <span className="auth-brand-mark">
               <Scale size={22} />
             </span>
-            <strong>JurisFlow</strong>
+            <strong>Magistrum</strong>
           </div>
 
           <header className="auth-header">

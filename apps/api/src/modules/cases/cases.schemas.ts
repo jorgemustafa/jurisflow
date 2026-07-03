@@ -1,4 +1,4 @@
-import { caseFinanceSchema } from "@jurisflow/shared";
+import { caseFinanceSchema } from "@magistrum/shared";
 import { z } from "zod";
 
 export const caseTypeSchema = z.enum(["judicial", "extrajudicial"]);

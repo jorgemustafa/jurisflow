@@ -1,4 +1,4 @@
-# JurisFlow Agent Instructions
+# Magistrum Agent Instructions
 
 Be direct, pragmatic, and concise. Keep the codebase small and clean. Avoid new patterns unless the project already has no suitable pattern.
 

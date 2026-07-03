@@ -40,21 +40,21 @@ Back up the database first:
 
 ```bash
 docker compose --env-file .env.prod -f compose.prod.yml exec -T postgres \
-  sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > jurisflow.backup
+  sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > magistrum.backup
 ```
 
 Generate new values with `openssl rand -hex 32`. Open `psql` as the current administrator:
 
 ```bash
 docker compose --env-file .env.prod -f compose.prod.yml exec postgres \
-  psql -U CURRENT_ADMIN_USER -d jurisflow
+  psql -U CURRENT_ADMIN_USER -d magistrum
 ```
 
 Use interactive password prompts so secrets do not enter shell history:
 
 ```text
-\password jurisflow_admin
-\password jurisflow_app
+\password magistrum_admin
+\password magistrum_app
 ```
 
 Update the matching values in `.env.prod`, validate, and recreate the services:

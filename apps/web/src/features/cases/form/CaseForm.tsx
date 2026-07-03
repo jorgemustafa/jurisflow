@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { caseFinanceSchema, type PaymentMethod } from "@jurisflow/shared";
+import { caseFinanceSchema, type PaymentMethod } from "@magistrum/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";

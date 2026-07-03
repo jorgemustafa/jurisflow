@@ -5,4 +5,3 @@ export const parseMoney = (value: string) => {
 };
 
 export const moneyInputValue = (cents: number) => (cents / 100).toFixed(2).replace(".", ",");
-

@@ -1,8 +1,8 @@
-# JurisFlow Product
+# Magistrum Product
 
 ## What Is This?
 
-JurisFlow is a law office management system built to replace operational spreadsheets with one central workspace for clients, legal cases, finance, documents, and daily office workflows.
+Magistrum is a law office management system built to replace operational spreadsheets with one central workspace for clients, legal cases, finance, documents, and daily office workflows.
 
 This first version should focus on clarity, data organization, and repeatable workflows before adding advanced automation.
 

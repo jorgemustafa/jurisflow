@@ -9,8 +9,8 @@ type Todo = {
   createdAt: string;
 };
 
-const storageKey = "jurisflow.todos";
-const collapsedKey = "jurisflow.todos.collapsed";
+const storageKey = "magistrum.todos";
+const collapsedKey = "magistrum.todos.collapsed";
 
 const loadTodos = (): Todo[] => {
   try {

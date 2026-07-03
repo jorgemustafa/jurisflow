@@ -10,7 +10,7 @@ function createUser(overrides: Partial<UserRecord> = {}): UserRecord {
   return {
     id: "user-1",
     name: "Dra. Ana",
-    email: "ana@jurisflow.test",
+    email: "ana@magistrum.test",
     passwordHash: null,
     role: "lawyer",
     status: "active",
@@ -44,9 +44,9 @@ describe("auth service", () => {
     const passwordHash = await hashPassword("password123");
     const service = createAuthService(createRepository(createUser({ passwordHash })), secret);
 
-    const result = await service.login({ email: "ana@jurisflow.test", password: "password123" });
+    const result = await service.login({ email: "ana@magistrum.test", password: "password123" });
 
-    expect(result.user).toMatchObject({ id: "user-1", email: "ana@jurisflow.test", role: "lawyer" });
+    expect(result.user).toMatchObject({ id: "user-1", email: "ana@magistrum.test", role: "lawyer" });
     expect("passwordHash" in result.user).toBe(false);
     expect(result.accessToken).toBeTruthy();
     expect(result.refreshToken).toBeTruthy();
@@ -56,7 +56,7 @@ describe("auth service", () => {
     const passwordHash = await hashPassword("password123");
     const service = createAuthService(createRepository(createUser({ passwordHash })), secret);
 
-    await expect(service.login({ email: "ana@jurisflow.test", password: "wrong-password" })).rejects.toBeInstanceOf(
+    await expect(service.login({ email: "ana@magistrum.test", password: "wrong-password" })).rejects.toBeInstanceOf(
       InvalidCredentialsError
     );
   });
@@ -65,7 +65,7 @@ describe("auth service", () => {
     const passwordHash = await hashPassword("password123");
     const service = createAuthService(createRepository(createUser({ passwordHash, status: "inactive" })), secret);
 
-    await expect(service.login({ email: "ana@jurisflow.test", password: "password123" })).rejects.toBeInstanceOf(
+    await expect(service.login({ email: "ana@magistrum.test", password: "password123" })).rejects.toBeInstanceOf(
       InvalidCredentialsError
     );
   });
@@ -102,7 +102,7 @@ describe("auth service", () => {
   it("does not generate password reset tokens for unknown emails", async () => {
     const service = createAuthService(createRepository(null), secret);
 
-    const result = await service.requestPasswordReset({ email: "missing@jurisflow.test" }, true);
+    const result = await service.requestPasswordReset({ email: "missing@magistrum.test" }, true);
 
     expect(result).toEqual({ message: "If the email exists, password reset instructions were generated." });
   });

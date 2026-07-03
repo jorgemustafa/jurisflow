@@ -1,5 +1,5 @@
 {
-  "name": "@jurisflow/api",
+  "name": "@magistrum/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
-    "@jurisflow/shared": "0.1.0",
+    "@magistrum/shared": "0.1.0",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "dotenv": "^17.4.2",

@@ -17,7 +17,7 @@ Frontend visible text should be in pt-BR. Backend code and API contracts should 
 | Finance | Financeiro | Area for receivables, payments, installments, overdue amounts, and dashboard metrics. |
 | Payment | Pagamento | Receivable or paid amount linked to a client and optionally to a case. |
 | Document | Documento | Uploaded or registered file linked to a client and optionally to a case. |
-| User | Usuário | Person using JurisFlow internally, such as lawyer or assistant. |
+| User | Usuário | Person using Magistrum internally, such as lawyer or assistant. |
 
 ## Status Terms
 

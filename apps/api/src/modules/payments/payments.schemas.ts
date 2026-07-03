@@ -1,4 +1,4 @@
-import { paymentMethodSchema, type PaymentMethod } from "@jurisflow/shared";
+import { paymentMethodSchema, type PaymentMethod } from "@magistrum/shared";
 import { z } from "zod";
 
 export const paymentStatusSchema = z.enum(["pending", "paid", "canceled"]);

@@ -1,4 +1,4 @@
-import type { ClientFormData, ClientStatus, ClientType } from "@jurisflow/shared";
+import type { ClientFormData, ClientStatus, ClientType } from "@magistrum/shared";
 import { request, searchParams } from "src/services/http.js";
 
 export type { ClientFormData, ClientStatus, ClientType };

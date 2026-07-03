@@ -7,7 +7,7 @@ import { prisma } from "../apps/api/src/shared/db/prisma.js";
 // active user. Notifications are tagged with the [DEMO] prefix so re-running
 // the script replaces the previous batch instead of piling up.
 
-const targetEmail = process.env.NOTIFY_USER_EMAIL ?? "demo.user.1@jurisflow.local";
+const targetEmail = process.env.NOTIFY_USER_EMAIL ?? "demo.user.1@magistrum.local";
 const DEMO_PREFIX = "[DEMO]";
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000);
