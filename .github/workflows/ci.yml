@@ -109,7 +109,9 @@ jobs:
           git fetch origin main
           git checkout main
           git merge --ff-only "$2"
-          npm run prod:config
+          docker run --rm --mount "type=bind,src=$PWD,dst=/app,readonly" -w /app node:22-alpine \
+            node scripts/validate-production-env.mjs .env.prod
+          docker compose --env-file .env.prod -f compose.prod.yml config --quiet
           docker compose --env-file .env.prod -f compose.prod.yml up -d --build --remove-orphans
           curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:8080/api/health
           curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:8080/

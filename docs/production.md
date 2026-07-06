@@ -14,7 +14,7 @@ Pushes to `main` deploy through the GitHub environment `oracle-vm`. Configure th
 | Secret | `ORACLE_VM_SSH_KEY` | Private SSH key accepted by the VM |
 | Secret | `ORACLE_VM_KNOWN_HOSTS` | Output of `ssh-keyscan -H <host>` verified against the VM host key |
 
-The deployment directory must already contain the repository and a valid `.env.prod`. The SSH user must be able to pull `main` and run Docker Compose without an interactive password.
+The deployment directory must already contain the repository and a valid `.env.prod`. The SSH user must be able to pull `main` and run Docker Compose without an interactive password. Node.js and npm are not required on the VM; environment validation runs through the Node Docker image.
 
 ## Request flow
 
