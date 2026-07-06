@@ -2,6 +2,20 @@
 
 Production uses `compose.prod.yml`, which is separate from the development Compose. It builds the API, serves the web build through Nginx, runs pending Prisma migrations before starting the API, and keeps PostgreSQL private inside the Compose network.
 
+## Automatic deployment
+
+Pushes to `main` deploy through the GitHub environment `oracle-vm`. Configure these environment values under **Settings > Environments > oracle-vm**:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| Variable | `ORACLE_VM_HOST` | VM public IP or DNS name |
+| Variable | `ORACLE_VM_USER` | SSH user, usually `ubuntu` |
+| Variable | `ORACLE_VM_DEPLOY_PATH` | Absolute repository path, for example `/home/ubuntu/jurisflow` |
+| Secret | `ORACLE_VM_SSH_KEY` | Private SSH key accepted by the VM |
+| Secret | `ORACLE_VM_KNOWN_HOSTS` | Output of `ssh-keyscan -H <host>` verified against the VM host key |
+
+The deployment directory must already contain the repository and a valid `.env.prod`. The SSH user must be able to pull `main` and run Docker Compose without an interactive password.
+
 ## Request flow
 
 ```mermaid
