@@ -15,6 +15,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<StoredAuth | null>(() => getStoredAuth());
+  const [ready, setReady] = useState(false);
 
   const saveSession = useCallback((nextSession: AuthSession) => {
     const stored = { accessToken: nextSession.accessToken, refreshToken: nextSession.refreshToken, user: nextSession.user };
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refresh,
       logout
     });
+    setReady(true);
   }, [logout, refresh]);
 
   const value = useMemo(
@@ -56,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [logout, refresh, saveSession, session]
   );
 
+  if (!ready) return null;
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

@@ -77,8 +77,8 @@ jobs:
       group: oracle-vm-deploy
       cancel-in-progress: false
     env:
-      ORACLE_VM_HOST: ${{ secrets.ORACLE_VM_HOST }}
-      ORACLE_VM_USER: ${{ secrets.ORACLE_VM_USER }}
+      ORACLE_VM_HOST: ${{ vars.ORACLE_VM_HOST }}
+      ORACLE_VM_USER: ${{ vars.ORACLE_VM_USER }}
       ORACLE_VM_SSH_KEY: ${{ secrets.ORACLE_VM_SSH_KEY }}
       ORACLE_VM_KNOWN_HOSTS: ${{ secrets.ORACLE_VM_KNOWN_HOSTS }}
       ORACLE_VM_DEPLOY_PATH: ${{ vars.ORACLE_VM_DEPLOY_PATH }}
@@ -86,11 +86,11 @@ jobs:
     steps:
       - name: Validate deploy configuration
         run: |
-          test -n "$ORACLE_VM_HOST"
-          test -n "$ORACLE_VM_USER"
-          test -n "$ORACLE_VM_SSH_KEY"
-          test -n "$ORACLE_VM_KNOWN_HOSTS"
-          test -n "$ORACLE_VM_DEPLOY_PATH"
+          : "${ORACLE_VM_HOST:?Set variable ORACLE_VM_HOST in the oracle-vm environment}"
+          : "${ORACLE_VM_USER:?Set variable ORACLE_VM_USER in the oracle-vm environment}"
+          : "${ORACLE_VM_SSH_KEY:?Set secret ORACLE_VM_SSH_KEY in the oracle-vm environment}"
+          : "${ORACLE_VM_KNOWN_HOSTS:?Set secret ORACLE_VM_KNOWN_HOSTS in the oracle-vm environment}"
+          : "${ORACLE_VM_DEPLOY_PATH:?Set variable ORACLE_VM_DEPLOY_PATH in the oracle-vm environment}"
 
       - name: Configure SSH
         run: |
@@ -109,8 +109,8 @@ jobs:
           git fetch origin main
           git checkout main
           git merge --ff-only "$2"
-          docker compose config --quiet
-          docker compose up -d --build --remove-orphans
-          curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:3333/health
-          curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:5173/
+          npm run prod:config
+          docker compose --env-file .env.prod -f compose.prod.yml up -d --build --remove-orphans
+          curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:8080/api/health
+          curl --fail --retry 10 --retry-delay 3 --retry-all-errors http://localhost:8080/
           DEPLOY

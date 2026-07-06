@@ -3,9 +3,16 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router";
 import { App } from "src/App.js";
+import { shouldRetryRequest } from "src/services/http.js";
 import "src/styles.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: shouldRetryRequest
+    }
+  }
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
