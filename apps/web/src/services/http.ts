@@ -1,11 +1,16 @@
 export class ApiError extends Error {
   fieldErrors: Record<string, string>;
+  status: number;
 
-  constructor(message: string, fieldErrors: Record<string, string> = {}) {
+  constructor(message: string, fieldErrors: Record<string, string> = {}, status = 0) {
     super(message);
     this.fieldErrors = fieldErrors;
+    this.status = status;
   }
 }
+
+export const shouldRetryRequest = (failureCount: number, error: unknown) =>
+  !(error instanceof ApiError && error.status === 401) && failureCount < 3;
 
 type ApiIssue = {
   code?: string;
@@ -105,10 +110,28 @@ let authHandlers: {
   refresh: () => Promise<string | null>;
   logout: () => void;
 } | null = null;
+let refreshPromise: Promise<string | null> | null = null;
 
 export function configureAuthHandlers(handlers: typeof authHandlers) {
   authHandlers = handlers;
 }
+
+const tokenExpiresSoon = (token: string) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))) as { exp?: number };
+    return Boolean(payload.exp && payload.exp <= Math.floor(Date.now() / 1000) + 30);
+  } catch {
+    return false;
+  }
+};
+
+const refreshAccessToken = () => {
+  if (!authHandlers) return Promise.resolve(null);
+  refreshPromise ??= authHandlers.refresh().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+};
 
 async function fetchApi(path: string, init?: AppRequestInit) {
   const token = init?.skipAuth ? null : authHandlers?.getAccessToken();
@@ -126,10 +149,18 @@ async function fetchApi(path: string, init?: AppRequestInit) {
 }
 
 export const request = async <T>(path: string, init?: AppRequestInit): Promise<T> => {
+  if (!init?.skipAuth && authHandlers) {
+    const token = authHandlers.getAccessToken();
+    if (token && tokenExpiresSoon(token) && !(await refreshAccessToken())) {
+      authHandlers.logout();
+      throw new ApiError(backendMessages["Invalid token"], {}, 401);
+    }
+  }
+
   let response = await fetchApi(path, init);
 
   if (response.status === 401 && !init?.skipAuth && !init?.skipRefresh && authHandlers) {
-    const token = await authHandlers.refresh();
+    const token = await refreshAccessToken();
     if (token) response = await fetchApi(path, { ...init, skipRefresh: true });
     else authHandlers.logout();
   }
@@ -150,7 +181,7 @@ export const request = async <T>(path: string, init?: AppRequestInit): Promise<T
     if (body?.field)
       fieldErrors[body.field] =
         backendMessages[body.message] ?? responseErrorMessage(response.status, body);
-    throw new ApiError(responseErrorMessage(response.status, body), fieldErrors);
+    throw new ApiError(responseErrorMessage(response.status, body), fieldErrors, response.status);
   }
 
   return response.json() as Promise<T>;

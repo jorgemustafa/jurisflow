@@ -187,6 +187,7 @@ Use TanStack Query for API reads and writes.
 - Mutations should update or invalidate affected queries.
 - Keep raw `fetch` usage inside `services/http.ts`.
 - Use `services/<domain>.ts` functions as the only place where feature code talks to the API.
+- Start authenticated queries only after auth handlers are ready. Refresh expiring tokens once per concurrent request group; never retry `401` through TanStack Query.
 
 ## Forms
 

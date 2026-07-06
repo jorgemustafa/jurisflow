@@ -2,6 +2,39 @@
 
 Production uses `compose.prod.yml`, which is separate from the development Compose. It builds the API, serves the web build through Nginx, runs pending Prisma migrations before starting the API, and keeps PostgreSQL private inside the Compose network.
 
+## Request flow
+
+```mermaid
+flowchart TD
+    browser["1. Browser requests https://magistrum.com.br"]
+    dns["2. DNS resolves magistrum.com.br<br/>to the Oracle VM public IP"]
+    firewall["3. Oracle network and VM firewall<br/>allow public ports 80 and 443"]
+    caddy["4. Caddy on the VM<br/>terminates TLS on :443<br/>and redirects :80 to HTTPS"]
+    loopback["5. Caddy reverse proxies over local HTTP<br/>to 127.0.0.1:8080"]
+    nginx["6. Nginx in the web container<br/>serves the React build"]
+    route{"7. Request path"}
+    spa["8a. Frontend route or asset<br/>Nginx returns HTML, JS, and CSS"]
+    apiProxy["8b. /api/*<br/>Nginx proxies inside Docker"]
+    api["9. Fastify API on api:3333<br/>validates auth and business rules"]
+    postgres["10. PostgreSQL on postgres:5432<br/>accepts only internal Docker traffic"]
+
+    browser --> dns --> firewall --> caddy --> loopback --> nginx --> route
+    route -->|"Frontend"| spa
+    route -->|"API"| apiProxy --> api --> postgres
+```
+
+Only Caddy is public. The web port is bound to the VM loopback interface, while the API and PostgreSQL expose no host ports:
+
+| Layer | Address | Exposure | Responsibility |
+| --- | --- | --- | --- |
+| DNS | `magistrum.com.br` | Public | Points the domain to the Oracle VM. |
+| Caddy | VM ports `80` and `443` | Public | Manages HTTPS certificates, redirects HTTP, and forwards requests. |
+| Web/Nginx | `127.0.0.1:8080` on the VM, container port `80` | VM only | Serves React and proxies `/api/*`. |
+| API | `api:3333` | Docker network only | Runs authentication and application rules. |
+| PostgreSQL | `postgres:5432` | Docker network only | Stores application data. |
+
+The Nginx system service on the VM must remain disabled because Caddy owns public ports `80` and `443`. Nginx is still used inside the `web` container.
+
 ## Security rules
 
 - Production deployment is blocked while `.env.prod` contains placeholders, database passwords shorter than 32 URL-safe characters, a JWT secret shorter than 64 characters, or a non-HTTPS application origin.
@@ -10,29 +43,6 @@ Production uses `compose.prod.yml`, which is separate from the development Compo
 - PostgreSQL has no published host port. Administrative access must use `docker compose exec` or an SSH tunnel.
 - TLS must terminate at the hosting provider or a reverse proxy in front of `WEB_PORT`. The included Nginx container only handles internal HTTP.
 - `.env.prod` is ignored by Git. Restrict it to the deployment user with `chmod 600 .env.prod` on Linux.
-
-## First deployment
-
-Copy the template and generate new secrets on the production server:
-
-```bash
-cp .env.prod.example .env.prod
-openssl rand -hex 32
-openssl rand -hex 32
-openssl rand -hex 32
-chmod 600 .env.prod
-```
-
-Use separate generated values for `POSTGRES_ADMIN_PASSWORD`, `POSTGRES_APP_PASSWORD`, and `JWT_SECRET`. Configure the real DataJud key and public HTTPS origin, then validate and start:
-
-```bash
-npm run prod:config
-npm run prod:up
-```
-
-Do not run `docker compose down -v`; `-v` deletes the database volume.
-
-The initialization script creates `POSTGRES_APP_USER` only when PostgreSQL initializes an empty volume. Changing `POSTGRES_*` values later does not modify roles in an existing database.
 
 ## Rotate credentials in an existing database
 
