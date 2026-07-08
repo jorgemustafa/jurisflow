@@ -50,6 +50,12 @@ const backendMessages: Record<string, string> = {
   "Case not found in DataJud": "Processo não encontrado no DataJud.",
   "DataJud request failed": "Falha ao consultar o DataJud.",
   "DATAJUD_API_KEY is not configured": "A integração com o DataJud não está configurada.",
+  "Document file is required": "Selecione um arquivo.",
+  "Document file is empty": "O arquivo está vazio.",
+  "Document file is too large": "O arquivo excede o limite permitido.",
+  "Unsupported document type": "Este tipo de arquivo não é permitido.",
+  "Document content does not match its type": "O conteúdo não corresponde ao tipo do arquivo.",
+  "Document not found": "Documento não encontrado.",
   "Import batch not found": "Lote de importação não encontrado.",
   "Import item not found": "Item de importação não encontrado.",
   "Import batch is not open": "O lote de importação não está aberto.",
@@ -136,11 +142,11 @@ const refreshAccessToken = () => {
 async function fetchApi(path: string, init?: AppRequestInit) {
   const token = init?.skipAuth ? null : authHandlers?.getAccessToken();
   const { skipAuth: _skipAuth, skipRefresh: _skipRefresh, ...fetchInit } = init ?? {};
-  const hasBody = fetchInit.body !== undefined && fetchInit.body !== null;
+  const hasJsonBody = fetchInit.body !== undefined && fetchInit.body !== null && !(fetchInit.body instanceof FormData);
 
   return fetch(`${API_URL}${path}`, {
     headers: {
-      ...(hasBody ? { "Content-Type": "application/json" } : {}),
+      ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...fetchInit.headers
     },
@@ -185,6 +191,17 @@ export const request = async <T>(path: string, init?: AppRequestInit): Promise<T
   }
 
   return response.json() as Promise<T>;
+};
+
+export const requestBlob = async (path: string): Promise<Blob> => {
+  let response = await fetchApi(path);
+  if (response.status === 401 && authHandlers) {
+    const token = await refreshAccessToken();
+    if (token) response = await fetchApi(path, { skipRefresh: true });
+    else authHandlers.logout();
+  }
+  if (!response.ok) throw new ApiError(responseErrorMessage(response.status, await response.json().catch(() => null)), {}, response.status);
+  return response.blob();
 };
 
 export const searchParams = (filters: Record<string, string>) => {

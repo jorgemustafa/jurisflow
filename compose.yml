@@ -6,7 +6,7 @@ services:
       context: .
       target: development
     container_name: magistrum-api
-    command: npm run dev:api
+    command: sh -c "npm run prisma:generate && npm run dev:api"
     environment:
       API_PORT: 3333
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-magistrum}?schema=public
@@ -15,11 +15,20 @@ services:
       WEB_ORIGIN: http://localhost:5173
       ENABLE_SYNC_SCHEDULER: ${ENABLE_SYNC_SCHEDULER:-true}
       SYNC_DAILY_TIME: ${SYNC_DAILY_TIME:-06:00}
+      OCI_AUTH_METHOD: config_file
+      OCI_CONFIG_FILE: /root/.oci/config
+      OCI_CONFIG_PROFILE: ${OCI_CONFIG_PROFILE:-DEFAULT}
+      OCI_REGION: ${OCI_REGION:?Set OCI_REGION in .env}
+      OCI_OBJECT_NAMESPACE: ${OCI_OBJECT_NAMESPACE:?Set OCI_OBJECT_NAMESPACE in .env}
+      OCI_OBJECT_BUCKET: ${OCI_OBJECT_BUCKET:?Set OCI_OBJECT_BUCKET in .env}
+      DOCUMENT_MAX_SIZE_BYTES: ${DOCUMENT_MAX_SIZE_BYTES:-26214400}
+      ENABLE_DOCUMENT_PURGE: ${ENABLE_DOCUMENT_PURGE:-true}
     ports:
       - "3333:3333"
     volumes:
       - .:/app
       - node-modules:/app/node_modules
+      - ./.oci:/root/.oci:ro
     depends_on:
       postgres:
         condition: service_healthy

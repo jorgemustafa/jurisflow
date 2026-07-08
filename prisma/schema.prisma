@@ -40,6 +40,7 @@ model User {
   timelineEvents CaseTimelineEvent[]
   syncRunsTriggered CaseSyncRun[]
   notifications Notification[]
+  documentsUploaded Document[] @relation("DocumentUploader")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
@@ -113,20 +114,30 @@ model Payment {
 }
 
 model Document {
-  id        String   @id @default(uuid())
-  clientId  String
-  caseId    String?
-  name      String
-  path      String
-  mimeType  String
-  client    Client   @relation(fields: [clientId], references: [id])
-  case      Case?    @relation(fields: [caseId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(uuid())
+  clientId         String
+  caseId           String?
+  uploadedByUserId String?
+  name             String
+  originalName     String
+  storageKey       String   @unique
+  mimeType         String
+  sizeBytes        Int
+  checksumSha256   String   @db.VarChar(64)
+  deletedAt        DateTime?
+  purgeAfter       DateTime?
+  client           Client   @relation(fields: [clientId], references: [id])
+  case             Case?    @relation(fields: [caseId], references: [id])
+  uploadedByUser   User?    @relation("DocumentUploader", fields: [uploadedByUserId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([clientId])
   @@index([caseId])
   @@index([mimeType])
+  @@index([deletedAt])
+  @@index([purgeAfter])
+  @@index([uploadedByUserId])
 }
 
 model CaseDeadline {

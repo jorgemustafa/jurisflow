@@ -1,12 +1,26 @@
 import { Link } from "react-router";
 import type { LegalDocument } from "src/services/documents.js";
+import { openDocument } from "src/services/documents.js";
+import { Download, Eye } from "lucide-react";
+import { useState } from "react";
+import { ApiError } from "src/services/http.js";
 import { formatDate } from "src/utils/format.js";
 
 export const DocumentLinksList = ({ documents }: { documents: LegalDocument[] }) => {
+  const [error, setError] = useState("");
   if (documents.length === 0) return <p className="empty">Nenhum documento vinculado.</p>;
 
+  const open = async (document: LegalDocument, download = false) => {
+    try {
+      setError("");
+      await openDocument(document, download);
+    } catch (failure) {
+      setError(failure instanceof ApiError ? failure.message : "Não foi possível abrir o documento.");
+    }
+  };
+
   return (
-    <div className="table-wrap">
+    <><div className="table-wrap">
       <table>
         <thead>
           <tr>
@@ -14,6 +28,7 @@ export const DocumentLinksList = ({ documents }: { documents: LegalDocument[] })
             <th>Processo</th>
             <th>Tipo</th>
             <th>Atualizado</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -31,10 +46,16 @@ export const DocumentLinksList = ({ documents }: { documents: LegalDocument[] })
               </td>
               <td>{document.mimeType}</td>
               <td>{formatDate(document.updatedAt)}</td>
+              <td className="table-actions">
+                <div className="table-action-group">
+                  {(document.mimeType === "application/pdf" || document.mimeType.startsWith("image/")) ? <button className="icon-button" title="Visualizar" onClick={() => void open(document)}><Eye size={17} /></button> : null}
+                  <button className="icon-button" title="Baixar" onClick={() => void open(document, true)}><Download size={17} /></button>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </div>{error ? <p className="alert">{error}</p> : null}</>
   );
 };

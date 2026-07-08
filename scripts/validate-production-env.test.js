@@ -10,6 +10,10 @@ const validEnv = {
   JWT_SECRET: "c".repeat(64),
   DATAJUD_API_KEY: "configured",
   APP_ORIGIN: "https://magistrum.com.br",
+  OCI_REGION: "sa-saopaulo-1",
+  OCI_OBJECT_NAMESPACE: "namespace",
+  OCI_OBJECT_BUCKET: "magistrum-documents",
+  DOCUMENT_MAX_SIZE_BYTES: "26214400",
 };
 
 describe("production environment", () => {
@@ -25,6 +29,7 @@ describe("production environment", () => {
       POSTGRES_APP_PASSWORD: "short",
       JWT_SECRET: "short",
       APP_ORIGIN: "http://magistrum.example.com/path",
+      DOCUMENT_MAX_SIZE_BYTES: "invalid",
     });
 
     expect(errors).toEqual(
@@ -34,6 +39,7 @@ describe("production environment", () => {
         "POSTGRES_ADMIN_USER and POSTGRES_APP_USER must be different",
         "JWT_SECRET must have at least 64 characters",
         "APP_ORIGIN must be a real HTTPS origin without a path",
+        "DOCUMENT_MAX_SIZE_BYTES must be a positive integer",
       ]),
     );
   });
