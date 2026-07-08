@@ -2,6 +2,8 @@
 
 Production uses `compose.prod.yml`, which is separate from the development Compose. It builds the API, serves the web build through Nginx, runs pending Prisma migrations before starting the API, and keeps PostgreSQL private inside the Compose network.
 
+Document storage setup: [Oracle Object Storage](./oracle-object-storage.md).
+
 ## Automatic deployment
 
 Pushes to `main` deploy through the GitHub environment `oracle-vm`. Configure these environment values under **Settings > Environments > oracle-vm**:

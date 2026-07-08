@@ -37,7 +37,7 @@ V1 should support uploading a file, listing documents by client, listing documen
 - Original file name should be stored when upload is implemented.
 - File size should be stored when upload is implemented.
 - Physical file storage should be hidden behind a storage service boundary.
-- Local filesystem storage is acceptable for development.
+- All environments use private OCI Object Storage; local development authenticates with an ignored OCI API-key config.
 - Production storage should be replaceable with object storage later.
 - Physical document deletion is out of scope for v1.
 - Versioning is out of scope for v1.

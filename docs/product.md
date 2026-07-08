@@ -71,9 +71,14 @@ Secondary users:
 
 - Store and organize documents by client and case.
 - Keep metadata such as name, type, upload date, and related entity.
-- Register document storage paths with validated metadata before binary storage is automated.
+- Register validated binary metadata while keeping content outside PostgreSQL.
 - Every document belongs to a client and can optionally belong to one case from that same client.
 - Start with a replaceable storage service boundary. Local storage is acceptable for development, and external object storage can be added later.
+- Store binaries only in private OCI Object Storage; local development uses OCI config-file credentials and production uses VM instance principal.
+- Allow PDF and image preview; other supported formats are downloaded.
+- Soft-deleted documents become unavailable immediately and their binaries are permanently removed after 30 days.
+- Accept PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, and PNG up to the configured size limit (25 MB by default).
+- Validate extension, MIME type, and file signature before storage.
 
 ## What Matters Most
 
