@@ -54,6 +54,10 @@ jobs:
     name: Docker
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      OCI_REGION: us-ashburn-1
+      OCI_OBJECT_NAMESPACE: ci
+      OCI_OBJECT_BUCKET: ci
     steps:
       - name: Checkout
         uses: actions/checkout@v4
