@@ -230,16 +230,6 @@ async function seed() {
     data: generatedPayments.map(writePayment),
   });
 
-  await prisma.document.createMany({
-    data: cases.map((item, index) => ({
-      clientId: item.clientId,
-      caseId: item.id,
-      name: `[DEMO] Documento ${index + 1}.pdf`,
-      path: `demo/client-${index + 1}/documento-${index + 1}.pdf`,
-      mimeType: "application/pdf",
-    })),
-  });
-
   await prisma.caseTimelineEvent.createMany({
     data: cases.flatMap((item, caseIndex) =>
       [0, 1, 2].map((eventIndex) => {

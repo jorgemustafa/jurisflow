@@ -11,6 +11,9 @@ const requiredKeys = [
   "JWT_SECRET",
   "DATAJUD_API_KEY",
   "APP_ORIGIN",
+  "OCI_REGION",
+  "OCI_OBJECT_NAMESPACE",
+  "OCI_OBJECT_BUCKET",
 ];
 
 export function parseEnv(content) {
@@ -41,6 +44,9 @@ export function validateProductionEnv(env) {
 
   if (env.JWT_SECRET && env.JWT_SECRET.length < 64)
     errors.push("JWT_SECRET must have at least 64 characters");
+
+  if (env.DOCUMENT_MAX_SIZE_BYTES && (!/^\d+$/.test(env.DOCUMENT_MAX_SIZE_BYTES) || Number(env.DOCUMENT_MAX_SIZE_BYTES) < 1))
+    errors.push("DOCUMENT_MAX_SIZE_BYTES must be a positive integer");
 
   for (const key of ["POSTGRES_DB", "POSTGRES_ADMIN_USER", "POSTGRES_APP_USER"]) {
     if (env[key] && !/^[a-z_][a-z0-9_]*$/.test(env[key]))

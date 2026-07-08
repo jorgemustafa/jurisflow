@@ -9,14 +9,20 @@ const emptyToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
 
 const optionalText = (max: number) => emptyToUndefined(z.string().trim().max(max));
 const optionalUuid = emptyToUndefined(z.string().uuid());
-const mimeType = z.string().trim().max(120).regex(/^[\w.+-]+\/[\w.+-]+$/, "Invalid MIME type");
+export const allowedDocumentMimeTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "image/jpeg",
+  "image/png"
+] as const;
 
 export const createDocumentSchema = z.object({
   clientId: z.string().uuid(),
   caseId: optionalUuid,
-  name: z.string().trim().min(2).max(255),
-  path: z.string().trim().min(2).max(1000),
-  mimeType
+  name: z.string().trim().min(2).max(255)
 });
 
 export const listDocumentsQuerySchema = z.object({

@@ -48,6 +48,12 @@ services:
       WEB_ORIGIN: ${APP_ORIGIN:?Set APP_ORIGIN in .env.prod}
       ENABLE_SYNC_SCHEDULER: ${ENABLE_SYNC_SCHEDULER:-true}
       SYNC_DAILY_TIME: ${SYNC_DAILY_TIME:-06:00}
+      OCI_AUTH_METHOD: instance_principal
+      OCI_REGION: ${OCI_REGION:?Set OCI_REGION in .env.prod}
+      OCI_OBJECT_NAMESPACE: ${OCI_OBJECT_NAMESPACE:?Set OCI_OBJECT_NAMESPACE in .env.prod}
+      OCI_OBJECT_BUCKET: ${OCI_OBJECT_BUCKET:?Set OCI_OBJECT_BUCKET in .env.prod}
+      DOCUMENT_MAX_SIZE_BYTES: ${DOCUMENT_MAX_SIZE_BYTES:-26214400}
+      ENABLE_DOCUMENT_PURGE: ${ENABLE_DOCUMENT_PURGE:-true}
     depends_on:
       migrate:
         condition: service_completed_successfully
