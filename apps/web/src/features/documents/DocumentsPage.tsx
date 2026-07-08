@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Upload } from "lucide-react";
+import { Download, Eye, Trash2, Upload } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { listCases } from "src/services/cases.js";
 import { listClients } from "src/services/clients.js";
-import { createDocument, listDocuments, type DocumentFilters, type DocumentFormData, type DocumentScope } from "src/services/documents.js";
+import { createDocument, deleteDocument, listDocuments, openDocument, type DocumentFilters, type DocumentFormData, type DocumentScope } from "src/services/documents.js";
 import { ApiError } from "src/services/http.js";
 import { formatDate } from "src/utils/format.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
@@ -14,8 +14,7 @@ const emptyForm: DocumentFormData = {
   clientId: "",
   caseId: "",
   name: "",
-  path: "",
-  mimeType: "application/pdf"
+  file: null
 };
 
 export const DocumentsPage = () => {
@@ -35,6 +34,7 @@ export const DocumentsPage = () => {
     mutationFn: (data: DocumentFormData) => createDocument(data),
     onSuccess: async () => {
       setForm(emptyForm);
+      setTab("list");
       setError("");
       await queryClient.invalidateQueries({ queryKey: ["documents"] });
     },
@@ -42,6 +42,20 @@ export const DocumentsPage = () => {
       setError(failure instanceof ApiError ? failure.message : "Não foi possível cadastrar o documento.");
     }
   });
+  const deleteMutation = useMutation({
+    mutationFn: deleteDocument,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["documents"] }),
+    onError: (failure) => setError(failure instanceof ApiError ? failure.message : "Não foi possível excluir o documento.")
+  });
+
+  const open = async (document: Parameters<typeof openDocument>[0], download = false) => {
+    try {
+      setError("");
+      await openDocument(document, download);
+    } catch (failure) {
+      setError(failure instanceof ApiError ? failure.message : "Não foi possível abrir o documento.");
+    }
+  };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -88,8 +102,12 @@ export const DocumentsPage = () => {
             ))}
           </select>
           <input placeholder="Nome do documento" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
-          <input placeholder="Caminho ou chave de armazenamento" value={form.path} onChange={(event) => setForm((current) => ({ ...current, path: event.target.value }))} />
-          <input placeholder="MIME type" value={form.mimeType} onChange={(event) => setForm((current) => ({ ...current, mimeType: event.target.value }))} />
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+            required
+            onChange={(event) => setForm((current) => ({ ...current, file: event.target.files?.[0] ?? null }))}
+          />
           <button className="button primary" disabled={createMutation.isPending}>
             <Upload size={18} />
             Cadastrar
@@ -125,6 +143,7 @@ export const DocumentsPage = () => {
                 <th>Processo</th>
                 <th>Tipo</th>
                 <th>Atualizado</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -147,12 +166,27 @@ export const DocumentsPage = () => {
                   </td>
                   <td>{document.mimeType}</td>
                   <td>{formatDate(document.updatedAt)}</td>
+                  <td className="table-actions">
+                    <div className="table-action-group">
+                      {(document.mimeType === "application/pdf" || document.mimeType.startsWith("image/")) ? (
+                        <button className="icon-button" title="Visualizar" onClick={() => void open(document)}><Eye size={17} /></button>
+                      ) : null}
+                      <button className="icon-button" title="Baixar" onClick={() => void open(document, true)}><Download size={17} /></button>
+                      <button
+                        className="icon-button"
+                        title="Excluir"
+                        disabled={deleteMutation.isPending}
+                        onClick={() => { if (window.confirm(`Excluir ${document.name}? O arquivo será removido permanentemente após 30 dias.`)) deleteMutation.mutate(document.id); }}
+                      ><Trash2 size={17} /></button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : null}</> : null}
+      {tab === "list" && error ? <p className="alert">{error}</p> : null}
     </>
   );
 };
