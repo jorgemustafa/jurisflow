@@ -19,9 +19,16 @@ type ClientsRepository = {
   list(filters: ClientListFilters): Promise<ClientRecord[]>;
   findById(id: string): Promise<ClientRecord | null>;
   findByDocument(document: string, excludeId?: string): Promise<ClientRecord | null>;
+  countLinks(id: string): Promise<ClientLinkCount[]>;
   create(data: CreateClientInput): Promise<ClientRecord>;
   update(id: string, data: UpdateClientInput): Promise<ClientRecord>;
   updateStatus(id: string, status: ClientStatus): Promise<ClientRecord>;
+  delete(id: string): Promise<void>;
+};
+
+export type ClientLinkCount = {
+  label: string;
+  count: number;
 };
 
 export class ClientNotFoundError extends Error {
@@ -39,6 +46,12 @@ export class ClientDocumentConflictError extends Error {
 export class ClientDocumentTypeError extends Error {
   constructor() {
     super("Document is invalid for client type");
+  }
+}
+
+export class ClientLinkedRecordsError extends Error {
+  constructor(readonly links: ClientLinkCount[]) {
+    super("Client has linked records");
   }
 }
 
@@ -86,6 +99,14 @@ export function createClientsService(repository: ClientsRepository) {
       const current = await repository.findById(id);
       if (!current) throw new ClientNotFoundError();
       return repository.updateStatus(id, status);
+    },
+
+    async delete(id: string) {
+      const current = await repository.findById(id);
+      if (!current) throw new ClientNotFoundError();
+      const links = (await repository.countLinks(id)).filter((link) => link.count > 0);
+      if (links.length) throw new ClientLinkedRecordsError(links);
+      await repository.delete(id);
     }
   };
 }

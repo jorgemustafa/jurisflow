@@ -1,10 +1,12 @@
 export class ApiError extends Error {
   fieldErrors: Record<string, string>;
+  linkedRecords: { label: string; count: number }[];
   status: number;
 
-  constructor(message: string, fieldErrors: Record<string, string> = {}, status = 0) {
+  constructor(message: string, fieldErrors: Record<string, string> = {}, status = 0, linkedRecords: { label: string; count: number }[] = []) {
     super(message);
     this.fieldErrors = fieldErrors;
+    this.linkedRecords = linkedRecords;
     this.status = status;
   }
 }
@@ -21,12 +23,19 @@ type ApiIssue = {
   validation?: string;
 };
 
+type ApiErrorBody = {
+  message?: string;
+  issues?: ApiIssue[];
+  linkedRecords?: { label: string; count: number }[];
+};
+
 const backendMessages: Record<string, string> = {
   "Invalid email or password": "Email ou senha inválidos.",
   "Invalid token": "Sua sessão expirou. Entre novamente.",
   "Client not found": "Cliente não encontrado.",
   "Client must be active": "O cliente precisa estar ativo.",
   "Client document already exists": "Já existe um cliente com este documento.",
+  "Client has linked records": "O cliente possui vínculos e não pode ser excluído.",
   "Document is invalid for client type": "O documento não é válido para o tipo de cliente.",
   "Case not found": "Processo não encontrado.",
   "Case must belong to the selected client": "O processo deve pertencer ao cliente selecionado.",
@@ -70,6 +79,9 @@ const backendMessages: Record<string, string> = {
 export const backendErrorMessage = (message: string | null, fallback: string) =>
   (message && backendMessages[message]) || fallback;
 
+const linkedRecordsMessage = (records: { label: string; count: number }[]) =>
+  records.map((record) => `${record.label} (${record.count})`).join(", ");
+
 export const issueMessage = (issue: ApiIssue) => {
   const translated = issue.message ? backendMessages[issue.message] : undefined;
   if (translated) return translated;
@@ -90,9 +102,11 @@ export const issueMessage = (issue: ApiIssue) => {
 
 export const responseErrorMessage = (
   status: number,
-  body: { message?: string; issues?: ApiIssue[] } | null,
+  body: ApiErrorBody | null,
 ) => {
   if (body?.issues?.length) return issueMessage(body.issues[0]);
+  if (body?.message === "Client has linked records" && body.linkedRecords?.length)
+    return `Este cliente não pode ser excluído. Vínculos: ${linkedRecordsMessage(body.linkedRecords)}.`;
   if (body?.message && backendMessages[body.message])
     return backendMessages[body.message];
   if (status >= 500) return "Ocorreu um erro interno. Tente novamente.";
@@ -187,7 +201,7 @@ export const request = async <T>(path: string, init?: AppRequestInit): Promise<T
     if (body?.field)
       fieldErrors[body.field] =
         backendMessages[body.message] ?? responseErrorMessage(response.status, body);
-    throw new ApiError(responseErrorMessage(response.status, body), fieldErrors, response.status);
+    throw new ApiError(responseErrorMessage(response.status, body), fieldErrors, response.status, body?.linkedRecords ?? []);
   }
 
   return response.json() as Promise<T>;

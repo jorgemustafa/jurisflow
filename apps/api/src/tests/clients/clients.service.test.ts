@@ -3,6 +3,7 @@ import type { ClientListFilters, ClientStatus, CreateClientInput, UpdateClientIn
 import {
   ClientDocumentConflictError,
   ClientDocumentTypeError,
+  ClientLinkedRecordsError,
   createClientsService,
   type ClientRecord
 } from "../../modules/clients/clients.service.js";
@@ -25,6 +26,14 @@ function createRepository(seed: ClientRecord[] = []) {
 
     async findByDocument(document: string, excludeId?: string) {
       return clients.find((client) => client.document === document && client.id !== excludeId) ?? null;
+    },
+
+    async countLinks(id: string) {
+      return [
+        { label: "processos", count: id === "client-linked" ? 1 : 0 },
+        { label: "pagamentos", count: 0 },
+        { label: "documentos", count: 0 }
+      ];
     },
 
     async create(data: CreateClientInput) {
@@ -58,6 +67,10 @@ function createRepository(seed: ClientRecord[] = []) {
       client.status = status;
       client.updatedAt = now;
       return client;
+    },
+
+    async delete(id: string) {
+      clients.splice(clients.findIndex((client) => client.id === id), 1);
     }
   };
 }
@@ -187,5 +200,52 @@ describe("clients service", () => {
 
     expect((await service.updateStatus("client-1", "inactive")).status).toBe("inactive");
     expect((await service.updateStatus("client-1", "active")).status).toBe("active");
+  });
+
+  it("blocks deleting clients with linked records", async () => {
+    const repository = createRepository([
+      {
+        id: "client-linked",
+        type: "individual",
+        status: "active",
+        name: "Cliente",
+        document: null,
+        email: null,
+        phone: null,
+        address: null,
+        notes: null,
+        createdAt: now,
+        updatedAt: now
+      }
+    ]);
+    const service = createClientsService(repository);
+
+    await expect(service.delete("client-linked")).rejects.toMatchObject({
+      links: [{ label: "processos", count: 1 }]
+    });
+    await expect(service.delete("client-linked")).rejects.toBeInstanceOf(ClientLinkedRecordsError);
+  });
+
+  it("deletes clients without linked records", async () => {
+    const repository = createRepository([
+      {
+        id: "client-1",
+        type: "individual",
+        status: "active",
+        name: "Cliente",
+        document: null,
+        email: null,
+        phone: null,
+        address: null,
+        notes: null,
+        createdAt: now,
+        updatedAt: now
+      }
+    ]);
+    const service = createClientsService(repository);
+
+    await service.delete("client-1");
+
+    expect(repository.clients).toHaveLength(0);
   });
 });
