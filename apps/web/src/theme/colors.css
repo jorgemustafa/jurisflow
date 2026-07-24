@@ -1,0 +1,79 @@
+:root {
+  --color-white: #ffffff;
+  --color-background: #f5f7fa;
+  --color-background-soft: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f4f6f8;
+  --color-surface-active: #f3f6fa;
+  --color-surface-muted: #edf1f5;
+  --color-surface-muted-strong: #e4e9ef;
+  --color-surface-muted-gradient: #e8edf2;
+  --color-surface-muted-gradient-light: #f5f7f9;
+
+  --color-foreground: #142033;
+  --color-text-strong: #1f2933;
+  --color-text: #52616f;
+  --color-text-muted: #62748a;
+  --color-text-subtle: #6b7785;
+  --color-text-disabled: #8a96a3;
+  --color-text-inverse: #ffffff;
+
+  --color-border: #dde3ea;
+  --color-border-strong: #cad3dd;
+  --color-border-soft: #edf1f5;
+  --color-border-muted: #dfe4eb;
+  --color-input: #cad3dd;
+  --color-ring: #c9962f;
+
+  --color-primary-950: #071a35;
+  --color-primary-900: #0b2747;
+  --color-primary-850: #0b2c4d;
+  --color-primary-800: #123a63;
+  --color-primary-700: #1b4b78;
+  --color-primary-650: #21405d;
+  --color-primary-border: #36516d;
+  --color-primary-muted: #b8c6d5;
+  --color-primary-soft: #cbd7e3;
+  --color-primary-inverse: #dce5ef;
+
+  --color-accent-500: #c9962f;
+  --color-accent-400: #ddb65c;
+  --color-accent-100: #fbf4e5;
+  --color-accent-dark: #9b711c;
+
+  --color-success: #0f5f3e;
+  --color-success-chart: #56a521;
+  --color-success-bg: #dff3e8;
+  --color-warning: #854d0e;
+  --color-warning-strong: #b54708;
+  --color-warning-chart: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #b42318;
+  --color-danger-dark: #991b1b;
+  --color-danger-bg: #fee2e2;
+  --color-danger-soft: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-orange: #7c2d12;
+  --color-orange-chart: #9a3412;
+  --color-orange-bg: #ffedd5;
+  --color-info: #1e3a8a;
+  --color-info-chart: #1321e7;
+  --color-info-bg: #dbeafe;
+  --color-purple-chart: #7c3aed;
+  --color-alert: #ef4444;
+  --color-lime-chart: #c7c419;
+  --color-disabled: #9aa6b2;
+
+  --shadow-primary-rgb: 7 26 53;
+  --shadow-popover-rgb: 19 34 53;
+  --ring-accent-rgb: 201 150 47;
+  --white-rgb: 255 255 255;
+  --white-rgb: 255 255 255;
+
+  --navy-950: var(--color-primary-950);
+  --navy-800: var(--color-primary-800);
+  --navy-700: var(--color-primary-700);
+  --gold-500: var(--color-accent-500);
+  --gold-400: var(--color-accent-400);
+  --gold-100: var(--color-accent-100);
+}
