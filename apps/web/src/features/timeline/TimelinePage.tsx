@@ -23,10 +23,12 @@ export const TimelinePage = () => {
 
   return (
     <>
-      <header className="page-header">
-        <span>Andamentos</span>
-        <h1>Linha do tempo</h1>
-        <p>Acompanhe os últimos registros dos processos em um só lugar.</p>
+      <header className="page-header row-header">
+        <div>
+          <span>Andamentos</span>
+          <h1>Linha do tempo</h1>
+          <p>Acompanhe os últimos registros dos processos em um só lugar.</p>
+        </div>
       </header>
 
       <section className="toolbar timeline-toolbar">

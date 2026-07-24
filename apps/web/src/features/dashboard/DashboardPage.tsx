@@ -12,6 +12,17 @@ import { DashboardDonutChart } from "src/features/dashboard/DashboardDonutChart.
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { MonthPicker } from "src/components/ui/MonthPicker.js";
 
+const chartColors = {
+  active: "var(--color-success-chart)",
+  open: "var(--color-info-chart)",
+  overdue: "var(--color-danger)",
+  paused: "var(--color-lime-chart)",
+  closed: "var(--color-primary-800)",
+  inactive: "var(--color-orange-chart)",
+  extrajudicial: "var(--color-purple-chart)",
+  deadline: "var(--color-warning-chart)"
+} as const;
+
 const percent = (value: number, total: number) => (total > 0 ? `${Math.round((value / total) * 100)}%` : "0%");
 
 export const DashboardPage = () => {
@@ -44,8 +55,6 @@ export const DashboardPage = () => {
 
   const financialTotal =
     (finance.data?.monthPaidCents ?? 0) + (finance.data?.monthOpenCents ?? 0) + (finance.data?.monthOverdueCents ?? 0);
-  const overdueCount = finance.data?.overduePayments.length ?? 0;
-  const upcomingCount = finance.data?.upcomingPayments.length ?? 0;
   const deadlineAlerts = deadlines.data?.filter((item) => item.alertLevel !== "none").length ?? 0;
 
   return (
@@ -80,19 +89,19 @@ export const DashboardPage = () => {
                 {
                   label: "Recebidas",
                   value: finance.data?.monthPaidCents ?? 0,
-                  color: "#0f766e",
+                  color: chartColors.active,
                   detail: percent(finance.data?.monthPaidCents ?? 0, financialTotal)
                 },
                 {
                   label: "A vencer",
                   value: finance.data?.monthOpenCents ?? 0,
-                  color: "#2563eb",
+                  color: chartColors.open,
                   detail: percent(finance.data?.monthOpenCents ?? 0, financialTotal)
                 },
                 {
                   label: "Em atraso",
                   value: finance.data?.monthOverdueCents ?? 0,
-                  color: "#b42318",
+                  color: chartColors.overdue,
                   detail: percent(finance.data?.monthOverdueCents ?? 0, financialTotal)
                 }
               ]}
@@ -100,21 +109,20 @@ export const DashboardPage = () => {
             <DashboardBarChart
               title="Processos por status"
               bars={[
-                { label: "Ativos", value: activeCases, color: "#0f766e" },
-                { label: "Pausados", value: onHoldCases, color: "#d97706" },
-                { label: "Encerrados", value: closedCases, color: "#2563eb" },
-                { label: "Cancelados", value: canceledCases, color: "#b42318" }
+                { label: "Ativos", value: activeCases, color: chartColors.active },
+                { label: "Pausados", value: onHoldCases, color: chartColors.paused },
+                { label: "Encerrados", value: closedCases, color: chartColors.closed },
+                { label: "Cancelados", value: canceledCases, color: chartColors.overdue }
               ]}
             />
             <DashboardBarChart
               title="Carteira operacional"
               bars={[
-                { label: "Clientes ativos", value: activeClients, color: "#0f766e" },
-                { label: "Clientes inativos", value: inactiveClients, color: "#9a3412" },
-                { label: "Judiciais", value: judicialCases, color: "#2563eb" },
-                { label: "Extrajudiciais", value: extrajudicialCases, color: "#7c3aed" },
-                { label: "Financeiro", value: upcomingCount + overdueCount, color: "#64748b" },
-                { label: "Prazos", value: deadlineAlerts, color: "#b42318" }
+                { label: "Clientes ativos", value: activeClients, color: chartColors.active },
+                { label: "Clientes inativos", value: inactiveClients, color: chartColors.inactive },
+                { label: "Judiciais", value: judicialCases, color: chartColors.closed },
+                { label: "Extrajudiciais", value: extrajudicialCases, color: chartColors.extrajudicial },
+                { label: "Prazos", value: deadlineAlerts, color: chartColors.deadline }
               ]}
             />
           </section>
