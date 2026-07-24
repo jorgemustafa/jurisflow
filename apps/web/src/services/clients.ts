@@ -36,3 +36,7 @@ export const updateClient = (id: string, data: ClientFormData) => {
 export const updateClientStatus = (id: string, status: ClientStatus) => {
   return request<Client>(`/clients/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
 };
+
+export const deleteClient = (id: string) => {
+  return request<void>(`/clients/${id}`, { method: "DELETE" });
+};

@@ -13,6 +13,7 @@ import {
 import {
   ClientDocumentConflictError,
   ClientDocumentTypeError,
+  ClientLinkedRecordsError,
   ClientNotFoundError,
   createClientsService
 } from "./clients.service.js";
@@ -38,6 +39,10 @@ function handleClientError(error: unknown, reply: FastifyReply) {
 
   if (error instanceof ClientDocumentTypeError) {
     return reply.code(400).send({ message: error.message, field: "document" });
+  }
+
+  if (error instanceof ClientLinkedRecordsError) {
+    return reply.code(409).send({ message: error.message, linkedRecords: error.links });
   }
 
   throw error;
@@ -89,6 +94,16 @@ export async function clientsRoutes(app: FastifyInstance) {
       const { id } = parseParams(request.params);
       const { status } = parseBody(updateClientStatusSchema, request.body);
       return await clientsService.updateStatus(id, status);
+    } catch (error) {
+      return handleClientError(error, reply);
+    }
+  });
+
+  app.delete("/:id", async (request, reply) => {
+    try {
+      const { id } = parseParams(request.params);
+      await clientsService.delete(id);
+      return reply.code(204).send();
     } catch (error) {
       return handleClientError(error, reply);
     }

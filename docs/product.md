@@ -37,8 +37,9 @@ Secondary users:
 - Store optional document, contact, free-text address, and notes.
 - Validate CPF/CNPJ, email, and Brazilian phone when provided.
 - Save CPF/CNPJ and phone numbers normalized as digits only.
-- Keep clients active or inactive instead of physically deleting them.
+- Use active/inactive for normal lifecycle changes.
 - Link clients to cases, payments, and documents.
+- Deleting a client is allowed only when it has no linked cases, payments, documents, or import items; otherwise the UI must show the blocking links.
 - Client is up to date with payment?
 
 ### Cases
@@ -57,6 +58,7 @@ Secondary users:
 - Link documents, financial records, and client history.
 - A client can have multiple cases, but one case is linked to only one client
 - A case has statuses: resolved, in process, cancelled, etc
+- Deleting a case is permanent and removes its linked payments, documents, deadlines, timeline events, sync runs, and notifications after explicit `DELETAR` confirmation.
 
 ### Finance
 

@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, RefreshCw } from "lucide-react";
+import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import {
   createCaseTimelineEvent,
+  deleteCase,
   getCase,
   listCaseSyncRuns,
   listCaseTimeline,
@@ -11,6 +12,7 @@ import {
   type CaseTimelineEventFormData,
   type CaseTimelineEventType
 } from "src/services/cases.js";
+import { getClient } from "src/services/clients.js";
 import { ApiError, backendErrorMessage } from "src/services/http.js";
 import { fieldValue, formatDate, formatMoney } from "src/utils/format.js";
 import { labelCaseStage, labelCaseStatus, labelCaseType, labelLegalArea, labelTimelineType } from "src/features/cases/utils/caseLabels.js";
@@ -23,6 +25,7 @@ import { listDocuments } from "src/services/documents.js";
 import { createDeadline, listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { Tabs } from "src/components/ui/Tabs.js";
+import { DeleteConfirmationDialog } from "src/components/DeleteConfirmationDialog.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
 const optionalMoney = (value: number | null) => (value === null ? "Não informado" : formatMoney(value));
@@ -45,14 +48,19 @@ const emptyDeadlineForm = (): DeadlineFormData => ({
 
 export const CaseDetailsPage = () => {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<"details" | "payments" | "documents" | "deadlines" | "sync" | "timeline">("details");
   const [timelineForm, setTimelineForm] = useState<CaseTimelineEventFormData>(emptyTimelineForm);
   const [deadlineForm, setDeadlineForm] = useState<DeadlineFormData>(emptyDeadlineForm);
   const [timelineError, setTimelineError] = useState("");
   const [deadlineError, setDeadlineError] = useState("");
+  const [deleteText, setDeleteText] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const queryClient = useQueryClient();
   const legalCase = useQuery({ queryKey: ["case", id], queryFn: () => getCase(id), enabled: Boolean(id) });
+  const client = useQuery({ queryKey: ["client", legalCase.data?.clientId], queryFn: () => getClient(legalCase.data!.clientId), enabled: Boolean(legalCase.data?.clientId) });
   const timeline = useQuery({ queryKey: ["case-timeline", id], queryFn: () => listCaseTimeline(id), enabled: Boolean(id) });
   const syncRuns = useQuery({ queryKey: ["case-sync-runs", id], queryFn: () => listCaseSyncRuns(id), enabled: Boolean(id) });
   const documents = useQuery({ queryKey: ["documents", "case", id], queryFn: () => listDocuments({ caseId: id }), enabled: Boolean(id) });
@@ -131,6 +139,23 @@ export const CaseDetailsPage = () => {
       setDeadlineError(failure instanceof ApiError ? failure.message : "Não foi possível atualizar o prazo.");
     }
   });
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteCase(id),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cases"] }),
+        queryClient.invalidateQueries({ queryKey: ["documents"] }),
+        queryClient.invalidateQueries({ queryKey: ["deadlines"] }),
+        queryClient.invalidateQueries({ queryKey: ["payments"] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] })
+      ]);
+      navigate("/cases");
+    },
+    onError: (failure) => {
+      setDeleteError(failure instanceof ApiError ? failure.message : "Não foi possível excluir o processo.");
+    }
+  });
 
   if (legalCase.isLoading) return <LoadingState label="Carregando processo" />;
   if (legalCase.isError || !legalCase.data) return <p className="alert">Processo não encontrado.</p>;
@@ -166,6 +191,10 @@ export const CaseDetailsPage = () => {
           <Link className="button primary" to={`/clients/${item.clientId}`}>
             Ver cliente
           </Link>
+          <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
+            <Trash2 size={18} />
+            Excluir
+          </button>
           <Link className="button primary" to={`/cases/${item.id}/edit`}>
             <Pencil size={18} />
             Editar
@@ -339,6 +368,26 @@ export const CaseDetailsPage = () => {
           </div>
         ) : null}
       </section> : null}
+
+      {isDeleteOpen ? (
+        <DeleteConfirmationDialog
+          title="Excluir processo"
+          confirmText="DELETAR"
+          value={deleteText}
+          error={deleteError}
+          isDeleting={deleteMutation.isPending}
+          onChange={setDeleteText}
+          onCancel={() => setDeleteOpen(false)}
+          onConfirm={() => deleteMutation.mutate()}
+        >
+          <p>Esta ação exclui permanentemente o processo e tudo que estiver vinculado a ele.</p>
+          <p><strong>Processo:</strong> {item.title}</p>
+          <p><strong>Cliente:</strong> {client.data?.name ?? item.clientId}</p>
+          <p><strong>CNJ:</strong> {fieldValue(item.cnjNumber)}</p>
+          <p><strong>Honorários:</strong> {formatMoney(item.totalFeeAmountCents)}</p>
+          <p>Serão removidos pagamentos, documentos, prazos, andamentos, sincronizações e notificações do processo.</p>
+        </DeleteConfirmationDialog>
+      ) : null}
     </>
   );
 };

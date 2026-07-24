@@ -90,6 +90,9 @@ function createRepository(
     async hasPendingFinance(_caseId: string) {
       return options.pendingFinance ?? false;
     },
+    async listDocumentStorageKeys(_caseId: string) {
+      return [];
+    },
     async create(
       data: CreateCaseRecordData,
       createdPayments: CreatePaymentData[],
@@ -116,6 +119,9 @@ function createRepository(
       if (!item) throw new Error("test setup error");
       Object.assign(item, data, { updatedAt: now });
       return item;
+    },
+    async delete(id: string) {
+      cases.splice(cases.findIndex((item) => item.id === id), 1);
     },
     seed(item: CaseRecord) {
       cases.push(item);
@@ -206,5 +212,32 @@ describe("cases service", () => {
         clientId: "22222222-2222-4222-8222-222222222222",
       }),
     ).rejects.toBeInstanceOf(CaseClientError);
+  });
+
+  it("deletes an existing case", async () => {
+    const repository = createRepository();
+    repository.seed(caseRecord());
+    const service = createCasesService(repository);
+
+    await service.delete("case-1");
+
+    expect(await repository.findById("case-1")).toBeNull();
+  });
+
+  it("deletes case document binaries before deleting the case", async () => {
+    const repository = { ...createRepository(), listDocumentStorageKeys: async () => ["client-1/file.pdf"] };
+    repository.seed(caseRecord());
+    const deletedKeys: string[] = [];
+    const service = createCasesService(repository, {
+      documentStorage: {
+        put: async () => undefined,
+        get: async () => ({ body: Buffer.from("") }),
+        delete: async (key) => { deletedKeys.push(key); },
+      },
+    });
+
+    await service.delete("case-1");
+
+    expect(deletedKeys).toEqual(["client-1/file.pdf"]);
   });
 });
