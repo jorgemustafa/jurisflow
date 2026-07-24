@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, LogIn, Scale } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate, useLocation, useNavigate } from "react-router";
@@ -43,10 +43,7 @@ export function LoginPage() {
       <section className="auth-showcase" aria-hidden="true">
         <div className="auth-showcase-content">
           <div className="auth-brand">
-            <span className="auth-brand-mark">
-              <Scale size={24} />
-            </span>
-            <strong>Magistrum</strong>
+            <img src="/brand/logomarca.png" alt="Magistrum" />
           </div>
           <h2>Sua operação jurídica em um só lugar.</h2>
           <p>Organize processos, clientes, prazos e finanças com clareza e segurança.</p>
@@ -56,10 +53,7 @@ export function LoginPage() {
       <section className="auth-panel">
         <div className="auth-card">
           <div className="auth-brand auth-brand-mobile">
-            <span className="auth-brand-mark">
-              <Scale size={22} />
-            </span>
-            <strong>Magistrum</strong>
+            <img src="/brand/logomarca.png" alt="Magistrum" />
           </div>
 
           <header className="auth-header">

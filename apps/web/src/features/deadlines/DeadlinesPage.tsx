@@ -39,10 +39,12 @@ export const DeadlinesPage = () => {
 
   return (
     <>
-      <header className="page-header">
-        <span>Prazos</span>
-        <h1>Alertas de prazo</h1>
-        <p>Acompanhe prazos pendentes, atrasados e próximos do vencimento.</p>
+      <header className="page-header row-header">
+        <div>
+          <span>Prazos</span>
+          <h1>Alertas de prazo</h1>
+          <p>Acompanhe prazos pendentes, atrasados e próximos do vencimento.</p>
+        </div>
       </header>
 
       <section className="toolbar deadlines-toolbar">

@@ -22,7 +22,7 @@ export const DashboardDonutChart = ({ title, totalLabel, segments }: DashboardDo
           return `${segment.color} ${start}% ${cursor}%`;
         })
         .join(", ")
-    : "#edf1f5 0% 100%";
+    : "var(--color-surface-muted) 0% 100%";
 
   return (
     <section className="chart-panel">

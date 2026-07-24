@@ -1,5 +1,7 @@
 import animate from "tailwindcss-animate";
 
+const withOpacity = (variable) => `rgb(var(${variable}) / <alpha-value>)`;
+
 /** @type {import("tailwindcss").Config} */
 export default {
   darkMode: ["class"],
@@ -12,22 +14,24 @@ export default {
         sm: "4px"
       },
       colors: {
-        border: "#cad3dd",
-        input: "#cad3dd",
-        ring: "#0f766e",
-        background: "#f4f6f8",
-        foreground: "#1f2933",
+        white: "var(--color-white)",
+        border: "var(--color-border)",
+        input: "var(--color-input)",
+        ring: withOpacity("--ring-accent-rgb"),
+        background: "var(--color-background)",
+        foreground: "var(--color-foreground)",
         primary: {
-          DEFAULT: "#0f766e",
-          foreground: "#ffffff"
+          DEFAULT: "var(--color-primary-800)",
+          foreground: "var(--color-text-inverse)",
+          hover: "var(--color-primary-850)"
         },
         destructive: {
-          DEFAULT: "#b42318",
-          foreground: "#ffffff"
+          DEFAULT: "var(--color-danger)",
+          foreground: "var(--color-text-inverse)"
         },
         muted: {
-          DEFAULT: "#eef3f7",
-          foreground: "#52616f"
+          DEFAULT: "var(--color-surface-muted)",
+          foreground: "var(--color-text)"
         }
       }
     }

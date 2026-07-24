@@ -21,7 +21,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <aside className="sidebar" aria-label="Navegação principal">
         <div className="sidebar-top">
           <div className="sidebar-brand">
-            <strong>Magistrum</strong>
+            <img src="/brand/logomarca.png" alt="Magistrum" />
             <span>{auth.session?.user.name}</span>
           </div>
           <button
