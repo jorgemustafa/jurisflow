@@ -130,9 +130,14 @@ Approved for Client Management v1.
 | `status`    | `ClientStatus` | yes      | Defaults to `ACTIVE`.                                                    |
 | `name`      | string         | yes      | Full name for individuals; company/legal name for companies.             |
 | `document`  | string         | no       | CPF/CNPJ, digits only, unique when present, max 14 chars.                |
+| `rg`        | string         | no       | Brazilian RG or local identity value, free text, max 20 chars.           |
 | `email`     | string         | no       | Valid email when present, saved trimmed and lowercase, not unique.       |
 | `phone`     | string         | no       | Brazilian phone, digits only, 10 or 11 digits, not unique, max 11 chars. |
-| `address`   | string         | no       | Free text in v1.                                                         |
+| `address`   | string         | no       | Legacy free text, used as complement/bairro with structured address fields. |
+| `street`    | string         | no       | Street address block.                                                    |
+| `city`      | string         | no       | City name, max 120 chars.                                                |
+| `state`     | string         | no       | Brazilian UF, uppercase, 2 chars.                                        |
+| `zipCode`   | string         | no       | CEP, digits only, 8 chars.                                               |
 | `notes`     | string         | no       | Free text in v1.                                                         |
 | `createdAt` | datetime       | yes      | System managed.                                                          |
 | `updatedAt` | datetime       | yes      | System managed.                                                          |
@@ -148,6 +153,8 @@ Approved for Client Management v1.
 
 - CPF must be valid when `type` is `INDIVIDUAL` and `document` is present.
 - CNPJ must be valid when `type` is `COMPANY` and `document` is present.
+- RG, street, city, state, and CEP are optional.
+- CEP must have 8 digits when present. The frontend may use ViaCEP to prefill street, city, state, and complement/bairro, but saving does not depend on the external service.
 - Type can change only if the existing document remains valid for the new type or the document is removed/changed.
 - Duplicate names are allowed.
 - Inactive clients are excluded from default listing but remain viewable and editable.

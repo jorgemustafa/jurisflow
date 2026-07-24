@@ -2,13 +2,15 @@ import { describe, expect, it } from "vitest";
 import { createClientSchema, listClientsQuerySchema, updateClientSchema } from "../../modules/clients/clients.schemas.js";
 
 describe("client schemas", () => {
-  it("normalizes CPF, email, and phone", () => {
+  it("normalizes CPF, email, phone, state, and CEP", () => {
     const client = createClientSchema.parse({
       type: "individual",
       name: " Maria Silva ",
       document: "529.982.247-25",
       email: " MARIA@EMAIL.COM ",
-      phone: "(11) 99999-9999"
+      phone: "(11) 99999-9999",
+      state: "sp",
+      zipCode: "01001-000"
     });
 
     expect(client).toMatchObject({
@@ -16,7 +18,9 @@ describe("client schemas", () => {
       name: "Maria Silva",
       document: "52998224725",
       email: "maria@email.com",
-      phone: "11999999999"
+      phone: "11999999999",
+      state: "SP",
+      zipCode: "01001000"
     });
   });
 
@@ -65,7 +69,12 @@ describe("client schemas", () => {
       document: "",
       email: null,
       phone: "",
+      rg: "",
       address: "",
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
       notes: ""
     });
 
@@ -73,7 +82,12 @@ describe("client schemas", () => {
       document: null,
       email: null,
       phone: null,
+      rg: null,
       address: null,
+      street: null,
+      city: null,
+      state: null,
+      zipCode: null,
       notes: null
     });
   });

@@ -202,8 +202,8 @@ export const CaseDetailsPage = () => {
         <ClientDetailItem label="Honorários totais" value={optionalMoney(item.totalFeeAmountCents)} />
         <ClientDetailItem label="Abertura" value={optionalDate(item.openedAt)} />
         <ClientDetailItem label="Encerramento" value={optionalDate(item.closedAt)} />
-        <ClientDetailItem label="Cliente" value={item.clientId} />
-        <ClientDetailItem label="Responsável" value={fieldValue(item.responsibleUserId)} />
+        <ClientDetailItem label="Cliente" value={item.clientName ?? item.clientId} />
+        <ClientDetailItem label="Responsável" value={fieldValue(item.responsibleUserName ?? item.responsibleUserId)} />
         <ClientDetailItem label="Criado em" value={formatDate(item.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(item.updatedAt)} />
       </section> : null}

@@ -16,7 +16,9 @@ import type {
 export type CaseRecord = {
   id: string;
   clientId: string;
+  clientName: string | null;
   responsibleUserId: string | null;
+  responsibleUserName: string | null;
   caseType: CaseType;
   title: string;
   cnjNumber: string | null;

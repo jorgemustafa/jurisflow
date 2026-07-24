@@ -6,7 +6,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Search, Trash2 } from "lucide-react";
 import { Fragment, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import {
   confirmCaseImportBatch,
   createCaseImportBatch,
@@ -74,6 +74,8 @@ const statusBadges: Record<CaseImportItemStatus, string> = {
 };
 
 export const ImportCasePage = () => {
+  const [searchParams] = useSearchParams();
+  const selectedClientId = searchParams.get("clientId") ?? "";
   const [input, setInput] = useState("");
   const [batchId, setBatchId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -96,17 +98,28 @@ export const ImportCasePage = () => {
   const setBatchData = (data: CaseImportBatch) => {
     queryClient.setQueryData(["case-import-batch", data.id], data);
   };
+  const selectedClientName = clients.data?.find((client) => client.id === selectedClientId)?.name;
 
   const failureMessage = (failure: unknown, fallback: string) =>
     failure instanceof ApiError ? failure.message : fallback;
 
   const createMutation = useMutation({
     mutationFn: () => createCaseImportBatch(cnjNumbers),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setError("");
       setSummary(null);
-      setBatchData(data);
       setBatchId(data.id);
+      let nextBatch = data;
+      try {
+        if (selectedClientId) {
+          for (const item of data.items.filter((entry) => entry.status === "pending" && !entry.clientId)) {
+            nextBatch = await updateCaseImportItem(data.id, item.id, { clientId: selectedClientId });
+          }
+        }
+      } catch {
+        setError("Não foi possível vincular o cliente automaticamente. Selecione na revisão.");
+      }
+      setBatchData(nextBatch);
     },
     onError: (failure) =>
       setError(
@@ -364,6 +377,7 @@ export const ImportCasePage = () => {
             automaticamente pelo número e os clientes são vinculados na revisão
             antes de salvar.
           </p>
+          {selectedClientId ? <p>Cliente pré-selecionado: {selectedClientName ?? selectedClientId}</p> : null}
         </div>
         <Link className="button" to="/cases">
           Voltar
@@ -371,6 +385,7 @@ export const ImportCasePage = () => {
       </header>
 
       <section className="panel">
+        {clients.isLoading ? <LoadingState label="Carregando clientes ativos" variant="list" /> : null}
         <form className="case-import-batch-form" onSubmit={submit}>
           <textarea
             rows={6}
@@ -390,6 +405,7 @@ export const ImportCasePage = () => {
               className="button primary"
               disabled={
                 createMutation.isPending ||
+                (Boolean(selectedClientId) && clients.isLoading) ||
                 cnjNumbers.length === 0 ||
                 invalidNumbers.length > 0
               }

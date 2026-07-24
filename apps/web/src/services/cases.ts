@@ -30,7 +30,9 @@ export type CaseTimelineEventType =
 export type LegalCase = {
   id: string;
   clientId: string;
+  clientName: string | null;
   responsibleUserId: string | null;
+  responsibleUserName: string | null;
   caseType: CaseType;
   title: string;
   cnjNumber: string | null;

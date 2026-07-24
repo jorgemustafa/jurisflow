@@ -9,6 +9,28 @@ import {
 
 const now = new Date("2026-01-01T00:00:00.000Z");
 
+function clientRecord(overrides: Partial<ClientRecord> = {}): ClientRecord {
+  return {
+    id: "client-1",
+    type: "individual",
+    status: "active",
+    name: "Cliente",
+    document: null,
+    rg: null,
+    email: null,
+    phone: null,
+    address: null,
+    street: null,
+    city: null,
+    state: null,
+    zipCode: null,
+    notes: null,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides
+  };
+}
+
 function createRepository(seed: ClientRecord[] = []) {
   const clients = [...seed];
 
@@ -34,9 +56,14 @@ function createRepository(seed: ClientRecord[] = []) {
         status: "active",
         name: data.name,
         document: data.document ?? null,
+        rg: data.rg ?? null,
         email: data.email ?? null,
         phone: data.phone ?? null,
         address: data.address ?? null,
+        street: data.street ?? null,
+        city: data.city ?? null,
+        state: data.state ?? null,
+        zipCode: data.zipCode ?? null,
         notes: data.notes ?? null,
         createdAt: now,
         updatedAt: now
@@ -92,19 +119,10 @@ describe("clients service", () => {
 
   it("rejects duplicate documents when provided", async () => {
     const repository = createRepository([
-      {
-        id: "client-1",
-        type: "individual",
-        status: "active",
+      clientRecord({
         name: "Maria Silva",
-        document: "52998224725",
-        email: null,
-        phone: null,
-        address: null,
-        notes: null,
-        createdAt: now,
-        updatedAt: now
-      }
+        document: "52998224725"
+      })
     ]);
     const service = createClientsService(repository);
 
@@ -124,21 +142,7 @@ describe("clients service", () => {
   });
 
   it("allows changing type when document is empty", async () => {
-    const repository = createRepository([
-      {
-        id: "client-1",
-        type: "individual",
-        status: "active",
-        name: "Cliente",
-        document: null,
-        email: null,
-        phone: null,
-        address: null,
-        notes: null,
-        createdAt: now,
-        updatedAt: now
-      }
-    ]);
+    const repository = createRepository([clientRecord()]);
     const service = createClientsService(repository);
 
     const client = await service.update("client-1", { type: "company" });
@@ -148,19 +152,7 @@ describe("clients service", () => {
 
   it("blocks changing type when the existing document is invalid for the next type", async () => {
     const repository = createRepository([
-      {
-        id: "client-1",
-        type: "individual",
-        status: "active",
-        name: "Cliente",
-        document: "52998224725",
-        email: null,
-        phone: null,
-        address: null,
-        notes: null,
-        createdAt: now,
-        updatedAt: now
-      }
+      clientRecord({ document: "52998224725" })
     ]);
     const service = createClientsService(repository);
 
@@ -168,21 +160,7 @@ describe("clients service", () => {
   });
 
   it("inactivates and reactivates clients", async () => {
-    const repository = createRepository([
-      {
-        id: "client-1",
-        type: "individual",
-        status: "active",
-        name: "Cliente",
-        document: null,
-        email: null,
-        phone: null,
-        address: null,
-        notes: null,
-        createdAt: now,
-        updatedAt: now
-      }
-    ]);
+    const repository = createRepository([clientRecord()]);
     const service = createClientsService(repository);
 
     expect((await service.updateStatus("client-1", "inactive")).status).toBe("inactive");

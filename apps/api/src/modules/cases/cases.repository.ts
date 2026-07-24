@@ -52,7 +52,9 @@ const toApiLegalArea = (value: DbLegalArea): LegalArea =>
 type DbCase = {
   id: string;
   clientId: string;
+  client?: { name: string } | null;
   responsibleUserId: string | null;
+  responsibleUser?: { name: string } | null;
   caseType: DbCaseType;
   title: string;
   cnjNumber: string | null;
@@ -74,6 +76,8 @@ type DbCase = {
 function toCaseRecord(item: DbCase): CaseRecord {
   return {
     ...item,
+    clientName: item.client?.name ?? null,
+    responsibleUserName: item.responsibleUser?.name ?? null,
     caseType: toApiCaseType(item.caseType),
     status: toApiStatus(item.status),
     stage: item.stage ? toApiStage(item.stage) : null,
@@ -121,13 +125,17 @@ export const casesRepository = {
   async list(filters: CaseListFilters) {
     const cases = await prisma.case.findMany({
       where: listWhere(filters),
+      include: { client: { select: { name: true } }, responsibleUser: { select: { name: true } } },
       orderBy: { updatedAt: "desc" },
     });
     return cases.map((item) => toCaseRecord(item as DbCase));
   },
 
   async findById(id: string) {
-    const item = await prisma.case.findUnique({ where: { id } });
+    const item = await prisma.case.findUnique({
+      where: { id },
+      include: { client: { select: { name: true } }, responsibleUser: { select: { name: true } } },
+    });
     return item ? toCaseRecord(item as DbCase) : null;
   },
 
