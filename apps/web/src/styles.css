@@ -1347,6 +1347,77 @@ tr:last-child td {
   background: var(--color-danger);
 }
 
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  min-height: 34px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  color: var(--color-text-strong);
+  background: var(--color-white);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--color-surface-hover);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  padding: 20px;
+  background: rgb(var(--shadow-primary-rgb) / 0.35);
+  place-items: center;
+}
+
+.dialog {
+  display: grid;
+  width: min(520px, 100%);
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-white);
+  box-shadow: 0 18px 48px rgb(var(--shadow-popover-rgb) / 0.22);
+}
+
+.dialog-header,
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.dialog-body {
+  display: grid;
+  gap: 8px;
+  color: var(--color-text);
+}
+
+.dialog-body p {
+  margin: 0;
+}
+
+.dialog-body strong {
+  color: var(--color-text-strong);
+}
+
+.confirm-field {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
 .row-editor td {
   background: var(--color-background-soft);
 }

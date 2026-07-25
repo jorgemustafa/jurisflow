@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FolderPlus, Pencil } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { FolderPlus, Pencil, Trash2 } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router";
 import { listCases } from "src/services/cases.js";
-import { ClientStatus, getClient, updateClientStatus } from "src/services/clients.js";
+import { ClientStatus, deleteClient, getClient, updateClientStatus } from "src/services/clients.js";
+import { ApiError } from "src/services/http.js";
 import { fieldValue, formatDate } from "src/utils/format.js";
 import { ClientCasesList } from "src/features/clients/detail/ClientCasesList.js";
 import { ClientDetailItem } from "src/features/clients/detail/ClientDetailItem.js";
@@ -12,10 +13,15 @@ import { listDocuments } from "src/services/documents.js";
 import { useState } from "react";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { Tabs } from "src/components/ui/Tabs.js";
+import { DeleteConfirmationDialog } from "src/components/DeleteConfirmationDialog.js";
 
 export const ClientDetailsPage = () => {
   const [tab, setTab] = useState<"details" | "cases" | "documents">("details");
+  const [deleteText, setDeleteText] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeleteOpen, setDeleteOpen] = useState(false);
   const { id = "" } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const client = useQuery({ queryKey: ["client", id], queryFn: () => getClient(id), enabled: Boolean(id) });
   const cases = useQuery({
@@ -33,6 +39,16 @@ export const ClientDetailsPage = () => {
     onSuccess: (updated) => {
       queryClient.setQueryData(["client", id], updated);
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+    }
+  });
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteClient(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      navigate("/clients");
+    },
+    onError: (failure) => {
+      setDeleteError(failure instanceof ApiError ? failure.message : "Não foi possível excluir o cliente.");
     }
   });
 
@@ -53,6 +69,11 @@ export const ClientDetailsPage = () => {
             {client.data.status === "active" ? "Inativar" : "Reativar"}
           </button>
           <Link className="button" to={`/cases/import?clientId=${client.data.id}`}>
+          <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
+            <Trash2 size={18} />
+            Excluir
+          </button>
+          <Link className="button" to={`/clients/${client.data.id}/cases/new`}>
             <FolderPlus size={18} />
             Novo processo
           </Link>
@@ -99,6 +120,25 @@ export const ClientDetailsPage = () => {
         {documents.isError ? <p className="alert">Não foi possível carregar os documentos do cliente.</p> : null}
         {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
       </section> : null}
+
+      {isDeleteOpen ? (
+        <DeleteConfirmationDialog
+          title="Excluir cliente"
+          confirmText="DELETAR"
+          value={deleteText}
+          error={deleteError}
+          isDeleting={deleteMutation.isPending}
+          onChange={setDeleteText}
+          onCancel={() => setDeleteOpen(false)}
+          onConfirm={() => deleteMutation.mutate()}
+        >
+          <p>Esta ação exclui permanentemente o cliente abaixo se não houver vínculos.</p>
+          <p><strong>Cliente:</strong> {client.data.name}</p>
+          <p><strong>Documento:</strong> {fieldValue(client.data.document)}</p>
+          <p><strong>Status:</strong> {labelClientStatus(client.data.status)}</p>
+          <p>Se houver processos, pagamentos, documentos ou itens de importação, a exclusão será bloqueada.</p>
+        </DeleteConfirmationDialog>
+      ) : null}
     </>
   );
 };

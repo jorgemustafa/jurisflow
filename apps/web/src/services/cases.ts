@@ -171,6 +171,10 @@ export const updateCase = (id: string, data: CaseFormData) => {
   });
 };
 
+export const deleteCase = (id: string) => {
+  return request<void>(`/cases/${id}`, { method: "DELETE" });
+};
+
 export const listCaseTimeline = (caseId: string) => {
   return request<CaseTimelineEvent[]>(`/cases/${caseId}/timeline`);
 };

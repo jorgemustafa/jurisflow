@@ -184,6 +184,14 @@ export const casesRepository = {
     return count > 0;
   },
 
+  async listDocumentStorageKeys(caseId: string) {
+    const documents = await prisma.document.findMany({
+      where: { caseId },
+      select: { storageKey: true },
+    });
+    return documents.map((document) => document.storageKey);
+  },
+
   async create(data: CreateCaseRecordData, payments: CreatePaymentData[]) {
     const item = await prisma.$transaction(async (tx) => {
       const created = await tx.case.create({
@@ -203,5 +211,18 @@ export const casesRepository = {
       data: writeData(data) as Prisma.CaseUncheckedUpdateInput,
     });
     return toCaseRecord(item as DbCase);
+  },
+
+  async delete(id: string) {
+    await prisma.$transaction([
+      prisma.notification.deleteMany({ where: { caseId: id } }),
+      prisma.caseSyncRun.deleteMany({ where: { caseId: id } }),
+      prisma.caseDeadline.deleteMany({ where: { caseId: id } }),
+      prisma.caseTimelineEvent.deleteMany({ where: { caseId: id } }),
+      prisma.document.deleteMany({ where: { caseId: id } }),
+      prisma.payment.deleteMany({ where: { caseId: id } }),
+      prisma.caseImportItem.updateMany({ where: { caseId: id }, data: { caseId: null } }),
+      prisma.case.delete({ where: { id } }),
+    ]);
   },
 };

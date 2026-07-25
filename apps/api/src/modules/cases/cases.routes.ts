@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply } from "fastify";
 import { ZodError } from "zod";
 import { requireAuth } from "../../shared/http/protected.js";
 import { parseBody } from "../../shared/http/validate.js";
+import { getDocumentStorage } from "../documents/document-storage.js";
 import { PaymentScheduleError } from "../payments/payments.service.js";
 import { caseTimelineRepository } from "./case-timeline.repository.js";
 import { createCaseTimelineEventSchema } from "./case-timeline.schemas.js";
@@ -211,6 +212,16 @@ export async function casesRoutes(app: FastifyInstance) {
     try {
       const { id } = caseParamsSchema.parse(request.params);
       return await casesService.update(id, parseBody(updateCaseSchema, request.body));
+    } catch (error) {
+      return handleCaseError(error, reply);
+    }
+  });
+
+  app.delete("/:id", async (request, reply) => {
+    try {
+      const { id } = caseParamsSchema.parse(request.params);
+      await createCasesService(casesRepository, { documentStorage: await getDocumentStorage() }).delete(id);
+      return reply.code(204).send();
     } catch (error) {
       return handleCaseError(error, reply);
     }

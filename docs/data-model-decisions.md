@@ -159,6 +159,7 @@ Approved for Client Management v1.
 - Duplicate names are allowed.
 - Inactive clients are excluded from default listing but remain viewable and editable.
 - Creating future cases for inactive clients should require reactivation.
+- Physical client deletion is blocked when the client has any linked cases, payments, documents, or import items. The API returns the blocking link counts so the UI can show what must be handled first.
 
 ## User
 
@@ -232,6 +233,9 @@ Approved as the base Case Management model.
 - Finance data is required for manual and imported case creation.
 - Case, paid entry, generated installments, and imported movements are persisted atomically per case.
 - `totalFeeAmountCents` cannot be edited after creation. Renegotiation is outside v1.
+- Physical case deletion is allowed only after explicit UI confirmation by typing `DELETAR`.
+- Physical case deletion removes linked payments, documents, deadlines, timeline events, sync runs, and notifications in the same database operation; document binaries are deleted from storage before metadata is removed.
+- Case import items keep audit history after case deletion, but their `caseId` reference is cleared.
 
 ### Case Import Batch Rules
 
