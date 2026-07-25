@@ -68,12 +68,11 @@ export const ClientDetailsPage = () => {
           <button className="button" onClick={() => statusMutation.mutate(nextStatus)} disabled={statusMutation.isPending}>
             {client.data.status === "active" ? "Inativar" : "Reativar"}
           </button>
-          <Link className="button" to={`/cases/import?clientId=${client.data.id}`}>
           <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
             <Trash2 size={18} />
             Excluir
           </button>
-          <Link className="button" to={`/clients/${client.data.id}/cases/new`}>
+          <Link className="button" to={`/cases/import?clientId=${client.data.id}`}>
             <FolderPlus size={18} />
             Novo processo
           </Link>

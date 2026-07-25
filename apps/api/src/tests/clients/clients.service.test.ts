@@ -182,19 +182,9 @@ describe("clients service", () => {
 
   it("blocks deleting clients with linked records", async () => {
     const repository = createRepository([
-      {
+      clientRecord({
         id: "client-linked",
-        type: "individual",
-        status: "active",
-        name: "Cliente",
-        document: null,
-        email: null,
-        phone: null,
-        address: null,
-        notes: null,
-        createdAt: now,
-        updatedAt: now
-      }
+      })
     ]);
     const service = createClientsService(repository);
 
@@ -205,21 +195,7 @@ describe("clients service", () => {
   });
 
   it("deletes clients without linked records", async () => {
-    const repository = createRepository([
-      {
-        id: "client-1",
-        type: "individual",
-        status: "active",
-        name: "Cliente",
-        document: null,
-        email: null,
-        phone: null,
-        address: null,
-        notes: null,
-        createdAt: now,
-        updatedAt: now
-      }
-    ]);
+    const repository = createRepository([clientRecord()]);
     const service = createClientsService(repository);
 
     await service.delete("client-1");
