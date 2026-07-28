@@ -225,6 +225,7 @@ Approved as the base Case Management model.
 - Finance data is required for manual and imported case creation.
 - Case, paid entry, generated installments, and imported movements are persisted atomically per case.
 - `totalFeeAmountCents` cannot be edited after creation. Renegotiation is outside v1.
+- Case creation may generate installments with due dates before system creation so offices can register cases already in progress. Past generated installments remain normal generated payments; receipt must still be registered explicitly unless it is the entry payment.
 
 ### Case Import Batch Rules
 

@@ -79,12 +79,6 @@ export class PaymentCaseError extends Error {
   }
 }
 
-export class PaymentScheduleError extends Error {
-  constructor(message = "Payment schedule is invalid") {
-    super(message);
-  }
-}
-
 export class PaymentStatusError extends Error {
   constructor(message = "Payment status does not allow this operation") {
     super(message);
@@ -108,14 +102,6 @@ export function addMonths(date: Date, months: number) {
   );
 }
 
-export function isNextCalendarMonth(reference: Date, date: Date) {
-  const next = addMonths(reference, 1);
-  return (
-    date.getUTCFullYear() === next.getUTCFullYear() &&
-    date.getUTCMonth() === next.getUTCMonth()
-  );
-}
-
 export function buildCasePayments(
   caseId: string,
   clientId: string,
@@ -124,10 +110,6 @@ export function buildCasePayments(
   scheduleId: string = randomUUID(),
 ): CreatePaymentData[] {
   const firstDueDate = new Date(`${finance.firstDueDate}T12:00:00.000Z`);
-  if (!isNextCalendarMonth(createdAt, firstDueDate))
-    throw new PaymentScheduleError(
-      "First due date must be in the next calendar month",
-    );
 
   const balance = finance.totalFeeAmountCents - finance.entryAmountCents;
   const installmentTotal = Math.ceil(balance / finance.installmentAmountCents);
