@@ -3,7 +3,6 @@ import { ZodError } from "zod";
 import { requireAuth } from "../../shared/http/protected.js";
 import { parseBody } from "../../shared/http/validate.js";
 import { getDocumentStorage } from "../documents/document-storage.js";
-import { PaymentScheduleError } from "../payments/payments.service.js";
 import { caseTimelineRepository } from "./case-timeline.repository.js";
 import { createCaseTimelineEventSchema } from "./case-timeline.schemas.js";
 import { CaseTimelineCaseNotFoundError, createCaseTimelineService } from "./case-timeline.service.js";
