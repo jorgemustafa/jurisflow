@@ -11,7 +11,15 @@ import { Label } from "src/components/ui/label.js";
 import { Select } from "src/components/ui/select.js";
 import { Textarea } from "src/components/ui/textarea.js";
 import { FieldError } from "src/features/clients/form/FieldError.js";
-import { parseMoney } from "src/features/finance/utils/money.js";
+import {
+  moneyInputValue,
+  parseMoney,
+} from "src/features/finance/utils/money.js";
+import {
+  calculateFinanceSchedule,
+  dateWithDueDay,
+  installmentAmountForCount,
+} from "src/features/cases/utils/financeSchedule.js";
 import {
   createCase,
   getCase,
@@ -100,9 +108,13 @@ const emptyFinanceForm = () => ({
   total: "",
   entry: "",
   installment: "",
+  installmentCount: "",
   firstDueDate: nextMonthDate(),
+  dueDay: "",
   entryPaymentMethod: "pix" as PaymentMethod,
 });
+
+type FinanceForm = ReturnType<typeof emptyFinanceForm>;
 
 type CaseFormProps =
   | {
@@ -132,6 +144,12 @@ export const CaseForm = (props: CaseFormProps) => {
     ),
   });
   const watchedType = form.watch("caseType");
+  const financeSchedule = calculateFinanceSchedule(
+    parseMoney(financeForm.total),
+    parseMoney(financeForm.entry),
+    parseMoney(financeForm.installment),
+    financeForm.firstDueDate,
+  );
   const legalCase = useQuery({
     queryKey: ["case", props.mode === "update" ? props.caseId : ""],
     queryFn: () => getCase(props.mode === "update" ? props.caseId : ""),
@@ -205,6 +223,40 @@ export const CaseForm = (props: CaseFormProps) => {
       return;
     }
     mutation.mutate({ ...caseData, finance: finance.data });
+  };
+
+  const updateFinanceByInstallment = (next: Partial<FinanceForm>) => {
+    setFinanceForm((current) => {
+      const updated = { ...current, ...next };
+      const schedule = calculateFinanceSchedule(
+        parseMoney(updated.total),
+        parseMoney(updated.entry),
+        parseMoney(updated.installment),
+        updated.firstDueDate,
+      );
+      return {
+        ...updated,
+        dueDay: String(schedule.dueDay ?? ""),
+        installmentCount: schedule.installmentCount
+          ? String(schedule.installmentCount)
+          : "",
+      };
+    });
+  };
+
+  const updateFinanceByCount = (installmentCount: string) => {
+    setFinanceForm((current) => {
+      const balanceCents = parseMoney(current.total) - parseMoney(current.entry);
+      const count = Number(installmentCount);
+      const installmentCents = installmentAmountForCount(balanceCents, count);
+      return {
+        ...current,
+        installmentCount,
+        installment: Number.isFinite(installmentCents)
+          ? moneyInputValue(installmentCents)
+          : current.installment,
+      };
+    });
   };
 
   if (legalCase.isLoading) return <LoadingState label="Carregando processo" />;
@@ -344,10 +396,7 @@ export const CaseForm = (props: CaseFormProps) => {
                 id="totalFee"
                 value={financeForm.total}
                 onChange={(event) =>
-                  setFinanceForm((current) => ({
-                    ...current,
-                    total: event.target.value,
-                  }))
+                  updateFinanceByInstallment({ total: event.target.value })
                 }
               />
             </div>
@@ -357,10 +406,7 @@ export const CaseForm = (props: CaseFormProps) => {
                 id="entryAmount"
                 value={financeForm.entry}
                 onChange={(event) =>
-                  setFinanceForm((current) => ({
-                    ...current,
-                    entry: event.target.value,
-                  }))
+                  updateFinanceByInstallment({ entry: event.target.value })
                 }
               />
             </div>
@@ -370,24 +416,73 @@ export const CaseForm = (props: CaseFormProps) => {
                 id="installmentAmount"
                 value={financeForm.installment}
                 onChange={(event) =>
-                  setFinanceForm((current) => ({
-                    ...current,
+                  updateFinanceByInstallment({
                     installment: event.target.value,
-                  }))
+                  })
                 }
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="firstDueDate">Primeiro vencimento</Label>
+              <Label htmlFor="installmentCount">Quantidade de parcelas</Label>
+              <Input
+                id="installmentCount"
+                type="number"
+                min={1}
+                step={1}
+                value={financeForm.installmentCount}
+                onChange={(event) => updateFinanceByCount(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dueDay">Dia de vencimento</Label>
+              <Input
+                id="dueDay"
+                type="number"
+                min={1}
+                max={31}
+                value={financeForm.dueDay}
+                onChange={(event) => {
+                  const dueDay = Number(event.target.value);
+                  updateFinanceByInstallment({
+                    dueDay: event.target.value,
+                    firstDueDate: dateWithDueDay(
+                      financeForm.firstDueDate,
+                      dueDay,
+                    ),
+                  });
+                }}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="firstDueDate">Início das parcelas</Label>
               <Input
                 id="firstDueDate"
                 type="date"
                 value={financeForm.firstDueDate}
                 onChange={(event) =>
-                  setFinanceForm((current) => ({
-                    ...current,
+                  updateFinanceByInstallment({
                     firstDueDate: event.target.value,
-                  }))
+                  })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="lastDueDate">Fim das parcelas</Label>
+              <Input
+                id="lastDueDate"
+                type="date"
+                readOnly
+                value={financeSchedule.lastDueDate}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Valor restante</Label>
+              <Input
+                readOnly
+                value={
+                  Number.isFinite(financeSchedule.balanceCents)
+                    ? moneyInputValue(financeSchedule.balanceCents)
+                    : ""
                 }
               />
             </div>

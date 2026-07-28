@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import type { PaymentListFilters } from "../../modules/payments/payments.schemas.js";
 import {
   PaymentClientError,
-  PaymentScheduleError,
   PaymentStatusError,
   buildCasePayments,
   createPaymentsService,
@@ -136,15 +135,17 @@ describe("fixed case payment schedule", () => {
     ).toEqual(["2026-07-31", "2026-08-31", "2026-09-30"]);
   });
 
-  it("rejects a first due date outside the next calendar month", () => {
-    expect(() =>
-      buildCasePayments(
-        "case-1",
-        "client-1",
-        { ...finance, firstDueDate: "2026-08-10" },
-        now,
-      ),
-    ).toThrow(PaymentScheduleError);
+  it("allows a past first due date for cases already in progress", () => {
+    const payments = buildCasePayments(
+      "case-1",
+      "client-1",
+      { ...finance, firstDueDate: "2026-04-10" },
+      now,
+    );
+
+    expect(
+      payments.slice(1).map((item) => item.dueDate.toISOString().slice(0, 10)),
+    ).toEqual(["2026-04-10", "2026-05-10", "2026-06-10"]);
   });
 });
 

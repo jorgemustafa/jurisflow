@@ -71,6 +71,7 @@ Secondary users:
 - Make it easy to understand what needs action.
 - Require an immutable financial agreement when a case is created or imported.
 - Register the configurable entry as received at creation and derive monthly installments from the remaining balance and fixed installment value.
+- Case financial schedules may start in the past when registering cases already in progress; generated due dates preserve the informed start date/day and calculate the final installment date from the number of derived installments.
 - Carry unpaid installments into later month views while preserving and showing their original competence; mark them overdue only after their due date passes.
 
 ### Documents

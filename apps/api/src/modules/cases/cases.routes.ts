@@ -3,7 +3,6 @@ import { ZodError } from "zod";
 import { requireAuth } from "../../shared/http/protected.js";
 import { parseBody } from "../../shared/http/validate.js";
 import { getDocumentStorage } from "../documents/document-storage.js";
-import { PaymentScheduleError } from "../payments/payments.service.js";
 import { caseTimelineRepository } from "./case-timeline.repository.js";
 import { createCaseTimelineEventSchema } from "./case-timeline.schemas.js";
 import { CaseTimelineCaseNotFoundError, createCaseTimelineService } from "./case-timeline.service.js";
@@ -55,7 +54,6 @@ function handleCaseError(error: unknown, reply: FastifyReply) {
   if (error instanceof CaseCnjConflictError) return reply.code(409).send({ message: error.message, field: "cnjNumber" });
   if (error instanceof CaseCnjTypeError) return reply.code(400).send({ message: error.message, field: "cnjNumber" });
   if (error instanceof CasePendingFinanceError) return reply.code(409).send({ message: error.message, field: "status" });
-  if (error instanceof PaymentScheduleError) return reply.code(400).send({ message: error.message, field: "finance.firstDueDate" });
   if (error instanceof CaseImportClientError) return reply.code(400).send({ message: error.message, field: "clientId" });
   if (error instanceof CaseImportBatchNotFoundError) return reply.code(404).send({ message: error.message });
   if (error instanceof CaseImportItemNotFoundError) return reply.code(404).send({ message: error.message });
