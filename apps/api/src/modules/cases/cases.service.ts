@@ -3,6 +3,7 @@ import {
   buildCasePayments,
   type CreatePaymentData,
 } from "../payments/payments.service.js";
+import type { DocumentStorage } from "../documents/document-storage.js";
 import type {
   CaseListFilters,
   CaseStage,
@@ -16,7 +17,9 @@ import type {
 export type CaseRecord = {
   id: string;
   clientId: string;
+  clientName: string | null;
   responsibleUserId: string | null;
+  responsibleUserName: string | null;
   caseType: CaseType;
   title: string;
   cnjNumber: string | null;
@@ -58,11 +61,13 @@ type CasesRepository = {
     excludeId?: string,
   ): Promise<CaseRecord | null>;
   hasPendingFinance(caseId: string): Promise<boolean>;
+  listDocumentStorageKeys(caseId: string): Promise<string[]>;
   create(
     data: CreateCaseRecordData,
     payments: CreatePaymentData[],
   ): Promise<CaseRecord>;
   update(id: string, data: UpdateCaseInput): Promise<CaseRecord>;
+  delete(id: string): Promise<void>;
 };
 
 export class CaseNotFoundError extends Error {
@@ -106,7 +111,7 @@ const isClosedStatus = (status: CaseStatus) =>
 
 export function createCasesService(
   repository: CasesRepository,
-  options: { now?: () => Date } = {},
+  options: { now?: () => Date; documentStorage?: DocumentStorage } = {},
 ) {
   const now = options.now ?? (() => new Date());
   async function ensureActiveClient(clientId: string) {
@@ -207,6 +212,16 @@ export function createCasesService(
       }
 
       return repository.update(id, input);
+    },
+
+    async delete(id: string) {
+      const current = await repository.findById(id);
+      if (!current) throw new CaseNotFoundError();
+      const storageKeys = await repository.listDocumentStorageKeys(id);
+      if (options.documentStorage) {
+        for (const key of storageKeys) await options.documentStorage.delete(key);
+      }
+      await repository.delete(id);
     },
   };
 }

@@ -9,9 +9,14 @@ export type Client = {
   status: ClientStatus;
   name: string;
   document: string | null;
+  rg: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -35,4 +40,8 @@ export const updateClient = (id: string, data: ClientFormData) => {
 
 export const updateClientStatus = (id: string, status: ClientStatus) => {
   return request<Client>(`/clients/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+};
+
+export const deleteClient = (id: string) => {
+  return request<void>(`/clients/${id}`, { method: "DELETE" });
 };

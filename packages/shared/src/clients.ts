@@ -55,6 +55,7 @@ export const clientFormSchema = z
     type: clientTypeSchema,
     name: z.string().trim().min(2, { message: "Informe ao menos 2 caracteres" }).max(255, { message: "Use até 255 caracteres" }),
     document: z.string().trim(),
+    rg: z.string().trim().max(20, "Use até 20 caracteres"),
     email: z.union([z.literal(""), z.string().trim().email("Informe um email válido")]),
     phone: z
       .string()
@@ -64,6 +65,16 @@ export const clientFormSchema = z
         return digits.length === 0 || digits.length === 10 || digits.length === 11;
       }, "Telefone deve ter 10 ou 11 dígitos"),
     address: z.string().trim().max(500, "Use até 500 caracteres"),
+    street: z.string().trim().max(255, "Use até 255 caracteres"),
+    city: z.string().trim().max(120, "Use até 120 caracteres"),
+    state: z.string().trim().max(2, "Use UF com 2 letras"),
+    zipCode: z
+      .string()
+      .trim()
+      .refine((value) => {
+        const digits = onlyDigits(value);
+        return digits.length === 0 || digits.length === 8;
+      }, "CEP deve ter 8 dígitos"),
     notes: z.string().trim().max(1000, "Use até 1000 caracteres")
   })
   .superRefine((data, context) => {

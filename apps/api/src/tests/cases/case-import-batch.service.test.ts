@@ -32,7 +32,9 @@ function caseRecord(overrides: Partial<CaseRecord> = {}): CaseRecord {
   return {
     id: "case-1",
     clientId: "client-1",
+    clientName: null,
     responsibleUserId: null,
+    responsibleUserName: null,
     caseType: "judicial",
     title: "Ação",
     cnjNumber: cnjTjsp,

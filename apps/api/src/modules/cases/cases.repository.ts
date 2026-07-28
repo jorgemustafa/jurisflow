@@ -52,7 +52,9 @@ const toApiLegalArea = (value: DbLegalArea): LegalArea =>
 type DbCase = {
   id: string;
   clientId: string;
+  client?: { name: string } | null;
   responsibleUserId: string | null;
+  responsibleUser?: { name: string } | null;
   caseType: DbCaseType;
   title: string;
   cnjNumber: string | null;
@@ -74,6 +76,8 @@ type DbCase = {
 function toCaseRecord(item: DbCase): CaseRecord {
   return {
     ...item,
+    clientName: item.client?.name ?? null,
+    responsibleUserName: item.responsibleUser?.name ?? null,
     caseType: toApiCaseType(item.caseType),
     status: toApiStatus(item.status),
     stage: item.stage ? toApiStage(item.stage) : null,
@@ -121,13 +125,17 @@ export const casesRepository = {
   async list(filters: CaseListFilters) {
     const cases = await prisma.case.findMany({
       where: listWhere(filters),
+      include: { client: { select: { name: true } }, responsibleUser: { select: { name: true } } },
       orderBy: { updatedAt: "desc" },
     });
     return cases.map((item) => toCaseRecord(item as DbCase));
   },
 
   async findById(id: string) {
-    const item = await prisma.case.findUnique({ where: { id } });
+    const item = await prisma.case.findUnique({
+      where: { id },
+      include: { client: { select: { name: true } }, responsibleUser: { select: { name: true } } },
+    });
     return item ? toCaseRecord(item as DbCase) : null;
   },
 
@@ -176,6 +184,14 @@ export const casesRepository = {
     return count > 0;
   },
 
+  async listDocumentStorageKeys(caseId: string) {
+    const documents = await prisma.document.findMany({
+      where: { caseId },
+      select: { storageKey: true },
+    });
+    return documents.map((document) => document.storageKey);
+  },
+
   async create(data: CreateCaseRecordData, payments: CreatePaymentData[]) {
     const item = await prisma.$transaction(async (tx) => {
       const created = await tx.case.create({
@@ -195,5 +211,18 @@ export const casesRepository = {
       data: writeData(data) as Prisma.CaseUncheckedUpdateInput,
     });
     return toCaseRecord(item as DbCase);
+  },
+
+  async delete(id: string) {
+    await prisma.$transaction([
+      prisma.notification.deleteMany({ where: { caseId: id } }),
+      prisma.caseSyncRun.deleteMany({ where: { caseId: id } }),
+      prisma.caseDeadline.deleteMany({ where: { caseId: id } }),
+      prisma.caseTimelineEvent.deleteMany({ where: { caseId: id } }),
+      prisma.document.deleteMany({ where: { caseId: id } }),
+      prisma.payment.deleteMany({ where: { caseId: id } }),
+      prisma.caseImportItem.updateMany({ where: { caseId: id }, data: { caseId: null } }),
+      prisma.case.delete({ where: { id } }),
+    ]);
   },
 };

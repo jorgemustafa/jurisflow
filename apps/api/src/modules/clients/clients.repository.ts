@@ -18,9 +18,14 @@ type DbClient = {
   status: DbClientStatus;
   name: string;
   document: string | null;
+  rg: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -52,7 +57,7 @@ function listWhere(filters: ClientListFilters): Prisma.ClientWhereInput {
     where.OR = [
       { name: { contains: filters.q, mode: "insensitive" } },
       { email: { contains: filters.q, mode: "insensitive" } },
-      ...(qDigits ? [{ document: { contains: qDigits } }, { phone: { contains: qDigits } }] : [])
+      ...(qDigits ? [{ document: { contains: qDigits } }, { rg: { contains: qDigits } }, { phone: { contains: qDigits } }, { zipCode: { contains: qDigits } }] : [])
     ];
   }
 
@@ -80,6 +85,21 @@ export const clientsRepository = {
     return client ? toClientRecord(client as DbClient) : null;
   },
 
+  async countLinks(id: string) {
+    const [cases, payments, documents, importItems] = await prisma.$transaction([
+      prisma.case.count({ where: { clientId: id } }),
+      prisma.payment.count({ where: { clientId: id } }),
+      prisma.document.count({ where: { clientId: id } }),
+      prisma.caseImportItem.count({ where: { clientId: id } })
+    ]);
+    return [
+      { label: "processos", count: cases },
+      { label: "pagamentos", count: payments },
+      { label: "documentos", count: documents },
+      { label: "itens de importação", count: importItems }
+    ];
+  },
+
   async create(data: CreateClientInput) {
     const client = await prisma.client.create({ data: writeData(data) as Prisma.ClientUncheckedCreateInput });
     return toClientRecord(client as DbClient);
@@ -93,5 +113,9 @@ export const clientsRepository = {
   async updateStatus(id: string, status: ClientStatus) {
     const client = await prisma.client.update({ where: { id }, data: { status: toDbStatus(status) } });
     return toClientRecord(client as DbClient);
+  },
+
+  async delete(id: string) {
+    await prisma.client.delete({ where: { id } });
   }
 };

@@ -14,6 +14,13 @@ Be direct, pragmatic, and concise. Keep the codebase small and clean. Avoid new 
 
 ## Before Committing
 
+For every feature request:
+
+1. Create a feature branch from `main`.
+2. Commit the completed change.
+3. Open a PR from the feature branch to `main` and send the review link.
+4. Always run at least typecheck and unit tests before committing.
+
 Do not commit until the relevant checks pass.
 
 Required checks:
