@@ -191,10 +191,6 @@ export const CaseDetailsPage = () => {
           <Link className="button primary" to={`/clients/${item.clientId}`}>
             Ver cliente
           </Link>
-          <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
-            <Trash2 size={18} />
-            Excluir
-          </button>
           <Link className="button primary" to={`/cases/${item.id}/edit`}>
             <Pencil size={18} />
             Editar
@@ -368,6 +364,13 @@ export const CaseDetailsPage = () => {
           </div>
         ) : null}
       </section> : null}
+
+      <div className="actions">
+        <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
+          <Trash2 size={18} />
+          Excluir processo
+        </button>
+      </div>
 
       {isDeleteOpen ? (
         <DeleteConfirmationDialog
