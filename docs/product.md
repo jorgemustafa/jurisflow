@@ -35,6 +35,8 @@ Secondary users:
 - Client Management v1 is the first usable workflow.
 - Require only client type and name at creation.
 - Store optional document, contact, free-text address, and notes.
+- Store optional RG and structured address blocks: street, city, state, and CEP.
+- Allow optional CEP lookup through the free ViaCEP public API to prefill address fields.
 - Validate CPF/CNPJ, email, and Brazilian phone when provided.
 - Save CPF/CNPJ and phone numbers normalized as digits only.
 - Use active/inactive for normal lifecycle changes.
@@ -47,6 +49,8 @@ Secondary users:
 - Register legal cases and internal matters.
 - Allow creating a case directly from a client page; the new case remains linked to that client.
 - Allow assisted import of Brazilian judicial cases by CNJ using free public DataJud data when configured.
+- New case entry should use the import flow as the default path for judicial processes.
+- Starting case import from a client page should preselect that client in the import review.
 - Imported judicial cases must be manually linked to an active client before they become office cases.
 - Allow editing case details from the case detail page.
 - Track case status, CNJ number, area, responsible person, and relevant dates.

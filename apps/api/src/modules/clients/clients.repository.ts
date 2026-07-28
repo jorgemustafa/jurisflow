@@ -18,9 +18,14 @@ type DbClient = {
   status: DbClientStatus;
   name: string;
   document: string | null;
+  rg: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -52,7 +57,7 @@ function listWhere(filters: ClientListFilters): Prisma.ClientWhereInput {
     where.OR = [
       { name: { contains: filters.q, mode: "insensitive" } },
       { email: { contains: filters.q, mode: "insensitive" } },
-      ...(qDigits ? [{ document: { contains: qDigits } }, { phone: { contains: qDigits } }] : [])
+      ...(qDigits ? [{ document: { contains: qDigits } }, { rg: { contains: qDigits } }, { phone: { contains: qDigits } }, { zipCode: { contains: qDigits } }] : [])
     ];
   }
 

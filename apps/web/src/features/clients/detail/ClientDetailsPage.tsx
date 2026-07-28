@@ -72,7 +72,7 @@ export const ClientDetailsPage = () => {
             <Trash2 size={18} />
             Excluir
           </button>
-          <Link className="button" to={`/clients/${client.data.id}/cases/new`}>
+          <Link className="button" to={`/cases/import?clientId=${client.data.id}`}>
             <FolderPlus size={18} />
             Novo processo
           </Link>
@@ -96,10 +96,15 @@ export const ClientDetailsPage = () => {
 
       {tab === "details" ? <section className="details-grid">
         <ClientDetailItem label="Status" value={labelClientStatus(client.data.status)} />
-        <ClientDetailItem label="Documento" value={fieldValue(client.data.document)} />
+        <ClientDetailItem label="CPF/CNPJ" value={fieldValue(client.data.document)} />
+        <ClientDetailItem label="RG" value={fieldValue(client.data.rg)} />
         <ClientDetailItem label="Email" value={fieldValue(client.data.email)} />
         <ClientDetailItem label="Telefone" value={fieldValue(client.data.phone)} />
-        <ClientDetailItem label="Endereço" value={fieldValue(client.data.address)} />
+        <ClientDetailItem label="CEP" value={fieldValue(client.data.zipCode)} />
+        <ClientDetailItem label="Rua" value={fieldValue(client.data.street)} />
+        <ClientDetailItem label="Cidade" value={fieldValue(client.data.city)} />
+        <ClientDetailItem label="Estado" value={fieldValue(client.data.state)} />
+        <ClientDetailItem label="Complemento/Bairro" value={fieldValue(client.data.address)} />
         <ClientDetailItem label="Observações" value={fieldValue(client.data.notes)} />
         <ClientDetailItem label="Criado em" value={formatDate(client.data.createdAt)} />
         <ClientDetailItem label="Atualizado em" value={formatDate(client.data.updatedAt)} />

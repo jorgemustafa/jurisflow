@@ -1109,6 +1109,12 @@ tr:last-child td {
   gap: 8px 12px;
 }
 
+.page-content > .form {
+  flex: 1;
+  overflow: auto;
+  padding-bottom: 24px;
+}
+
 .form label {
   display: grid;
   gap: 4px;
@@ -1117,8 +1123,43 @@ tr:last-child td {
 
 .form > .actions,
 .form > .alert,
+.form > .form-section,
 .finance-form-section {
   grid-column: 1 / -1;
+}
+
+.form-header {
+  margin-bottom: 12px;
+}
+
+.form-section {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.form-section legend {
+  padding: 0 8px;
+  font-weight: 700;
+}
+
+.form-span-2 {
+  grid-column: span 2;
+}
+
+.form-span-4,
+.form-section > .alert {
+  grid-column: 1 / -1;
+}
+
+.input-action {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
 }
 
 .actions {
@@ -1455,11 +1496,11 @@ textarea:focus {
 
 .finance-form-section {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 10px;
   padding: 12px;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .finance-form-section legend {
@@ -1905,8 +1946,14 @@ textarea:focus {
 
   .details-grid,
   .form,
+  .form-section,
   .finance-form-section {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-span-2,
+  .form-span-4 {
+    grid-column: 1 / -1;
   }
 
   .page-header h1 {
@@ -1922,5 +1969,15 @@ textarea:focus {
   .timeline-side {
     justify-items: start;
     text-align: left;
+  }
+}
+
+@media (max-width: 500px) {
+  .details-grid,
+  .form,
+  .form-section,
+  .finance-form-section,
+  .input-action {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -7,9 +7,14 @@ export type ClientRecord = {
   status: ClientStatus;
   name: string;
   document: string | null;
+  rg: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;

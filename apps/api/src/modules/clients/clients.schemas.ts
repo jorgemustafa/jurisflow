@@ -47,6 +47,10 @@ const nullablePhone = emptyToNull(
 
 const optionalDocument = emptyToUndefined(z.string().transform(onlyDigits));
 const nullableDocument = emptyToNull(z.string().transform(onlyDigits));
+const optionalZipCode = emptyToUndefined(z.string().transform(onlyDigits).refine((value) => value.length === 8, "Zip code must have 8 digits"));
+const nullableZipCode = emptyToNull(z.string().transform(onlyDigits).refine((value) => value.length === 8, "Zip code must have 8 digits"));
+const optionalState = emptyToUndefined(z.string().trim().toUpperCase().length(2));
+const nullableState = emptyToNull(z.string().trim().toUpperCase().length(2));
 
 function validateDocument(type: ClientType, document: string | null | undefined, context: z.RefinementCtx) {
   if (!document) return;
@@ -65,9 +69,14 @@ export const createClientSchema = z
     type: clientTypeSchema,
     name: z.string().trim().min(2).max(255),
     document: optionalDocument,
+    rg: optionalText(20),
     email: optionalEmail,
     phone: optionalPhone,
     address: optionalText(500),
+    street: optionalText(255),
+    city: optionalText(120),
+    state: optionalState,
+    zipCode: optionalZipCode,
     notes: optionalText(1000)
   })
   .superRefine((data, context) => validateDocument(data.type, data.document, context));
@@ -77,9 +86,14 @@ export const updateClientSchema = z
     type: clientTypeSchema.optional(),
     name: z.string().trim().min(2).max(255).optional(),
     document: nullableDocument,
+    rg: nullableText(20),
     email: nullableEmail,
     phone: nullablePhone,
     address: nullableText(500),
+    street: nullableText(255),
+    city: nullableText(120),
+    state: nullableState,
+    zipCode: nullableZipCode,
     notes: nullableText(1000)
   })
   .refine((data) => Object.keys(data).length > 0, "At least one field must be provided")

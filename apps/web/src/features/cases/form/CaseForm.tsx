@@ -213,7 +213,7 @@ export const CaseForm = (props: CaseFormProps) => {
 
   return (
     <>
-      <header className="page-header">
+      <header className="page-header form-header">
         <span>Processos</span>
         <h1>{isEdit ? "Editar processo" : "Novo processo"}</h1>
       </header>
