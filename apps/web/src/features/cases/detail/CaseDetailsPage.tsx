@@ -191,10 +191,6 @@ export const CaseDetailsPage = () => {
           <Link className="button primary" to={`/clients/${item.clientId}`}>
             Ver cliente
           </Link>
-          <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
-            <Trash2 size={18} />
-            Excluir
-          </button>
           <Link className="button primary" to={`/cases/${item.id}/edit`}>
             <Pencil size={18} />
             Editar
@@ -237,17 +233,17 @@ export const CaseDetailsPage = () => {
         <ClientDetailItem label="Atualizado em" value={formatDate(item.updatedAt)} />
       </section> : null}
 
-      {tab === "payments" ? <section className="panel">
+      {tab === "payments" ? <section className="panel tab-panel">
         <CasePaymentsPanel caseId={item.id} />
       </section> : null}
 
-      {tab === "documents" ? <section className="panel">
+      {tab === "documents" ? <section className="panel tab-panel">
         {documents.isLoading ? <LoadingState label="Carregando documentos do processo" variant="table" columns={4} /> : null}
         {documents.isError ? <p className="alert">Não foi possível carregar os documentos do processo.</p> : null}
         {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
       </section> : null}
 
-      {tab === "deadlines" ? <section className="panel timeline-panel">
+      {tab === "deadlines" ? <section className="panel tab-panel timeline-panel">
         <form className="deadline-form" onSubmit={submitDeadline}>
           <input
             placeholder="Título do prazo"
@@ -279,7 +275,7 @@ export const CaseDetailsPage = () => {
         ) : null}
       </section> : null}
 
-      {tab === "sync" ? <section className="panel timeline-panel">
+      {tab === "sync" ? <section className="panel tab-panel timeline-panel">
         {syncRuns.isLoading ? <LoadingState label="Carregando histórico de atualizações" variant="table" columns={5} /> : null}
         {syncRuns.isError ? <p className="alert">Não foi possível carregar o histórico de atualizações.</p> : null}
         {syncRuns.data?.length === 0 ? <p className="empty">Nenhuma sincronização registrada ainda.</p> : null}
@@ -313,7 +309,7 @@ export const CaseDetailsPage = () => {
         ) : null}
       </section> : null}
 
-      {tab === "timeline" ? <section className="panel timeline-panel">
+      {tab === "timeline" ? <section className="panel tab-panel timeline-panel">
         <form className="timeline-form" onSubmit={submitTimeline}>
           <select
             value={timelineForm.type}
@@ -368,6 +364,13 @@ export const CaseDetailsPage = () => {
           </div>
         ) : null}
       </section> : null}
+
+      <div className="actions page-footer-actions">
+        <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
+          <Trash2 size={18} />
+          Excluir processo
+        </button>
+      </div>
 
       {isDeleteOpen ? (
         <DeleteConfirmationDialog

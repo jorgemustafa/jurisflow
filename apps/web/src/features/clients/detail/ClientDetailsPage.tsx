@@ -68,10 +68,6 @@ export const ClientDetailsPage = () => {
           <button className="button" onClick={() => statusMutation.mutate(nextStatus)} disabled={statusMutation.isPending}>
             {client.data.status === "active" ? "Inativar" : "Reativar"}
           </button>
-          <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
-            <Trash2 size={18} />
-            Excluir
-          </button>
           <Link className="button" to={`/cases/import?clientId=${client.data.id}`}>
             <FolderPlus size={18} />
             Novo processo
@@ -119,6 +115,13 @@ export const ClientDetailsPage = () => {
         {documents.isError ? <p className="alert">Não foi possível carregar os documentos do cliente.</p> : null}
         {documents.data ? <DocumentLinksList documents={documents.data} /> : null}
       </section> : null}
+
+      <div className="actions page-footer-actions">
+        <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
+          <Trash2 size={18} />
+          Excluir cliente
+        </button>
+      </div>
 
       {isDeleteOpen ? (
         <DeleteConfirmationDialog
