@@ -672,6 +672,7 @@ textarea {
 
 .tabs {
   display: flex;
+  flex: 0 0 auto;
   gap: 4px;
   overflow-x: auto;
   margin-bottom: 12px;
@@ -847,6 +848,26 @@ textarea {
 
 .panel {
   margin-top: 12px;
+}
+
+.tab-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-panel > .table-wrap,
+.tab-panel > .case-payments-panel,
+.tab-panel > .case-payments-panel > .table-wrap {
+  min-height: 0;
+  flex: 1;
+}
+
+.tab-panel > .case-payments-panel {
+  display: flex;
+  flex-direction: column;
 }
 
 .panel h2 {
@@ -1171,6 +1192,7 @@ tr:last-child td {
 }
 
 .page-footer-actions {
+  flex: 0 0 auto;
   margin-top: auto;
   padding-top: 12px;
 }
