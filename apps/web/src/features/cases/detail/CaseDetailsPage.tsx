@@ -365,7 +365,7 @@ export const CaseDetailsPage = () => {
         ) : null}
       </section> : null}
 
-      <div className="actions">
+      <div className="actions page-footer-actions">
         <button className="button danger" type="button" onClick={() => { setDeleteError(""); setDeleteText(""); setDeleteOpen(true); }}>
           <Trash2 size={18} />
           Excluir processo

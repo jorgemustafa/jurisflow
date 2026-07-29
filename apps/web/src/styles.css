@@ -1164,8 +1164,15 @@ tr:last-child td {
 
 .actions {
   display: flex;
+  justify-content: end;
+  align-items: end;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.page-footer-actions {
+  margin-top: auto;
+  padding-top: 12px;
 }
 
 .alert,
