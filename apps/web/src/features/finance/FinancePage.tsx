@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
-  CalendarDays,
   Plus,
   X,
 } from "lucide-react";
@@ -141,10 +140,6 @@ export const FinancePage = () => {
         </div>
         <div className="actions">
           <div className="finance-period">
-            <div className="finance-period-label">
-              <CalendarDays size={15} />
-              Competência
-            </div>
             <div className="month-nav">
               <button
                 className="button"
