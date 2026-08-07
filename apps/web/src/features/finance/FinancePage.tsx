@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { LoadingState } from "src/components/ui/LoadingState.js";
+import { DateInput } from "src/components/ui/DateInput.js";
 import { MonthPicker } from "src/components/ui/MonthPicker.js";
 import { Tabs } from "src/components/ui/Tabs.js";
 import { CasePaymentsPanel } from "src/features/finance/CasePaymentsPanel.js";
@@ -238,8 +239,7 @@ export const FinancePage = () => {
             </label>
             <label>
               Vencimento
-              <input
-                type="date"
+              <DateInput
                 value={newPayment.dueDate}
                 onChange={(event) =>
                   setNewPayment((current) => ({

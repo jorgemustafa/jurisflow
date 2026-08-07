@@ -25,6 +25,7 @@ import {
 } from "src/features/finance/utils/money.js";
 import { fieldValue } from "src/utils/format.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
+import { DateInput } from "src/components/ui/DateInput.js";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 const today = () => new Date().toISOString().slice(0, 10);
@@ -319,9 +320,8 @@ export const ImportCasePage = () => {
               </label>
               <label>
                 Entrada recebida em
-                <input
+                <DateInput
                   name="entryReceivedAt"
-                  type="date"
                   defaultValue={item.financeData?.entryReceivedAt ?? today()}
                 />
               </label>
@@ -338,9 +338,8 @@ export const ImportCasePage = () => {
               </label>
               <label>
                 Primeiro vencimento
-                <input
+                <DateInput
                   name="firstDueDate"
-                  type="date"
                   defaultValue={
                     item.financeData?.firstDueDate ?? nextMonthDate()
                   }

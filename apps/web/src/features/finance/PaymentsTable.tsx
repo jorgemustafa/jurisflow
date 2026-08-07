@@ -16,6 +16,7 @@ import {
 } from "src/services/finance.js";
 import { ApiError } from "src/services/http.js";
 import { formatDate, formatMoney } from "src/utils/format.js";
+import { DateInput } from "src/components/ui/DateInput.js";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -181,8 +182,7 @@ export const PaymentsTable = ({
             <div className="row-editor-form">
               <label>
                 Recebido em
-                <input
-                  type="date"
+                <DateInput
                   value={receive.paidAt}
                   onChange={(event) =>
                     setReceive((current) => ({
@@ -233,8 +233,7 @@ export const PaymentsTable = ({
                 <>
                   <label>
                     Vencimento
-                    <input
-                      type="date"
+                    <DateInput
                       value={editForm.dueDate}
                       onChange={(event) =>
                         setEditForm((current) => ({
@@ -324,8 +323,7 @@ export const PaymentsTable = ({
             <div className="row-editor-form">
               <label>
                 Data de recebimento
-                <input
-                  type="date"
+                <DateInput
                   value={fixPaidAt}
                   onChange={(event) => setFixPaidAt(event.target.value)}
                 />

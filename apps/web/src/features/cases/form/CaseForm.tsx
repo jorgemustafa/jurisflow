@@ -7,6 +7,7 @@ import { useNavigate } from "react-router";
 import { z } from "zod";
 import { Button } from "src/components/ui/button.js";
 import { Input } from "src/components/ui/input.js";
+import { DateInput } from "src/components/ui/DateInput.js";
 import { Label } from "src/components/ui/label.js";
 import { Select } from "src/components/ui/select.js";
 import { Textarea } from "src/components/ui/textarea.js";
@@ -371,13 +372,21 @@ export const CaseForm = (props: CaseFormProps) => {
 
         <div className="grid gap-2">
           <Label htmlFor="openedAt">Abertura</Label>
-          <Input id="openedAt" type="date" {...form.register("openedAt")} />
+          <DateInput
+            id="openedAt"
+            value={form.watch("openedAt")}
+            onChange={(event) => form.setValue("openedAt", event.target.value, { shouldDirty: true })}
+          />
           <FieldError message={form.formState.errors.openedAt?.message} />
         </div>
 
         <div className="grid gap-2">
           <Label htmlFor="closedAt">Encerramento</Label>
-          <Input id="closedAt" type="date" {...form.register("closedAt")} />
+          <DateInput
+            id="closedAt"
+            value={form.watch("closedAt")}
+            onChange={(event) => form.setValue("closedAt", event.target.value, { shouldDirty: true })}
+          />
           <FieldError message={form.formState.errors.closedAt?.message} />
         </div>
 
@@ -416,9 +425,8 @@ export const CaseForm = (props: CaseFormProps) => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="entryReceivedAt">Entrada recebida em</Label>
-              <Input
+              <DateInput
                 id="entryReceivedAt"
-                type="date"
                 value={financeForm.entryReceivedAt}
                 onChange={(event) =>
                   setFinanceForm((current) => ({
@@ -473,9 +481,8 @@ export const CaseForm = (props: CaseFormProps) => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="firstDueDate">Início das parcelas</Label>
-              <Input
+              <DateInput
                 id="firstDueDate"
-                type="date"
                 value={financeForm.firstDueDate}
                 onChange={(event) =>
                   updateFinanceByInstallment({
@@ -486,9 +493,8 @@ export const CaseForm = (props: CaseFormProps) => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="lastDueDate">Fim das parcelas</Label>
-              <Input
+              <DateInput
                 id="lastDueDate"
-                type="date"
                 readOnly
                 value={financeSchedule.lastDueDate}
               />
