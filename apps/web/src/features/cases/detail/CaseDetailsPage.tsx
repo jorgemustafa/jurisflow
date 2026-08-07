@@ -25,6 +25,7 @@ import { listDocuments } from "src/services/documents.js";
 import { createDeadline, listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { Tabs } from "src/components/ui/Tabs.js";
+import { DateInput } from "src/components/ui/DateInput.js";
 import { DeleteConfirmationDialog } from "src/components/DeleteConfirmationDialog.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
@@ -250,7 +251,7 @@ export const CaseDetailsPage = () => {
             value={deadlineForm.title}
             onChange={(event) => setDeadlineForm((current) => ({ ...current, title: event.target.value }))}
           />
-          <input type="date" value={deadlineForm.dueAt} onChange={(event) => setDeadlineForm((current) => ({ ...current, dueAt: event.target.value }))} />
+          <DateInput value={deadlineForm.dueAt} onChange={(event) => setDeadlineForm((current) => ({ ...current, dueAt: event.target.value }))} />
           <textarea
             placeholder="Descrição"
             rows={3}
@@ -321,8 +322,7 @@ export const CaseDetailsPage = () => {
               </option>
             ))}
           </select>
-          <input
-            type="date"
+          <DateInput
             value={timelineForm.occurredAt}
             onChange={(event) => setTimelineForm((current) => ({ ...current, occurredAt: event.target.value }))}
           />

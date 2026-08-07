@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { labelDeadlineAlert, labelDeadlineStatus } from "src/features/deadlines/deadlineLabels.js";
 import type { CaseDeadline, DeadlineFormData, DeadlineStatus } from "src/services/deadlines.js";
 import { formatDate } from "src/utils/format.js";
+import { DateInput } from "src/components/ui/DateInput.js";
 
 type DeadlineListProps = {
   deadlines: CaseDeadline[];
@@ -77,7 +78,7 @@ export const DeadlineList = ({ deadlines, onStatusChange, onUpdate, isUpdating }
               <td>{deadline.clientName ?? "Não informado"}</td>
               <td>
                 {editingId === deadline.id ? (
-                  <input type="date" value={draft.dueAt} onChange={(event) => setDraft((current) => ({ ...current, dueAt: event.target.value }))} />
+                  <DateInput value={draft.dueAt} onChange={(event) => setDraft((current) => ({ ...current, dueAt: event.target.value }))} />
                 ) : (
                   formatDate(deadline.dueAt)
                 )}
