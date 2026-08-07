@@ -603,7 +603,7 @@ textarea {
 .month-picker {
   display: grid;
   grid-template-columns: minmax(130px, 1fr) 86px;
-  gap: 8px;
+  height: 38px;
 }
 
 .date-input { position: relative; }
@@ -1321,8 +1321,66 @@ tr:last-child td {
 .month-nav {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  height: 38px;
 }
+
+.finance-period {
+  display: inline-flex;
+}
+
+.finance-period .month-nav {
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-white);
+  box-shadow: 0 2px 6px rgb(7 26 53 / 6%);
+}
+
+.finance-period .month-nav > .button {
+  min-width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  color: var(--navy-800);
+  background: var(--color-background-soft);
+}
+
+.finance-period .month-nav > .button:hover {
+  background: var(--navy-800);
+  color: var(--color-white);
+}
+
+.finance-period .month-picker {
+  min-width: 160px;
+  gap: 0;
+}
+
+.finance-period .month-picker select,
+.finance-period .month-picker input {
+  height: 26px;
+  border-color: transparent;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.finance-period .month-picker select { border-radius: 6px 0 0 6px; }
+.finance-period .month-picker input { border-left-color: var(--color-border); border-radius: 0 6px 6px 0; text-align: center; }
+
+.finance-period-today {
+  height: 26px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--navy-800);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.finance-period-today:hover { background: var(--color-background-soft); }
 
 .month-nav .month-input {
   min-width: 150px;
@@ -1966,13 +2024,14 @@ textarea:focus {
   }
 
   .row-header .actions,
+  .finance-period,
   .month-nav {
     width: 100%;
   }
 
-  .month-nav {
+  .finance-period .month-nav {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
   }
 
   .month-picker {

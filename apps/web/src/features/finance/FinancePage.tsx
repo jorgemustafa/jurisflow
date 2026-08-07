@@ -139,24 +139,35 @@ export const FinancePage = () => {
           <span>Financeiro</span>
         </div>
         <div className="actions">
-          <div className="month-nav">
-            <button
-              className="button"
-              type="button"
-              title="Mês anterior"
-              onClick={() => setMonth((current) => moveMonth(current, -1))}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <MonthPicker value={month} onChange={setMonth} />
-            <button
-              className="button"
-              type="button"
-              title="Próximo mês"
-              onClick={() => setMonth((current) => moveMonth(current, 1))}
-            >
-              <ChevronRight size={16} />
-            </button>
+          <div className="finance-period">
+            <div className="month-nav">
+              <button
+                className="p-2"
+                type="button"
+                title="Mês anterior"
+                onClick={() => setMonth((current) => moveMonth(current, -1))}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <MonthPicker value={month} onChange={setMonth} />
+              <button
+                className="p-2"
+                type="button"
+                title="Próximo mês"
+                onClick={() => setMonth((current) => moveMonth(current, 1))}
+              >
+                <ChevronRight size={16} />
+              </button>
+              {month !== currentMonth() ? (
+                <button
+                  className="finance-period-today"
+                  type="button"
+                  onClick={() => setMonth(currentMonth())}
+                >
+                  Mês atual
+                </button>
+              ) : null}
+            </div>
           </div>
           <button
             className="button primary"
