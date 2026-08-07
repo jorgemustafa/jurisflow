@@ -24,6 +24,23 @@ describe("case schemas", () => {
     });
   });
 
+  it("accepts entry receipt date and overdue past-installment choice", () => {
+    const input = createCaseSchema.parse({
+      clientId: "11111111-1111-4111-8111-111111111111",
+      title: "Ação em andamento",
+      finance: {
+        ...finance,
+        entryReceivedAt: "2026-03-15",
+        pastInstallmentsPaid: false,
+      },
+    });
+
+    expect(input.finance).toMatchObject({
+      entryReceivedAt: "2026-03-15",
+      pastInstallmentsPaid: false,
+    });
+  });
+
   it("normalizes CNJ numbers to digits", () => {
     const input = createCaseSchema.parse({
       clientId: "11111111-1111-4111-8111-111111111111",

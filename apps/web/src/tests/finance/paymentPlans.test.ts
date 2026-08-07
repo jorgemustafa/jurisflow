@@ -39,8 +39,16 @@ describe("payment plan summaries", () => {
         status: "paid",
         paidAt: "2026-06-10T00:00:00.000Z",
       }),
-      payment({ id: "payment-2", installmentNumber: 2 }),
-      payment({ id: "payment-3", installmentNumber: 3 }),
+      payment({
+        id: "payment-2",
+        installmentNumber: 2,
+        dueDate: "2026-06-10T00:00:00.000Z",
+      }),
+      payment({
+        id: "payment-3",
+        installmentNumber: 3,
+        dueDate: "2026-07-10T00:00:00.000Z",
+      }),
     ]);
 
     expect(summaries[0]).toMatchObject({
@@ -51,6 +59,7 @@ describe("payment plan summaries", () => {
       installmentCount: 3,
       paidInstallments: 1,
       pendingInstallments: 2,
+      lastPaymentDueDate: "2026-07-10T00:00:00.000Z",
     });
   });
 

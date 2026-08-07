@@ -27,6 +27,7 @@ import { fieldValue } from "src/utils/format.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
+const today = () => new Date().toISOString().slice(0, 10);
 const nextMonthDate = () => {
   const now = new Date();
   const lastDay = new Date(
@@ -179,6 +180,7 @@ export const ImportCasePage = () => {
     const finance = caseFinanceSchema.safeParse({
       totalFeeAmountCents: parseMoney(String(fields.get("total") ?? "")),
       entryAmountCents: parseMoney(String(fields.get("entry") ?? "")),
+      entryReceivedAt: String(fields.get("entryReceivedAt") ?? ""),
       installmentAmountCents: parseMoney(
         String(fields.get("installment") ?? ""),
       ),
@@ -186,6 +188,7 @@ export const ImportCasePage = () => {
       entryPaymentMethod: String(
         fields.get("entryPaymentMethod") ?? "pix",
       ) as PaymentMethod,
+      pastInstallmentsPaid: fields.get("pastInstallmentsPaid") !== null,
     });
     if (!finance.success) {
       setError(
@@ -315,6 +318,14 @@ export const ImportCasePage = () => {
                 />
               </label>
               <label>
+                Entrada recebida em
+                <input
+                  name="entryReceivedAt"
+                  type="date"
+                  defaultValue={item.financeData?.entryReceivedAt ?? today()}
+                />
+              </label>
+              <label>
                 Parcela (R$)
                 <input
                   name="installment"
@@ -349,6 +360,14 @@ export const ImportCasePage = () => {
                   <option value="boleto">Boleto</option>
                   <option value="other">Outro</option>
                 </select>
+              </label>
+              <label>
+                <input
+                  name="pastInstallmentsPaid"
+                  type="checkbox"
+                  defaultChecked={item.financeData?.pastInstallmentsPaid ?? true}
+                />
+                Parcelas vencidas já foram recebidas
               </label>
               <button
                 className="button primary"

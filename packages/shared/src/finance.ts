@@ -29,9 +29,11 @@ export const caseFinanceSchema = z
   .object({
     totalFeeAmountCents: positiveCents,
     entryAmountCents: positiveCents,
+    entryReceivedAt: dateOnly.optional(),
     installmentAmountCents: positiveCents,
     firstDueDate: dateOnly,
     entryPaymentMethod: paymentMethodSchema,
+    pastInstallmentsPaid: z.boolean().optional(),
   })
   .refine((data) => data.entryAmountCents < data.totalFeeAmountCents, {
     message: "Entry amount must be lower than total fee",

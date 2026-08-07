@@ -146,6 +146,32 @@ describe("fixed case payment schedule", () => {
     expect(
       payments.slice(1).map((item) => item.dueDate.toISOString().slice(0, 10)),
     ).toEqual(["2026-04-10", "2026-05-10", "2026-06-10"]);
+    expect(payments.slice(1)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ status: "paid", paidAt: new Date("2026-04-10T12:00:00.000Z") }),
+        expect.objectContaining({ status: "paid", paidAt: new Date("2026-05-10T12:00:00.000Z") }),
+      ]),
+    );
+  });
+
+  it("uses the informed entry receipt date and can keep past installments overdue", () => {
+    const payments = buildCasePayments(
+      "case-1",
+      "client-1",
+      {
+        ...finance,
+        entryReceivedAt: "2026-03-15",
+        firstDueDate: "2026-04-10",
+        pastInstallmentsPaid: false,
+      },
+      now,
+    );
+
+    expect(payments[0]).toMatchObject({
+      dueDate: new Date("2026-03-15T12:00:00.000Z"),
+      paidAt: new Date("2026-03-15T12:00:00.000Z"),
+    });
+    expect(payments.slice(1).every((payment) => payment.status !== "paid")).toBe(true);
   });
 });
 

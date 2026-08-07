@@ -107,11 +107,13 @@ const nextMonthDate = () => {
 const emptyFinanceForm = () => ({
   total: "",
   entry: "",
+  entryReceivedAt: new Date().toISOString().slice(0, 10),
   installment: "",
   installmentCount: "",
   firstDueDate: nextMonthDate(),
   dueDay: "",
   entryPaymentMethod: "pix" as PaymentMethod,
+  pastInstallmentsPaid: true,
 });
 
 type FinanceForm = ReturnType<typeof emptyFinanceForm>;
@@ -212,9 +214,11 @@ export const CaseForm = (props: CaseFormProps) => {
     const finance = caseFinanceSchema.safeParse({
       totalFeeAmountCents: parseMoney(financeForm.total),
       entryAmountCents: parseMoney(financeForm.entry),
+      entryReceivedAt: financeForm.entryReceivedAt,
       installmentAmountCents: parseMoney(financeForm.installment),
       firstDueDate: financeForm.firstDueDate,
       entryPaymentMethod: financeForm.entryPaymentMethod,
+      pastInstallmentsPaid: financeForm.pastInstallmentsPaid,
     });
     if (!finance.success) {
       setGeneralError(
@@ -411,6 +415,20 @@ export const CaseForm = (props: CaseFormProps) => {
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="entryReceivedAt">Entrada recebida em</Label>
+              <Input
+                id="entryReceivedAt"
+                type="date"
+                value={financeForm.entryReceivedAt}
+                onChange={(event) =>
+                  setFinanceForm((current) => ({
+                    ...current,
+                    entryReceivedAt: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="installmentAmount">Valor da parcela (R$)</Label>
               <Input
                 id="installmentAmount"
@@ -507,6 +525,19 @@ export const CaseForm = (props: CaseFormProps) => {
                 <option value="other">Outro</option>
               </Select>
             </div>
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={financeForm.pastInstallmentsPaid}
+                onChange={(event) =>
+                  setFinanceForm((current) => ({
+                    ...current,
+                    pastInstallmentsPaid: event.target.checked,
+                  }))
+                }
+              />
+              Parcelas vencidas já foram recebidas
+            </label>
           </fieldset>
         ) : null}
 
