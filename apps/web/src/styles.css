@@ -1321,8 +1321,77 @@ tr:last-child td {
 .month-nav {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
+
+.finance-period {
+  display: grid;
+  gap: 5px;
+}
+
+.finance-period-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.finance-period .month-nav {
+  padding: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-white);
+  box-shadow: 0 2px 6px rgb(7 26 53 / 6%);
+}
+
+.finance-period .month-nav > .button {
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  color: var(--navy-800);
+  background: var(--color-background-soft);
+}
+
+.finance-period .month-nav > .button:hover {
+  background: var(--navy-800);
+  color: var(--color-white);
+}
+
+.finance-period .month-picker {
+  min-width: 204px;
+  gap: 0;
+}
+
+.finance-period .month-picker select,
+.finance-period .month-picker input {
+  height: 36px;
+  border-color: transparent;
+  background: transparent;
+  font-weight: 700;
+}
+
+.finance-period .month-picker select { border-radius: 6px 0 0 6px; }
+.finance-period .month-picker input { border-left-color: var(--color-border); border-radius: 0 6px 6px 0; text-align: center; }
+
+.finance-period-today {
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--navy-800);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.finance-period-today:hover { background: var(--color-background-soft); }
 
 .month-nav .month-input {
   min-width: 150px;
@@ -1966,13 +2035,14 @@ textarea:focus {
   }
 
   .row-header .actions,
+  .finance-period,
   .month-nav {
     width: 100%;
   }
 
-  .month-nav {
+  .finance-period .month-nav {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
   }
 
   .month-picker {
