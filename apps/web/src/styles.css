@@ -603,7 +603,7 @@ textarea {
 .month-picker {
   display: grid;
   grid-template-columns: minmax(130px, 1fr) 86px;
-  gap: 8px;
+  height: 38px;
 }
 
 .date-input { position: relative; }
@@ -1321,7 +1321,7 @@ tr:last-child td {
 .month-nav {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  height: 38px;
 }
 
 .finance-period {

@@ -142,7 +142,7 @@ export const FinancePage = () => {
           <div className="finance-period">
             <div className="month-nav">
               <button
-                className="button"
+                className="p-2"
                 type="button"
                 title="Mês anterior"
                 onClick={() => setMonth((current) => moveMonth(current, -1))}
@@ -151,7 +151,7 @@ export const FinancePage = () => {
               </button>
               <MonthPicker value={month} onChange={setMonth} />
               <button
-                className="button"
+                className="p-2"
                 type="button"
                 title="Próximo mês"
                 onClick={() => setMonth((current) => moveMonth(current, 1))}
