@@ -58,6 +58,7 @@ The Nginx system service on the VM must remain disabled because Caddy owns publi
 - The application database role is not a superuser and cannot create databases, roles, or replication slots.
 - PostgreSQL has no published host port. Administrative access must use `docker compose exec` or an SSH tunnel.
 - TLS must terminate at the hosting provider or a reverse proxy in front of `WEB_PORT`. The included Nginx container only handles internal HTTP.
+- The Content Security Policy permits browser connections only to the application and `https://viacep.com.br`, used to prefill client addresses from a CEP.
 - `.env.prod` is ignored by Git. Restrict it to the deployment user with `chmod 600 .env.prod` on Linux.
 
 ## Rotate credentials in an existing database
