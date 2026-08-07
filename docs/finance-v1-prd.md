@@ -31,7 +31,7 @@ There is no `CaseFee` table in v1. This is intentional: a separate fee table is 
 
 ## Installments
 
-- The entry is configurable, included in the agreed total, and stored as generated payment `0/N`, paid at case creation.
+- The entry is configurable, included in the agreed total, and stored as generated payment `0/N`, paid on its informed receipt date.
 - The remaining balance is `totalFeeAmountCents - entryAmountCents`.
 - The number of monthly installments is `ceil(balance / installmentAmountCents)`.
 - The final installment contains only the remaining balance and can be lower than the chosen installment amount.
@@ -89,9 +89,11 @@ Manual payments use:
 - Prior-competence payments are marked overdue only when `dueDate` is before today; selecting a future month cannot make a future payment overdue.
 - Late payments appear in their receipt month using `paidAt`, while retaining the original competence badge.
 - Finance UI shows a process-level installment summary with total agreed value, split count, paid installments, pending installments, paid amount, and pending amount.
+- The process-level installment summary shows the calculated month of the final installment.
 - `paidAt` is required when status becomes `PAID`.
 - UI defaults `paidAt` to today.
 - User can override `paidAt` because payments may be registered late.
+- Cases registered in progress default all installments due before registration to paid. The creation form can keep them pending instead, making them overdue by the standard due-date rule.
 - `paymentMethod` is required by the API when marking a payment paid.
 - UI preselects `PIX`; the user can confirm without touching it.
 - Database keeps `paymentMethod` nullable for imported/legacy flexibility.

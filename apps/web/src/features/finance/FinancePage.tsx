@@ -346,6 +346,7 @@ export const FinancePage = () => {
                   <th>Progresso</th>
                   <th>Recebido</th>
                   <th>Pendente</th>
+                  <th>Último pgto.</th>
                 </tr>
               </thead>
               <tbody>
@@ -383,6 +384,11 @@ export const FinancePage = () => {
                           parcelas ({percent}%)
                         </small>
                       </td>
+                      <td>
+                        {plan.lastPaymentDueDate
+                          ? monthLabel(plan.lastPaymentDueDate.slice(0, 7))
+                          : "—"}
+                      </td>
                       <td>{formatMoney(plan.paidCents)}</td>
                       <td>
                         <span className="expand-cell">
@@ -400,7 +406,7 @@ export const FinancePage = () => {
                         className="expanded-payment-row"
                         key={`${plan.id}-payments`}
                       >
-                        <td colSpan={6}>
+                        <td colSpan={7}>
                           <CasePaymentsPanel
                             caseId={plan.caseId}
                           />

@@ -12,6 +12,7 @@ export type PaymentPlanSummary = {
   paidInstallments: number;
   pendingInstallments: number;
   canceledInstallments: number;
+  lastPaymentDueDate: string | null;
 };
 
 export const buildPaymentPlanSummaries = (
@@ -64,6 +65,13 @@ export const buildPaymentPlanSummaries = (
         canceledInstallments: installments.filter(
           (payment) => payment.status === "canceled",
         ).length,
+        lastPaymentDueDate: installments.reduce<string | null>(
+          (lastDueDate, payment) =>
+            !lastDueDate || payment.dueDate > lastDueDate
+              ? payment.dueDate
+              : lastDueDate,
+          null,
+        ),
       };
     })
     .sort((left, right) => right.pendingCents - left.pendingCents);

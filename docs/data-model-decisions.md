@@ -233,7 +233,8 @@ Approved as the base Case Management model.
 - Finance data is required for manual and imported case creation.
 - Case, paid entry, generated installments, and imported movements are persisted atomically per case.
 - `totalFeeAmountCents` cannot be edited after creation. Renegotiation is outside v1.
-- Case creation may generate installments with due dates before system creation so offices can register cases already in progress. Past generated installments remain normal generated payments; receipt must still be registered explicitly unless it is the entry payment.
+- Case creation records the entry as paid on its informed receipt date, not necessarily the system creation date.
+- When registering a case already in progress, installments due before the registration date are marked paid by default using their due date as the receipt date. The user can opt out so those installments remain pending and are calculated as overdue.
 - Physical case deletion is allowed only after explicit UI confirmation by typing `DELETAR`.
 - Physical case deletion removes linked payments, documents, deadlines, timeline events, sync runs, and notifications in the same database operation; document binaries are deleted from storage before metadata is removed.
 - Case import items keep audit history after case deletion, but their `caseId` reference is cleared.
@@ -376,6 +377,7 @@ Approved for Finance v1.
 - Pending overdue payments remain visible in later month scopes without changing `dueDate`; `dueDate` is their immutable competence reference.
 - A pending payment is overdue only when `dueDate` is before today, regardless of the month currently selected in the finance UI.
 - A late receipt is also visible in its `paidAt` month with the original competence.
+- The final installment date is calculated from the first due date and the generated installment count, and is shown in the process payment-plan table.
 
 ## Document
 

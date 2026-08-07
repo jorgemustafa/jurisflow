@@ -110,6 +110,10 @@ export function buildCasePayments(
   scheduleId: string = randomUUID(),
 ): CreatePaymentData[] {
   const firstDueDate = new Date(`${finance.firstDueDate}T12:00:00.000Z`);
+  const entryReceivedAt = new Date(
+    `${finance.entryReceivedAt ?? createdAt.toISOString().slice(0, 10)}T12:00:00.000Z`,
+  );
+  const today = new Date(Date.UTC(createdAt.getUTCFullYear(), createdAt.getUTCMonth(), createdAt.getUTCDate()));
 
   const balance = finance.totalFeeAmountCents - finance.entryAmountCents;
   const installmentTotal = Math.ceil(balance / finance.installmentAmountCents);
@@ -120,8 +124,8 @@ export function buildCasePayments(
     source: "generated",
     description: "Honorários - Entrada",
     amountCents: finance.entryAmountCents,
-    dueDate: createdAt,
-    paidAt: createdAt,
+    dueDate: entryReceivedAt,
+    paidAt: entryReceivedAt,
     paymentMethod: finance.entryPaymentMethod,
     status: "paid",
     installmentNumber: 0,
@@ -134,6 +138,8 @@ export function buildCasePayments(
       finance.installmentAmountCents,
       balance - index * finance.installmentAmountCents,
     );
+    const dueDate = addMonths(firstDueDate, index);
+    const paid = finance.pastInstallmentsPaid !== false && dueDate < today;
     return {
       clientId,
       caseId,
@@ -141,9 +147,16 @@ export function buildCasePayments(
       source: "generated",
       description: `Honorários - Parcela ${installmentNumber}/${installmentTotal}`,
       amountCents,
-      dueDate: addMonths(firstDueDate, index),
+      dueDate,
       installmentNumber,
       installmentTotal,
+      ...(paid
+        ? {
+            status: "paid" as const,
+            paidAt: dueDate,
+            paymentMethod: finance.entryPaymentMethod,
+          }
+        : {}),
     } satisfies CreatePaymentData;
   });
 
