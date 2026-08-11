@@ -1,9 +1,19 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../shared/db/prisma.js";
-import type { CaseTimelineEventType, CaseTimelineFilters, CreateCaseTimelineEventInput } from "./case-timeline.schemas.js";
+import type {
+  CaseTimelineEventType,
+  CaseTimelineFilters,
+  CreateCaseTimelineEventInput,
+} from "./case-timeline.schemas.js";
 import type { CaseTimelineEventRecord } from "./case-timeline.service.js";
 
-type DbCaseTimelineEventType = "NOTE" | "HEARING" | "PETITION" | "DECISION" | "STATUS_CHANGE" | "OTHER";
+type DbCaseTimelineEventType =
+  | "NOTE"
+  | "HEARING"
+  | "PETITION"
+  | "DECISION"
+  | "STATUS_CHANGE"
+  | "OTHER";
 
 type DbCaseTimelineEvent = {
   id: string;
@@ -22,8 +32,10 @@ type DbCaseTimelineEvent = {
   case?: { title: string; client: { name: string } } | null;
 };
 
-const toDbType = (value: CaseTimelineEventType): DbCaseTimelineEventType => value.toUpperCase() as DbCaseTimelineEventType;
-const toApiType = (value: DbCaseTimelineEventType): CaseTimelineEventType => value.toLowerCase() as CaseTimelineEventType;
+const toDbType = (value: CaseTimelineEventType): DbCaseTimelineEventType =>
+  value.toUpperCase() as DbCaseTimelineEventType;
+const toApiType = (value: DbCaseTimelineEventType): CaseTimelineEventType =>
+  value.toLowerCase() as CaseTimelineEventType;
 
 function toRecord(item: DbCaseTimelineEvent): CaseTimelineEventRecord {
   return {
@@ -41,25 +53,33 @@ function toRecord(item: DbCaseTimelineEvent): CaseTimelineEventRecord {
     description: item.description,
     occurredAt: item.occurredAt,
     createdAt: item.createdAt,
-    updatedAt: item.updatedAt
+    updatedAt: item.updatedAt,
   };
 }
 
 const includeRelations = {
   createdByUser: { select: { name: true } },
-  case: { select: { title: true, client: { select: { name: true } } } }
+  case: { select: { title: true, client: { select: { name: true } } } },
 };
 
-function listAllWhere(filters: CaseTimelineFilters): Prisma.CaseTimelineEventWhereInput {
+function listAllWhere(
+  filters: CaseTimelineFilters,
+): Prisma.CaseTimelineEventWhereInput {
   const where: Prisma.CaseTimelineEventWhereInput = {};
   if (filters.type !== "all") where.type = toDbType(filters.type);
   if (filters.caseId) where.caseId = filters.caseId;
+  if (filters.cnjNumber)
+    where.case = { cnjNumber: { contains: filters.cnjNumber } };
   if (filters.q) {
     where.OR = [
       { title: { contains: filters.q, mode: "insensitive" } },
       { description: { contains: filters.q, mode: "insensitive" } },
       { case: { title: { contains: filters.q, mode: "insensitive" } } },
-      { case: { client: { name: { contains: filters.q, mode: "insensitive" } } } }
+      {
+        case: {
+          client: { name: { contains: filters.q, mode: "insensitive" } },
+        },
+      },
     ];
   }
   return where;
@@ -74,7 +94,7 @@ export const caseTimelineRepository = {
     const items = await prisma.caseTimelineEvent.findMany({
       where: { caseId },
       include: includeRelations,
-      orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }]
+      orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
     });
     return items.map((item) => toRecord(item as DbCaseTimelineEvent));
   },
@@ -83,12 +103,16 @@ export const caseTimelineRepository = {
     const items = await prisma.caseTimelineEvent.findMany({
       where: listAllWhere(filters),
       include: includeRelations,
-      orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }]
+      orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
     });
     return items.map((item) => toRecord(item as DbCaseTimelineEvent));
   },
 
-  async create(caseId: string, data: CreateCaseTimelineEventInput & { occurredAt: Date }, createdByUserId: string | null) {
+  async create(
+    caseId: string,
+    data: CreateCaseTimelineEventInput & { occurredAt: Date },
+    createdByUserId: string | null,
+  ) {
     const item = await prisma.caseTimelineEvent.create({
       data: {
         caseId,
@@ -99,10 +123,10 @@ export const caseTimelineRepository = {
         type: toDbType(data.type),
         title: data.title,
         description: data.description ?? null,
-        occurredAt: data.occurredAt
+        occurredAt: data.occurredAt,
       },
-      include: includeRelations
+      include: includeRelations,
     });
     return toRecord(item as DbCaseTimelineEvent);
-  }
+  },
 };

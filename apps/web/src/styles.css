@@ -8,7 +8,13 @@
   color: var(--color-foreground);
   background: var(--color-background);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
 * {
@@ -222,7 +228,11 @@ textarea {
   overflow: hidden;
   padding: 28px 20px;
   color: var(--color-background-soft);
-  background: linear-gradient(180deg, var(--navy-950), var(--color-primary-900));
+  background: linear-gradient(
+    180deg,
+    var(--navy-950),
+    var(--color-primary-900)
+  );
 }
 
 .sidebar-top {
@@ -391,7 +401,9 @@ textarea {
   height: 420px;
   border: 1px solid rgb(var(--white-rgb) / 0.12);
   border-radius: 50%;
-  box-shadow: 0 0 0 80px rgb(var(--white-rgb) / 0.035), 0 0 0 160px rgb(var(--white-rgb) / 0.025);
+  box-shadow:
+    0 0 0 80px rgb(var(--white-rgb) / 0.035),
+    0 0 0 160px rgb(var(--white-rgb) / 0.025);
   content: "";
 }
 
@@ -606,22 +618,75 @@ textarea {
   height: 38px;
 }
 
-.date-input { position: relative; }
+.date-input {
+  position: relative;
+}
 .date-input-trigger {
-  display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 40px;
-  padding: 0 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-white); color: var(--color-text); font: inherit; text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-white);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
 }
 .date-picker {
-  position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: 272px; padding: 12px;
-  border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-white); box-shadow: 0 10px 24px rgb(0 0 0 / 16%);
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 272px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-white);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 16%);
 }
-.date-picker-header, .date-picker-actions { display: flex; align-items: center; justify-content: space-between; }
-.date-picker-header button, .date-picker-actions button, .date-picker-grid button { border: 0; background: transparent; color: var(--navy-800); font: inherit; cursor: pointer; }
-.date-picker-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 12px 0; text-align: center; }
-.date-picker-grid span { color: var(--color-text-muted); font-size: 12px; }
-.date-picker-grid button { min-height: 28px; border-radius: 4px; }
-.date-picker-grid button:hover, .date-picker-grid button.selected { background: var(--navy-800); color: var(--color-white); }
-.date-picker-actions { border-top: 1px solid var(--color-border-soft); padding-top: 8px; font-size: 13px; }
+.date-picker-header,
+.date-picker-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.date-picker-header button,
+.date-picker-actions button,
+.date-picker-grid button {
+  border: 0;
+  background: transparent;
+  color: var(--navy-800);
+  font: inherit;
+  cursor: pointer;
+}
+.date-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 12px 0;
+  text-align: center;
+}
+.date-picker-grid span {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+.date-picker-grid button {
+  min-height: 28px;
+  border-radius: 4px;
+}
+.date-picker-grid button:hover,
+.date-picker-grid button.selected {
+  background: var(--navy-800);
+  color: var(--color-white);
+}
+.date-picker-actions {
+  border-top: 1px solid var(--color-border-soft);
+  padding-top: 8px;
+  font-size: 13px;
+}
 
 .loading-state {
   display: grid;
@@ -652,7 +717,12 @@ textarea {
 
 .skeleton {
   border-radius: 6px;
-  background: linear-gradient(90deg, var(--color-surface-muted-gradient) 25%, var(--color-surface-muted-gradient-light) 50%, var(--color-surface-muted-gradient) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-muted-gradient) 25%,
+    var(--color-surface-muted-gradient-light) 50%,
+    var(--color-surface-muted-gradient) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
@@ -934,7 +1004,7 @@ textarea {
 }
 
 .timeline-toolbar {
-  grid-template-columns: minmax(260px, 1fr) 190px;
+  grid-template-columns: minmax(260px, 1fr) minmax(180px, 240px) 190px;
 }
 
 .deadlines-toolbar {
@@ -1364,8 +1434,14 @@ tr:last-child td {
   font-weight: 700;
 }
 
-.finance-period .month-picker select { border-radius: 6px 0 0 6px; }
-.finance-period .month-picker input { border-left-color: var(--color-border); border-radius: 0 6px 6px 0; text-align: center; }
+.finance-period .month-picker select {
+  border-radius: 6px 0 0 6px;
+}
+.finance-period .month-picker input {
+  border-left-color: var(--color-border);
+  border-radius: 0 6px 6px 0;
+  text-align: center;
+}
 
 .finance-period-today {
   height: 26px;
@@ -1380,7 +1456,9 @@ tr:last-child td {
   cursor: pointer;
 }
 
-.finance-period-today:hover { background: var(--color-background-soft); }
+.finance-period-today:hover {
+  background: var(--color-background-soft);
+}
 
 .month-nav .month-input {
   min-width: 150px;
@@ -1543,6 +1621,18 @@ tr:last-child td {
   min-width: 200px;
   font-size: 13px;
   font-weight: 700;
+}
+
+.row-editor-form .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row-editor-form .checkbox-label input {
+  width: 16px;
+  min-height: 16px;
+  height: 16px;
 }
 
 .row-editor-form .grow {

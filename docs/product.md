@@ -56,7 +56,8 @@ Secondary users:
 - Track case status, CNJ number, area, responsible person, and relevant dates.
 - Register timeline events for important case activity, such as notes, hearings, petitions, decisions, and status changes.
 - Import public process movements into the case timeline when available from DataJud.
-- Show a general timeline so the office can scan recent activity across all cases.
+- Show a general timeline so the office can scan recent activity across all cases and filter it by CNJ.
+- Import a process title from its DataJud class without appending the CNJ number.
 - Track case deadlines and surface overdue or near-due alerts.
 - Values, value of each installment, number of installment, total value
 - Link documents, financial records, and client history.
