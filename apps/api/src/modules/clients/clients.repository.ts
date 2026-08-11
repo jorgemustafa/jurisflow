@@ -86,17 +86,15 @@ export const clientsRepository = {
   },
 
   async countLinks(id: string) {
-    const [cases, payments, documents, importItems] = await prisma.$transaction([
+    const [cases, payments, documents] = await prisma.$transaction([
       prisma.case.count({ where: { clientId: id } }),
       prisma.payment.count({ where: { clientId: id } }),
-      prisma.document.count({ where: { clientId: id } }),
-      prisma.caseImportItem.count({ where: { clientId: id } })
+      prisma.document.count({ where: { clientId: id } })
     ]);
     return [
       { label: "processos", count: cases },
       { label: "pagamentos", count: payments },
-      { label: "documentos", count: documents },
-      { label: "itens de importação", count: importItems }
+      { label: "documentos", count: documents }
     ];
   },
 

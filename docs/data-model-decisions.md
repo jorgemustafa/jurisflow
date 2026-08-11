@@ -159,7 +159,7 @@ Approved for Client Management v1.
 - Duplicate names are allowed.
 - Inactive clients are excluded from default listing but remain viewable and editable.
 - Creating future cases for inactive clients should require reactivation.
-- Physical client deletion is blocked when the client has any linked cases, payments, documents, or import items. The API returns the blocking link counts so the UI can show what must be handled first.
+- Physical client deletion is blocked when the client has linked cases, payments, or documents. Linked import items are deleted by cascade and do not block deletion.
 
 ## User
 
