@@ -62,6 +62,7 @@ export type CaseFilters = {
 
 export type TimelineFilters = {
   q: string;
+  cnjNumber: string;
   type: CaseTimelineEventType | "all";
 };
 

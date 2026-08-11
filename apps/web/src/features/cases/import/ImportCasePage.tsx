@@ -100,7 +100,9 @@ export const ImportCasePage = () => {
   const setBatchData = (data: CaseImportBatch) => {
     queryClient.setQueryData(["case-import-batch", data.id], data);
   };
-  const selectedClientName = clients.data?.find((client) => client.id === selectedClientId)?.name;
+  const selectedClientName = clients.data?.find(
+    (client) => client.id === selectedClientId,
+  )?.name;
 
   const failureMessage = (failure: unknown, fallback: string) =>
     failure instanceof ApiError ? failure.message : fallback;
@@ -114,12 +116,18 @@ export const ImportCasePage = () => {
       let nextBatch = data;
       try {
         if (selectedClientId) {
-          for (const item of data.items.filter((entry) => entry.status === "pending" && !entry.clientId)) {
-            nextBatch = await updateCaseImportItem(data.id, item.id, { clientId: selectedClientId });
+          for (const item of data.items.filter(
+            (entry) => entry.status === "pending" && !entry.clientId,
+          )) {
+            nextBatch = await updateCaseImportItem(data.id, item.id, {
+              clientId: selectedClientId,
+            });
           }
         }
       } catch {
-        setError("Não foi possível vincular o cliente automaticamente. Selecione na revisão.");
+        setError(
+          "Não foi possível vincular o cliente automaticamente. Selecione na revisão.",
+        );
       }
       setBatchData(nextBatch);
     },
@@ -360,11 +368,13 @@ export const ImportCasePage = () => {
                   <option value="other">Outro</option>
                 </select>
               </label>
-              <label>
+              <label className="checkbox-label">
                 <input
                   name="pastInstallmentsPaid"
                   type="checkbox"
-                  defaultChecked={item.financeData?.pastInstallmentsPaid ?? true}
+                  defaultChecked={
+                    item.financeData?.pastInstallmentsPaid ?? true
+                  }
                 />
                 Parcelas vencidas já foram recebidas
               </label>
@@ -395,7 +405,11 @@ export const ImportCasePage = () => {
             automaticamente pelo número e os clientes são vinculados na revisão
             antes de salvar.
           </p>
-          {selectedClientId ? <p>Cliente pré-selecionado: {selectedClientName ?? selectedClientId}</p> : null}
+          {selectedClientId ? (
+            <p>
+              Cliente pré-selecionado: {selectedClientName ?? selectedClientId}
+            </p>
+          ) : null}
         </div>
         <Link className="button" to="/cases">
           Voltar
@@ -403,10 +417,12 @@ export const ImportCasePage = () => {
       </header>
 
       <section className="panel">
-        {clients.isLoading ? <LoadingState label="Carregando clientes ativos" variant="list" /> : null}
+        {clients.isLoading ? (
+          <LoadingState label="Carregando clientes ativos" variant="list" />
+        ) : null}
         <form className="case-import-batch-form" onSubmit={submit}>
           <textarea
-            rows={6}
+            rows={2}
             placeholder={"0000001-23.2026.8.26.0000\n0000002-34.2025.5.02.0000"}
             value={input}
             onChange={(event) => setInput(event.target.value)}
@@ -438,7 +454,13 @@ export const ImportCasePage = () => {
         {error ? <p className="alert">{error}</p> : null}
       </section>
 
-      {batch.isLoading ? <LoadingState label="Carregando revisão da importação" variant="table" columns={7} /> : null}
+      {batch.isLoading ? (
+        <LoadingState
+          label="Carregando revisão da importação"
+          variant="table"
+          columns={7}
+        />
+      ) : null}
       {batch.data ? (
         <section className="panel">
           <h2>Revisão da importação</h2>

@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
   createCaseTimelineEventSchema,
-  listCaseTimelineQuerySchema
+  listCaseTimelineQuerySchema,
 } from "../../modules/cases/case-timeline.schemas.js";
 
 describe("case timeline schemas", () => {
   it("accepts a minimal timeline event", () => {
     const input = createCaseTimelineEventSchema.parse({
       type: "note",
-      title: "Cliente enviou documentos"
+      title: "Cliente enviou documentos",
     });
 
     expect(input).toEqual({
       type: "note",
-      title: "Cliente enviou documentos"
+      title: "Cliente enviou documentos",
     });
   });
 
@@ -22,18 +22,28 @@ describe("case timeline schemas", () => {
       type: "hearing",
       title: " Audiência inicial ",
       description: "",
-      occurredAt: "2026-05-25"
+      occurredAt: "2026-05-25",
     });
 
     expect(input).toEqual({
       type: "hearing",
       title: "Audiência inicial",
       description: undefined,
-      occurredAt: new Date("2026-05-25T00:00:00.000Z")
+      occurredAt: new Date("2026-05-25T00:00:00.000Z"),
     });
   });
 
   it("defaults global timeline listing to all event types", () => {
     expect(listCaseTimelineQuerySchema.parse({})).toEqual({ type: "all" });
+  });
+
+  it("normalizes the CNJ timeline filter", () => {
+    expect(
+      listCaseTimelineQuerySchema.parse({
+        cnjNumber: "0000396-24.2018.8.26.0041",
+      }),
+    ).toMatchObject({
+      cnjNumber: "00003962420188260041",
+    });
   });
 });

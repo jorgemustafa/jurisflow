@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import type { PreviewCaseImportInput } from "./case-import.schemas.js";
-import type { ImportedCaseDraft, ImportedMovement } from "./case-import.service.js";
+import type {
+  ImportedCaseDraft,
+  ImportedMovement,
+} from "./case-import.service.js";
 
 type DataJudHit = {
   _source?: Record<string, unknown>;
@@ -31,14 +34,16 @@ export class DataJudRequestError extends Error {
 }
 
 const endpointBase = "https://api-publica.datajud.cnj.jus.br";
-const text = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
+const text = (value: unknown) =>
+  typeof value === "string" && value.trim() ? value.trim() : null;
 const date = (value: unknown) => {
   const parsed = text(value);
   if (!parsed) return null;
   const item = new Date(parsed);
   return Number.isNaN(item.getTime()) ? null : item;
 };
-const hash = (parts: unknown[]) => createHash("sha256").update(JSON.stringify(parts)).digest("hex");
+const hash = (parts: unknown[]) =>
+  createHash("sha256").update(JSON.stringify(parts)).digest("hex");
 
 function firstName(value: unknown) {
   if (!Array.isArray(value)) return null;
@@ -70,22 +75,33 @@ function mapMovements(source: Record<string, unknown>): ImportedMovement[] {
   return movements.flatMap((entry) => {
     const item = entry as Record<string, unknown>;
     const occurredAt = date(item.dataHora);
-    const title = nestedName(item, "movimento") ?? text(item.nome) ?? text(item.codigo);
+    const title =
+      nestedName(item, "movimento") ?? text(item.nome) ?? text(item.codigo);
     if (!occurredAt || !title) return [];
 
-    const externalId = [text(item.codigo), occurredAt.toISOString(), title].filter(Boolean).join("-");
+    const externalId = [text(item.codigo), occurredAt.toISOString(), title]
+      .filter(Boolean)
+      .join("-");
     return {
       externalId,
-      sourceHash: hash(["datajud", source.numeroProcesso, externalId, movementDescription(item)]),
+      sourceHash: hash([
+        "datajud",
+        source.numeroProcesso,
+        externalId,
+        movementDescription(item),
+      ]),
       type: "other",
       title,
       description: movementDescription(item),
-      occurredAt
+      occurredAt,
     };
   });
 }
 
-function mapCase(source: Record<string, unknown>, courtCode: string): ImportedCaseDraft {
+function mapCase(
+  source: Record<string, unknown>,
+  courtCode: string,
+): ImportedCaseDraft {
   const cnjNumber = text(source.numeroProcesso);
   if (!cnjNumber) throw new DataJudCaseNotFoundError();
 
@@ -96,31 +112,38 @@ function mapCase(source: Record<string, unknown>, courtCode: string): ImportedCa
 
   return {
     cnjNumber,
-    title: [caseClass, cnjNumber].filter(Boolean).join(" - "),
+    title: caseClass ?? cnjNumber,
     court,
     jurisdiction: null,
     division,
     description: subject,
     openedAt: date(source.dataAjuizamento),
-    movements: mapMovements(source)
+    movements: mapMovements(source),
   };
 }
 
-export async function fetchDataJudCase(input: PreviewCaseImportInput): Promise<ImportedCaseDraft> {
+export async function fetchDataJudCase(
+  input: PreviewCaseImportInput,
+): Promise<ImportedCaseDraft> {
   const apiKey = process.env.DATAJUD_API_KEY;
   if (!apiKey) throw new DataJudConfigError();
 
-  const response = await fetch(`${endpointBase}/api_publica_${input.courtCode}/_search`, {
-    method: "POST",
-    headers: {
-      Authorization: apiKey.startsWith("APIKey ") ? apiKey : `APIKey ${apiKey}`,
-      "Content-Type": "application/json"
+  const response = await fetch(
+    `${endpointBase}/api_publica_${input.courtCode}/_search`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: apiKey.startsWith("APIKey ")
+          ? apiKey
+          : `APIKey ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        size: 1,
+        query: { term: { numeroProcesso: input.cnjNumber } },
+      }),
     },
-    body: JSON.stringify({
-      size: 1,
-      query: { term: { numeroProcesso: input.cnjNumber } }
-    })
-  });
+  );
 
   if (!response.ok) throw new DataJudRequestError();
 
