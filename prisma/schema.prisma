@@ -7,25 +7,26 @@ datasource db {
 }
 
 model Client {
-  id        String       @id @default(uuid())
-  type      ClientType
-  status    ClientStatus @default(ACTIVE)
-  name      String
-  document  String?      @unique @db.VarChar(14)
-  rg        String?      @db.VarChar(20)
-  email     String?
-  phone     String?      @db.VarChar(11)
-  address   String?
-  street    String?
-  city      String?      @db.VarChar(120)
-  state     String?      @db.VarChar(2)
-  zipCode   String?      @db.VarChar(8)
-  notes     String?
-  cases     Case[]
-  payments  Payment[]
-  documents Document[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id          String           @id @default(uuid())
+  type        ClientType
+  status      ClientStatus     @default(ACTIVE)
+  name        String
+  document    String?          @unique @db.VarChar(14)
+  rg          String?          @db.VarChar(20)
+  email       String?
+  phone       String?          @db.VarChar(11)
+  address     String?
+  street      String?
+  city        String?          @db.VarChar(120)
+  state       String?          @db.VarChar(2)
+  zipCode     String?          @db.VarChar(8)
+  notes       String?
+  cases       Case[]
+  payments    Payment[]
+  documents   Document[]
+  importItems CaseImportItem[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@index([status])
   @@index([type])
@@ -207,12 +208,14 @@ model CaseImportItem {
   clientId     String?
   caseId       String?
   batch        CaseImportBatch      @relation(fields: [batchId], references: [id])
+  client       Client?              @relation(fields: [clientId], references: [id], onDelete: Cascade)
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
 
   @@index([batchId])
   @@index([status])
   @@index([cnjNumber])
+  @@index([clientId])
 }
 
 model CaseSyncRun {
