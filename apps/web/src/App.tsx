@@ -18,9 +18,11 @@ import { NotificationsPage } from "src/features/notifications/NotificationsPage.
 import { TimelinePage } from "src/features/timeline/TimelinePage.js";
 import { DeadlinesPage } from "src/features/deadlines/DeadlinesPage.js";
 import { Layout } from "src/layout/Layout.js";
+import { ToastProvider } from "src/components/ui/Toast.js";
 
 export const App = () => {
   return (
+    <ToastProvider>
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -52,5 +54,6 @@ export const App = () => {
         />
       </Routes>
     </AuthProvider>
+    </ToastProvider>
   );
 };

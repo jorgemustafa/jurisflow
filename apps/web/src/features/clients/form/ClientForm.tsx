@@ -15,6 +15,7 @@ import { ApiError } from "src/services/http.js";
 import { FieldError } from "src/features/clients/form/FieldError.js";
 import { emptyClientForm } from "src/features/clients/form/utils/clientFormDefaults.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 type ClientFormProps = {
   clientId?: string;
@@ -27,6 +28,7 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
   const queryClient = useQueryClient();
   const [generalError, setGeneralError] = useState("");
   const [cepFeedback, setCepFeedback] = useState("");
+  const { showToast } = useToast();
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientFormSchema),
     defaultValues: emptyClientForm
@@ -38,6 +40,7 @@ export const ClientForm = ({ clientId, mode }: ClientFormProps) => {
   const mutation = useMutation({
     mutationFn: (data: ClientFormData) => (isEdit ? updateClient(clientId!, data) : createClient(data)),
     onSuccess: (saved) => {
+      showToast(isEdit ? "Cliente atualizado." : "Cliente criado.");
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.setQueryData(["client", saved.id], saved);
       navigate(`/clients/${saved.id}`);

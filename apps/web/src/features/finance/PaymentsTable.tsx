@@ -17,6 +17,7 @@ import {
 import { ApiError } from "src/services/http.js";
 import { formatDate, formatMoney } from "src/utils/format.js";
 import { DateInput } from "src/components/ui/DateInput.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -86,9 +87,11 @@ export const PaymentsTable = ({
   const [cancelReason, setCancelReason] = useState("");
   const [fixPaidAt, setFixPaidAt] = useState(today());
   const [error, setError] = useState("");
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
 
-  const success = () => {
+  const success = (message: string) => {
+    showToast(message);
     setAction(null);
     setError("");
     queryClient.invalidateQueries({ queryKey: ["payments"] });
@@ -98,7 +101,7 @@ export const PaymentsTable = ({
     setError(cause instanceof ApiError ? cause.message : fallback);
   const paidMutation = useMutation({
     mutationFn: (id: string) => markPaymentPaid(id, receive),
-    onSuccess: success,
+    onSuccess: () => success("Pagamento recebido."),
     onError: (cause) =>
       failure(cause, "Não foi possível registrar o recebimento."),
   });
@@ -110,13 +113,13 @@ export const PaymentsTable = ({
       id: string;
       data: Parameters<typeof updatePayment>[1];
     }) => updatePayment(id, data),
-    onSuccess: success,
+    onSuccess: () => success("Pagamento atualizado."),
     onError: (cause) =>
       failure(cause, "Não foi possível atualizar o pagamento."),
   });
   const cancelMutation = useMutation({
     mutationFn: (id: string) => cancelPayment(id, { cancelReason }),
-    onSuccess: success,
+    onSuccess: () => success("Pagamento cancelado."),
     onError: (cause) =>
       failure(cause, "Não foi possível cancelar o pagamento."),
   });

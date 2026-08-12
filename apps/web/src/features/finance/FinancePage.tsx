@@ -30,6 +30,7 @@ import {
 import { ApiError } from "src/services/http.js";
 import { formatMoney } from "src/utils/format.js";
 import { monthLabel, moveMonth } from "src/utils/month.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -51,6 +52,7 @@ export const FinancePage = () => {
   const [newPayment, setNewPayment] = useState(emptyNewPayment);
   const [expandedCaseId, setExpandedCaseId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
 
   const payments = useQuery({
@@ -113,6 +115,7 @@ export const FinancePage = () => {
         notes: newPayment.notes || undefined,
       }),
     onSuccess: () => {
+      showToast("Pagamento criado.");
       setError("");
       setNewPayment(emptyNewPayment);
       setShowNewPayment(false);

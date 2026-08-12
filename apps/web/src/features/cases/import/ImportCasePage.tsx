@@ -26,6 +26,7 @@ import {
 import { fieldValue } from "src/utils/format.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { DateInput } from "src/components/ui/DateInput.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 const today = () => new Date().toISOString().slice(0, 10);
@@ -82,6 +83,7 @@ export const ImportCasePage = () => {
   const [batchId, setBatchId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [summary, setSummary] = useState<CaseImportBatchResult | null>(null);
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
 
   const cnjNumbers = useMemo(() => parseInput(input), [input]);
@@ -110,6 +112,7 @@ export const ImportCasePage = () => {
   const createMutation = useMutation({
     mutationFn: () => createCaseImportBatch(cnjNumbers),
     onSuccess: async (data) => {
+      showToast("Consulta de processos concluída.");
       setError("");
       setSummary(null);
       setBatchId(data.id);
@@ -148,6 +151,7 @@ export const ImportCasePage = () => {
     }) =>
       updateCaseImportItem(batchId as string, variables.itemId, variables.data),
     onSuccess: (data) => {
+      showToast("Importação atualizada.");
       setError("");
       setBatchData(data);
     },
@@ -158,6 +162,7 @@ export const ImportCasePage = () => {
   const confirmMutation = useMutation({
     mutationFn: () => confirmCaseImportBatch(batchId as string),
     onSuccess: async (result) => {
+      showToast(`${result.imported} processo(s) importado(s).`);
       setError("");
       setSummary(result);
       setBatchData(result.batch);

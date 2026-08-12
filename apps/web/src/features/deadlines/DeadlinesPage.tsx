@@ -4,6 +4,7 @@ import { DeadlineList } from "src/features/deadlines/DeadlineList.js";
 import { listDeadlines, updateDeadline, updateDeadlineStatus, type DeadlineFilters, type DeadlineFormData, type DeadlineStatus } from "src/services/deadlines.js";
 import { ApiError } from "src/services/http.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 const defaultFilters: DeadlineFilters = {
   q: "",
@@ -14,11 +15,13 @@ const defaultFilters: DeadlineFilters = {
 export const DeadlinesPage = () => {
   const [filters, setFilters] = useState(defaultFilters);
   const [deadlineError, setDeadlineError] = useState("");
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const deadlines = useQuery({ queryKey: ["deadlines", filters], queryFn: () => listDeadlines(filters) });
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: DeadlineFormData }) => updateDeadline(id, data),
     onSuccess: async () => {
+      showToast("Prazo atualizado.");
       setDeadlineError("");
       await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
     },
@@ -29,6 +32,7 @@ export const DeadlinesPage = () => {
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: DeadlineStatus }) => updateDeadlineStatus(id, status),
     onSuccess: async () => {
+      showToast("Prazo atualizado.");
       setDeadlineError("");
       await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
     },
