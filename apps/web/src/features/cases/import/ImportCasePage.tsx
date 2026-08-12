@@ -18,7 +18,7 @@ import {
   type CaseImportItemStatus,
 } from "src/services/cases.js";
 import { listClients } from "src/services/clients.js";
-import { ApiError, backendErrorMessage } from "src/services/http.js";
+import { ApiError } from "src/services/http.js";
 import {
   moneyInputValue,
   parseMoney,
@@ -218,19 +218,6 @@ export const ImportCasePage = () => {
       <tr>
         <td>{formatCnj(item.cnjNumber)}</td>
         <td>
-          {item.status === "failed" ? (
-            <span className="empty-inline">
-              {backendErrorMessage(item.errorMessage, "Falha na consulta")}
-            </span>
-          ) : item.caseId ? (
-            <Link className="table-link" to={`/cases/${item.caseId}`}>
-              {item.draft?.title ?? "Ver processo"}
-            </Link>
-          ) : (
-            fieldValue(item.draft?.title ?? null)
-          )}
-        </td>
-        <td>
           {fieldValue(
             item.draft?.court ?? item.courtCode?.toUpperCase() ?? null,
           )}
@@ -304,7 +291,7 @@ export const ImportCasePage = () => {
       </tr>
       {item.status === "pending" ? (
         <tr className="row-editor">
-          <td colSpan={7}>
+          <td colSpan={6}>
             <form
               className="row-editor-form"
               onSubmit={(event) => saveFinance(event, item.id)}
@@ -486,7 +473,6 @@ export const ImportCasePage = () => {
                 <thead>
                   <tr>
                     <th>CNJ</th>
-                    <th>Processo</th>
                     <th>Tribunal</th>
                     <th>Andamentos</th>
                     <th>Status</th>

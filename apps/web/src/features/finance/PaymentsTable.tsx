@@ -363,7 +363,7 @@ export const PaymentsTable = ({
           <thead>
             <tr>
               {showClient ? <th>Cliente</th> : null}
-              {showCase ? <th>Processo</th> : null}
+              {showCase ? <th>CNJ</th> : null}
               <th>Parcela</th>
               <th>Valor</th>
               <th>Vencimento</th>
@@ -384,7 +384,7 @@ export const PaymentsTable = ({
                   {showClient ? (
                     <td>{payment.clientName ?? payment.clientId}</td>
                   ) : null}
-                  {showCase ? <td>{payment.caseTitle ?? "—"}</td> : null}
+                  {showCase ? <td>{payment.caseCnjNumber ?? "—"}</td> : null}
                   <td>
                     {installmentLabel(payment)}
                     {competence ? (

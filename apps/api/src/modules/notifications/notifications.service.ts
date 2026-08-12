@@ -4,6 +4,7 @@ export type NotificationRecord = {
   id: string;
   caseId: string;
   caseTitle: string | null;
+  caseCnjNumber: string | null;
   title: string;
   body: string | null;
   newMovements: number;
@@ -12,7 +13,10 @@ export type NotificationRecord = {
 };
 
 type NotificationsRepository = {
-  list(userId: string, filters: NotificationListFilters): Promise<NotificationRecord[]>;
+  list(
+    userId: string,
+    filters: NotificationListFilters,
+  ): Promise<NotificationRecord[]>;
   unreadCount(userId: string): Promise<number>;
   markRead(id: string, userId: string): Promise<NotificationRecord | null>;
   markAllRead(userId: string): Promise<number>;
@@ -24,7 +28,9 @@ export class NotificationNotFoundError extends Error {
   }
 }
 
-export function createNotificationsService(repository: NotificationsRepository) {
+export function createNotificationsService(
+  repository: NotificationsRepository,
+) {
   return {
     list(userId: string, filters: NotificationListFilters) {
       return repository.list(userId, filters);
@@ -42,6 +48,6 @@ export function createNotificationsService(repository: NotificationsRepository) 
 
     async markAllRead(userId: string) {
       return { updated: await repository.markAllRead(userId) };
-    }
+    },
   };
 }

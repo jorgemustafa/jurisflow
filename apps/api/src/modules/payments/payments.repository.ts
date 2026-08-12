@@ -52,7 +52,11 @@ type DbPayment = {
   canceledAt: Date | null;
   cancelReason: string | null;
   client?: { name: string };
-  case?: { title: string; totalFeeAmountCents: number | null } | null;
+  case?: {
+    title: string;
+    cnjNumber: string | null;
+    totalFeeAmountCents: number | null;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -69,6 +73,7 @@ function toPaymentRecord(payment: DbPayment): PaymentRecord {
       : null,
     clientName: client?.name,
     caseTitle: linkedCase?.title ?? null,
+    caseCnjNumber: linkedCase?.cnjNumber ?? null,
     caseTotalFeeAmountCents: linkedCase?.totalFeeAmountCents ?? null,
   };
 }
@@ -105,7 +110,9 @@ export const paymentsRepository = {
       where: listWhere(filters),
       include: {
         client: { select: { name: true } },
-        case: { select: { title: true, totalFeeAmountCents: true } },
+        case: {
+          select: { title: true, cnjNumber: true, totalFeeAmountCents: true },
+        },
       },
       orderBy: { dueDate: "asc" },
     });

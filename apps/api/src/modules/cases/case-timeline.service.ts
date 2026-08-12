@@ -1,4 +1,8 @@
-import type { CaseTimelineEventType, CaseTimelineFilters, CreateCaseTimelineEventInput } from "./case-timeline.schemas.js";
+import type {
+  CaseTimelineEventType,
+  CaseTimelineFilters,
+  CreateCaseTimelineEventInput,
+} from "./case-timeline.schemas.js";
 
 export type CaseTimelineEventRecord = {
   id: string;
@@ -9,6 +13,7 @@ export type CaseTimelineEventRecord = {
   externalId: string | null;
   sourceHash: string | null;
   caseTitle: string | null;
+  caseCnjNumber: string | null;
   clientName: string | null;
   type: CaseTimelineEventType;
   title: string;
@@ -22,7 +27,11 @@ type CaseTimelineRepository = {
   findCaseById(id: string): Promise<{ id: string } | null>;
   list(caseId: string): Promise<CaseTimelineEventRecord[]>;
   listAll(filters: CaseTimelineFilters): Promise<CaseTimelineEventRecord[]>;
-  create(caseId: string, data: CreateCaseTimelineEventInput & { occurredAt: Date }, createdByUserId: string | null): Promise<CaseTimelineEventRecord>;
+  create(
+    caseId: string,
+    data: CreateCaseTimelineEventInput & { occurredAt: Date },
+    createdByUserId: string | null,
+  ): Promise<CaseTimelineEventRecord>;
 };
 
 export class CaseTimelineCaseNotFoundError extends Error {
@@ -47,9 +56,17 @@ export function createCaseTimelineService(repository: CaseTimelineRepository) {
       return repository.listAll(filters);
     },
 
-    async create(caseId: string, input: CreateCaseTimelineEventInput, createdByUserId: string | null) {
+    async create(
+      caseId: string,
+      input: CreateCaseTimelineEventInput,
+      createdByUserId: string | null,
+    ) {
       await ensureCase(caseId);
-      return repository.create(caseId, { ...input, occurredAt: input.occurredAt ?? new Date() }, createdByUserId);
-    }
+      return repository.create(
+        caseId,
+        { ...input, occurredAt: input.occurredAt ?? new Date() },
+        createdByUserId,
+      );
+    },
   };
 }
