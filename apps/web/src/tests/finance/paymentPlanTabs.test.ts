@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { filterPaymentPlanByStatus } from "../../features/finance/utils/paymentPlanStatus.js";
+import { sortPaymentsByDueDay } from "../../features/finance/utils/sortPaymentsByDueDay.js";
 import type { Payment } from "../../services/finance.js";
 
 const payment = (overrides: Partial<Payment> = {}): Payment => ({
@@ -44,5 +45,15 @@ describe("payment plan status tabs", () => {
     expect(
       filterPaymentPlanByStatus(items, "overdue").map((item) => item.id),
     ).toEqual(["overdue"]);
+  });
+
+  it("orders installments by due day", () => {
+    expect(
+      sortPaymentsByDueDay([
+        payment({ id: "twenty", dueDate: "2026-09-20T00:00:00.000Z" }),
+        payment({ id: "five", dueDate: "2026-08-05T00:00:00.000Z" }),
+        payment({ id: "ten", dueDate: "2026-10-10T00:00:00.000Z" }),
+      ]).map((item) => item.id),
+    ).toEqual(["five", "ten", "twenty"]);
   });
 });

@@ -68,7 +68,7 @@ export const clientsRepository = {
   async list(filters: ClientListFilters) {
     const clients = await prisma.client.findMany({
       where: listWhere(filters),
-      orderBy: { updatedAt: "desc" }
+      orderBy: { name: "asc" }
     });
     return clients.map((client) => toClientRecord(client as DbClient));
   },

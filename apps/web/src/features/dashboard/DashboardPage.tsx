@@ -67,14 +67,15 @@ export const DashboardPage = () => {
         <MonthPicker value={month} onChange={setMonth} />
       </header>
 
-      {isLoading ? <LoadingState label="Carregando indicadores" variant="metrics" items={6} /> : null}
+      {isLoading ? <LoadingState label="Carregando indicadores" variant="metrics" items={7} /> : null}
       {isError ? <p className="alert">Não foi possível carregar a visão geral.</p> : null}
 
       {!isLoading && !isError ? (
         <>
           <section className="metric-grid">
             <Metric label="Recebido no mês" value={formatMoney(finance.data?.receivedInMonthCents ?? 0)} />
-            <Metric label="A receber" value={formatMoney(finance.data?.totalToReceiveCents ?? 0)} />
+            <Metric label="A receber no mês" value={formatMoney(finance.data?.dueInMonthCents ?? 0)} />
+            <Metric label="A receber total" value={formatMoney(finance.data?.totalToReceiveCents ?? 0)} />
             <Metric label="Em atraso" value={formatMoney(finance.data?.overdueAmountCents ?? 0)} />
             <Metric label="Clientes ativos" value={String(activeClients)} />
             <Metric label="Processos ativos" value={String(activeCases)} />

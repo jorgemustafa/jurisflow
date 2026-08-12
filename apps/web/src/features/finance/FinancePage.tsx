@@ -398,6 +398,9 @@ export const FinancePage = () => {
           {!planPayments.isLoading ? (
             <PaymentsTable
               payments={visiblePlanInstallments}
+              showInstallment={planTab !== "paid"}
+              showDueDate={planTab !== "paid"}
+              showReceived={false}
               empty="Nenhuma parcela nesta categoria."
             />
           ) : null}

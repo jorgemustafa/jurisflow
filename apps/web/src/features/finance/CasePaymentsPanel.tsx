@@ -48,6 +48,9 @@ export const CasePaymentsPanel = ({ caseId }: { caseId: string }) => {
           payments={filteredPayments}
           showClient={false}
           showCase={false}
+          showInstallment={tab !== "paid"}
+          showDueDate={tab !== "paid"}
+          showReceived={false}
           empty="Nenhuma parcela nesta categoria."
         />
       ) : null}
