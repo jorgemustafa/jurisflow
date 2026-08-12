@@ -29,7 +29,11 @@ type DbCaseTimelineEvent = {
   createdAt: Date;
   updatedAt: Date;
   createdByUser?: { name: string } | null;
-  case?: { title: string; client: { name: string } } | null;
+  case?: {
+    title: string;
+    cnjNumber: string | null;
+    client: { name: string };
+  } | null;
 };
 
 const toDbType = (value: CaseTimelineEventType): DbCaseTimelineEventType =>
@@ -47,6 +51,7 @@ function toRecord(item: DbCaseTimelineEvent): CaseTimelineEventRecord {
     externalId: item.externalId,
     sourceHash: item.sourceHash,
     caseTitle: item.case?.title ?? null,
+    caseCnjNumber: item.case?.cnjNumber ?? null,
     clientName: item.case?.client.name ?? null,
     type: toApiType(item.type),
     title: item.title,
@@ -59,7 +64,13 @@ function toRecord(item: DbCaseTimelineEvent): CaseTimelineEventRecord {
 
 const includeRelations = {
   createdByUser: { select: { name: true } },
-  case: { select: { title: true, client: { select: { name: true } } } },
+  case: {
+    select: {
+      title: true,
+      cnjNumber: true,
+      client: { select: { name: true } },
+    },
+  },
 };
 
 function listAllWhere(

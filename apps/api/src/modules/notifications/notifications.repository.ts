@@ -11,31 +11,40 @@ type DbNotification = {
   newMovements: number;
   readAt: Date | null;
   createdAt: Date;
-  case?: { title: string } | null;
+  case?: { title: string; cnjNumber: string | null } | null;
 };
 
-const includeCase = { case: { select: { title: true } } } satisfies Prisma.NotificationInclude;
+const includeCase = {
+  case: { select: { title: true, cnjNumber: true } },
+} satisfies Prisma.NotificationInclude;
 
 function toRecord(item: DbNotification): NotificationRecord {
   return {
     id: item.id,
     caseId: item.caseId,
     caseTitle: item.case?.title ?? null,
+    caseCnjNumber: item.case?.cnjNumber ?? null,
     title: item.title,
     body: item.body,
     newMovements: item.newMovements,
     readAt: item.readAt,
-    createdAt: item.createdAt
+    createdAt: item.createdAt,
   };
 }
 
 export const notificationsRepository = {
-  async list(userId: string, filters: NotificationListFilters): Promise<NotificationRecord[]> {
+  async list(
+    userId: string,
+    filters: NotificationListFilters,
+  ): Promise<NotificationRecord[]> {
     const items = await prisma.notification.findMany({
-      where: { userId, ...(filters.status === "unread" ? { readAt: null } : {}) },
+      where: {
+        userId,
+        ...(filters.status === "unread" ? { readAt: null } : {}),
+      },
       include: includeCase,
       orderBy: { createdAt: "desc" },
-      take: 100
+      take: 100,
     });
     return items.map((item) => toRecord(item as DbNotification));
   },
@@ -44,9 +53,18 @@ export const notificationsRepository = {
     return prisma.notification.count({ where: { userId, readAt: null } });
   },
 
-  async markRead(id: string, userId: string): Promise<NotificationRecord | null> {
-    const result = await prisma.notification.updateMany({ where: { id, userId, readAt: null }, data: { readAt: new Date() } });
-    const item = await prisma.notification.findFirst({ where: { id, userId }, include: includeCase });
+  async markRead(
+    id: string,
+    userId: string,
+  ): Promise<NotificationRecord | null> {
+    const result = await prisma.notification.updateMany({
+      where: { id, userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    const item = await prisma.notification.findFirst({
+      where: { id, userId },
+      include: includeCase,
+    });
     if (!item) return null;
     // updateMany count is 0 when the notification was already read; the record still belongs to the user.
     void result;
@@ -54,7 +72,10 @@ export const notificationsRepository = {
   },
 
   async markAllRead(userId: string): Promise<number> {
-    const result = await prisma.notification.updateMany({ where: { userId, readAt: null }, data: { readAt: new Date() } });
+    const result = await prisma.notification.updateMany({
+      where: { userId, readAt: null },
+      data: { readAt: new Date() },
+    });
     return result.count;
-  }
+  },
 };

@@ -30,6 +30,7 @@ export type PaymentRecord = {
   cancelReason: string | null;
   clientName?: string;
   caseTitle?: string | null;
+  caseCnjNumber?: string | null;
   caseTotalFeeAmountCents?: number | null;
   createdAt: Date;
   updatedAt: Date;
@@ -113,7 +114,13 @@ export function buildCasePayments(
   const entryReceivedAt = new Date(
     `${finance.entryReceivedAt ?? createdAt.toISOString().slice(0, 10)}T12:00:00.000Z`,
   );
-  const today = new Date(Date.UTC(createdAt.getUTCFullYear(), createdAt.getUTCMonth(), createdAt.getUTCDate()));
+  const today = new Date(
+    Date.UTC(
+      createdAt.getUTCFullYear(),
+      createdAt.getUTCMonth(),
+      createdAt.getUTCDate(),
+    ),
+  );
 
   const balance = finance.totalFeeAmountCents - finance.entryAmountCents;
   const installmentTotal = Math.ceil(balance / finance.installmentAmountCents);

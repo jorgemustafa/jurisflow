@@ -7,7 +7,11 @@ type PaymentSummaryListProps = {
   empty: string;
 };
 
-export const PaymentSummaryList = ({ title, payments, empty }: PaymentSummaryListProps) => {
+export const PaymentSummaryList = ({
+  title,
+  payments,
+  empty,
+}: PaymentSummaryListProps) => {
   return (
     <section className="panel">
       <h2>{title}</h2>
@@ -19,7 +23,7 @@ export const PaymentSummaryList = ({ title, payments, empty }: PaymentSummaryLis
             <thead>
               <tr>
                 <th>Cliente</th>
-                <th>Processo</th>
+                <th>CNJ</th>
                 <th>Parcela</th>
                 <th>Valor</th>
                 <th>Vencimento</th>
@@ -29,7 +33,7 @@ export const PaymentSummaryList = ({ title, payments, empty }: PaymentSummaryLis
               {payments.map((payment) => (
                 <tr key={payment.id}>
                   <td>{payment.clientName}</td>
-                  <td>{payment.caseTitle ?? "Não vinculado"}</td>
+                  <td>{payment.caseCnjNumber ?? "Não vinculado"}</td>
                   <td>
                     {payment.installmentNumber}/{payment.installmentTotal}
                   </td>

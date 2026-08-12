@@ -5,6 +5,7 @@ export type FinancePaymentSummary = {
   id: string;
   clientName: string;
   caseTitle: string | null;
+  caseCnjNumber: string | null;
   description: string;
   amountCents: number;
   dueDate: string;
@@ -54,6 +55,7 @@ export type Payment = {
   cancelReason?: string | null;
   clientName?: string;
   caseTitle?: string | null;
+  caseCnjNumber?: string | null;
   caseTotalFeeAmountCents?: number | null;
 };
 

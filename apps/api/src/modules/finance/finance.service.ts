@@ -19,6 +19,7 @@ export type FinancePaymentSummary = {
   id: string;
   clientName: string;
   caseTitle: string | null;
+  caseCnjNumber: string | null;
   description: string;
   amountCents: number;
   dueDate: Date;
@@ -39,6 +40,6 @@ export function createFinanceService(repository: FinanceRepository) {
   return {
     dashboard(filters: FinanceDashboardFilters) {
       return repository.dashboard(filters.month ?? currentMonth());
-    }
+    },
   };
 }

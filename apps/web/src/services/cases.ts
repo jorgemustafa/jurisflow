@@ -103,6 +103,7 @@ export type CaseTimelineEvent = {
   externalId: string | null;
   sourceHash: string | null;
   caseTitle: string | null;
+  caseCnjNumber: string | null;
   clientName: string | null;
   type: CaseTimelineEventType;
   title: string;
