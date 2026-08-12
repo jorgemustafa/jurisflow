@@ -1,25 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Plus,
-  X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { DateInput } from "src/components/ui/DateInput.js";
 import { MonthPicker } from "src/components/ui/MonthPicker.js";
 import { Tabs } from "src/components/ui/Tabs.js";
-import { CasePaymentsPanel } from "src/features/finance/CasePaymentsPanel.js";
 import { Metric } from "src/features/finance/Metric.js";
 import { PaymentsTable } from "src/features/finance/PaymentsTable.js";
 import { currentMonth } from "src/features/finance/utils/currentMonth.js";
 import { isPaymentOverdue } from "src/features/finance/utils/isPaymentOverdue.js";
 import { parseMoney } from "src/features/finance/utils/money.js";
 import { buildMonthSummary } from "src/features/finance/utils/monthSummary.js";
-import { buildPaymentPlanSummaries } from "src/features/finance/utils/paymentPlans.js";
+import {
+  filterPaymentPlanByStatus,
+  type PaymentPlanTab,
+} from "src/features/finance/utils/paymentPlanStatus.js";
 import { listCases } from "src/services/cases.js";
 import { listClients } from "src/services/clients.js";
 import {
@@ -47,10 +42,10 @@ const emptyNewPayment = {
 export const FinancePage = () => {
   const [month, setMonth] = useState(currentMonth());
   const [tab, setTab] = useState<"payments" | "plans">("payments");
+  const [planTab, setPlanTab] = useState<PaymentPlanTab>("pending");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [showNewPayment, setShowNewPayment] = useState(false);
   const [newPayment, setNewPayment] = useState(emptyNewPayment);
-  const [expandedCaseId, setExpandedCaseId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const { showToast } = useToast();
   const queryClient = useQueryClient();
@@ -83,9 +78,18 @@ export const FinancePage = () => {
     enabled: showNewPayment && Boolean(newPayment.clientId),
   });
 
-  const plans = planPayments.data
-    ? buildPaymentPlanSummaries(planPayments.data)
-    : [];
+  const planInstallments = (planPayments.data ?? []).filter(
+    (payment) =>
+      payment.source === "generated" &&
+      Boolean(payment.caseId) &&
+      Boolean(payment.paymentScheduleId),
+  );
+  const visiblePlanInstallments = filterPaymentPlanByStatus(
+    planInstallments,
+    planTab,
+  );
+  const planCount = (current: PaymentPlanTab) =>
+    filterPaymentPlanByStatus(planInstallments, current).length;
   const monthPayments = useMemo(() => {
     const items = [...(payments.data ?? [])];
     return items.sort(
@@ -286,156 +290,119 @@ export const FinancePage = () => {
         </section>
       ) : null}
 
-      {payments.isLoading ? <LoadingState label="Carregando indicadores financeiros" variant="metrics" items={4} /> : <section className="metric-grid finance-metrics">
-        <Metric
-          label={`Recebido em ${monthLabel(month)}`}
-          value={formatMoney(summary.received)}
+      {payments.isLoading ? (
+        <LoadingState
+          label="Carregando indicadores financeiros"
+          variant="metrics"
+          items={4}
         />
-        <Metric label="A vencer no mês" value={formatMoney(summary.open)} />
-        <Metric label="Em atraso" value={formatMoney(summary.overdue)} />
-        <Metric
-          label="Total previsto no mês"
-          value={formatMoney(summary.scheduled)}
-        />
-      </section>}
+      ) : (
+        <section className="metric-grid finance-metrics">
+          <Metric
+            label={`Recebido em ${monthLabel(month)}`}
+            value={formatMoney(summary.received)}
+          />
+          <Metric label="A vencer no mês" value={formatMoney(summary.open)} />
+          <Metric label="Em atraso" value={formatMoney(summary.overdue)} />
+          <Metric
+            label="Total previsto no mês"
+            value={formatMoney(summary.scheduled)}
+          />
+        </section>
+      )}
       {error ? <p className="alert">{error}</p> : null}
 
       <Tabs
         ariaLabel="Seções financeiras"
-        tabs={[{ value: "payments", label: "Pagamentos do mês" }, { value: "plans", label: "Parcelas por processo" }]}
+        tabs={[
+          { value: "payments", label: "Pagamentos do mês" },
+          { value: "plans", label: "Parcelas por processo" },
+        ]}
         value={tab}
         onChange={setTab}
       />
 
-      {tab === "payments" ? <section className="panel">
-        <div className="panel-header">
-          <div className="chip-row">
-            {(
-              [
-                ["all", `Todos (${summary.counts.all})`],
-                ["pending", `Pendentes (${summary.counts.pending})`],
-                ["paid", `Recebidos (${summary.counts.paid})`],
-                ["canceled", `Cancelados (${summary.counts.canceled})`],
-              ] as [StatusFilter, string][]
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                className={`chip ${statusFilter === value ? "chip-active" : ""}`}
-                onClick={() => setStatusFilter(value)}
-              >
-                {label}
-              </button>
-            ))}
+      {tab === "payments" ? (
+        <section className="panel">
+          <div className="panel-header">
+            <div className="chip-row">
+              {(
+                [
+                  ["all", `Todos (${summary.counts.all})`],
+                  ["pending", `Pendentes (${summary.counts.pending})`],
+                  ["paid", `Recebidos (${summary.counts.paid})`],
+                  ["canceled", `Cancelados (${summary.counts.canceled})`],
+                ] as [StatusFilter, string][]
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`chip ${statusFilter === value ? "chip-active" : ""}`}
+                  onClick={() => setStatusFilter(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-        {payments.isLoading ? <LoadingState label="Carregando pagamentos" variant="table" columns={7} /> : null}
-        {payments.isError ? (
-          <p className="alert">Não foi possível carregar os pagamentos.</p>
-        ) : null}
-        {!payments.isLoading ? (
-          <PaymentsTable
-            payments={visiblePayments}
-            month={month}
-            empty="Nenhum pagamento encontrado para o mês selecionado."
-          />
-        ) : null}
-      </section> : null}
+          {payments.isLoading ? (
+            <LoadingState
+              label="Carregando pagamentos"
+              variant="table"
+              columns={7}
+            />
+          ) : null}
+          {payments.isError ? (
+            <p className="alert">Não foi possível carregar os pagamentos.</p>
+          ) : null}
+          {!payments.isLoading ? (
+            <PaymentsTable
+              payments={visiblePayments}
+              month={month}
+              empty="Nenhum pagamento encontrado para o mês selecionado."
+            />
+          ) : null}
+        </section>
+      ) : null}
 
-      {tab === "plans" ? <section className="panel">
-        {planPayments.isLoading ? <LoadingState label="Carregando parcelas dos processos" variant="table" columns={6} /> : null}
-        {planPayments.isError ? (
-          <p className="alert">
-            Não foi possível carregar o resumo de parcelas.
-          </p>
-        ) : null}
-        {plans.length ? (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Cliente</th>
-                  <th>Processo</th>
-                  <th>Valor total</th>
-                  <th>Progresso</th>
-                  <th>Recebido</th>
-                  <th>Pendente</th>
-                  <th>Último pgto.</th>
-                </tr>
-              </thead>
-              <tbody>
-                {plans.flatMap((plan) => {
-                  const percent =
-                    plan.installmentCount > 0
-                      ? Math.round(
-                          (plan.paidInstallments / plan.installmentCount) * 100,
-                        )
-                      : 0;
-                  const expanded = expandedCaseId === plan.caseId;
-                  return [
-                    <tr
-                      key={plan.id}
-                      className="clickable-row"
-                      onClick={() =>
-                        setExpandedCaseId(expanded ? null : plan.caseId)
-                      }
-                    >
-                      <td>{plan.clientName}</td>
-                      <td>{plan.caseTitle}</td>
-                      <td>{formatMoney(plan.totalCents)}</td>
-                      <td>
-                        <div
-                          className="progress"
-                          title={`${plan.paidInstallments} de ${plan.installmentCount} parcelas recebidas`}
-                        >
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${percent}%` }}
-                          />
-                        </div>
-                        <small className="muted">
-                          {plan.paidInstallments}/{plan.installmentCount}{" "}
-                          parcelas ({percent}%)
-                        </small>
-                      </td>
-                      <td>
-                        {plan.lastPaymentDueDate
-                          ? monthLabel(plan.lastPaymentDueDate.slice(0, 7))
-                          : "—"}
-                      </td>
-                      <td>{formatMoney(plan.paidCents)}</td>
-                      <td>
-                        <span className="expand-cell">
-                          {formatMoney(plan.pendingCents)}
-                          {expanded ? (
-                            <ChevronUp size={16} />
-                          ) : (
-                            <ChevronDown size={16} />
-                          )}
-                        </span>
-                      </td>
-                    </tr>,
-                    expanded ? (
-                      <tr
-                        className="expanded-payment-row"
-                        key={`${plan.id}-payments`}
-                      >
-                        <td colSpan={7}>
-                          <CasePaymentsPanel
-                            caseId={plan.caseId}
-                          />
-                        </td>
-                      </tr>
-                    ) : null,
-                  ].filter(Boolean);
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : !planPayments.isLoading ? (
-          <p className="empty-inline">Nenhum plano de parcelas cadastrado.</p>
-        ) : null}
-      </section> : null}
+      {tab === "plans" ? (
+        <section className="panel">
+          <Tabs
+            ariaLabel="Categorias das parcelas"
+            tabs={[
+              {
+                value: "pending",
+                label: `Pendentes (${planCount("pending")})`,
+              },
+              { value: "paid", label: `Finalizados (${planCount("paid")})` },
+              {
+                value: "overdue",
+                label: `Inadimplentes (${planCount("overdue")})`,
+              },
+            ]}
+            value={planTab}
+            onChange={setPlanTab}
+          />
+          {planPayments.isLoading ? (
+            <LoadingState
+              label="Carregando parcelas dos processos"
+              variant="table"
+              columns={6}
+            />
+          ) : null}
+          {planPayments.isError ? (
+            <p className="alert">
+              Não foi possível carregar o resumo de parcelas.
+            </p>
+          ) : null}
+          {!planPayments.isLoading ? (
+            <PaymentsTable
+              payments={visiblePlanInstallments}
+              empty="Nenhuma parcela nesta categoria."
+            />
+          ) : null}
+        </section>
+      ) : null}
     </>
   );
 };
