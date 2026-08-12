@@ -3,22 +3,25 @@ import type {
   CreateDeadlineInput,
   DeadlineListFilters,
   DeadlineStatus,
-  UpdateDeadlineInput
+  UpdateDeadlineInput,
 } from "../../modules/deadlines/deadlines.schemas.js";
 import {
   createDeadlinesService,
   DeadlineCaseNotFoundError,
   DeadlineNotFoundError,
-  type DeadlineRecord
+  type DeadlineRecord,
 } from "../../modules/deadlines/deadlines.service.js";
 
 const now = new Date("2026-05-25T12:00:00.000Z");
 
-function deadlineRecord(overrides: Partial<DeadlineRecord> = {}): DeadlineRecord {
+function deadlineRecord(
+  overrides: Partial<DeadlineRecord> = {},
+): DeadlineRecord {
   return {
     id: "deadline-1",
     caseId: "case-1",
     caseTitle: "Ação penal",
+    caseCnjNumber: "0000000-00.2026.8.00.0001",
     clientName: "Ana Silva",
     title: "Protocolar recurso",
     description: null,
@@ -28,7 +31,7 @@ function deadlineRecord(overrides: Partial<DeadlineRecord> = {}): DeadlineRecord
     alertLevel: "none",
     createdAt: now,
     updatedAt: now,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -43,10 +46,16 @@ function createRepository() {
       return deadlines.find((item) => item.id === id) ?? null;
     },
     async list(filters: DeadlineListFilters) {
-      return deadlines.filter((item) => filters.status === "all" || item.status === filters.status);
+      return deadlines.filter(
+        (item) => filters.status === "all" || item.status === filters.status,
+      );
     },
     async create(caseId: string, data: CreateDeadlineInput) {
-      const item = deadlineRecord({ id: `deadline-${deadlines.length + 1}`, caseId, ...data });
+      const item = deadlineRecord({
+        id: `deadline-${deadlines.length + 1}`,
+        caseId,
+        ...data,
+      });
       deadlines.push(item);
       return item;
     },
@@ -56,7 +65,11 @@ function createRepository() {
       Object.assign(item, data);
       return item;
     },
-    async updateStatus(id: string, status: DeadlineStatus, completedAt: Date | null) {
+    async updateStatus(
+      id: string,
+      status: DeadlineStatus,
+      completedAt: Date | null,
+    ) {
       const item = deadlines.find((current) => current.id === id);
       if (!item) throw new Error("test setup error");
       Object.assign(item, { status, completedAt });
@@ -64,7 +77,7 @@ function createRepository() {
     },
     seed(item: DeadlineRecord) {
       deadlines.push(item);
-    }
+    },
   };
 }
 
@@ -72,30 +85,56 @@ describe("deadlines service", () => {
   it("creates deadlines for existing cases", async () => {
     const service = createDeadlinesService(createRepository());
 
-    const item = await service.create("case-1", { title: "Protocolar recurso", dueAt: new Date("2026-05-28T00:00:00.000Z") });
+    const item = await service.create("case-1", {
+      title: "Protocolar recurso",
+      dueAt: new Date("2026-05-28T00:00:00.000Z"),
+    });
 
-    expect(item).toMatchObject({ caseId: "case-1", title: "Protocolar recurso", status: "pending" });
+    expect(item).toMatchObject({
+      caseId: "case-1",
+      title: "Protocolar recurso",
+      status: "pending",
+    });
   });
 
   it("blocks deadlines for missing cases", async () => {
     const service = createDeadlinesService(createRepository());
 
-    await expect(service.create("missing", { title: "Prazo", dueAt: now })).rejects.toBeInstanceOf(DeadlineCaseNotFoundError);
+    await expect(
+      service.create("missing", { title: "Prazo", dueAt: now }),
+    ).rejects.toBeInstanceOf(DeadlineCaseNotFoundError);
   });
 
   it("computes overdue and due-soon alerts for pending deadlines", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(now);
     const repository = createRepository();
-    repository.seed(deadlineRecord({ id: "overdue", dueAt: new Date("2026-05-24T00:00:00.000Z") }));
-    repository.seed(deadlineRecord({ id: "soon", dueAt: new Date("2026-05-28T00:00:00.000Z") }));
-    repository.seed(deadlineRecord({ id: "later", dueAt: new Date("2026-06-20T00:00:00.000Z") }));
+    repository.seed(
+      deadlineRecord({
+        id: "overdue",
+        dueAt: new Date("2026-05-24T00:00:00.000Z"),
+      }),
+    );
+    repository.seed(
+      deadlineRecord({
+        id: "soon",
+        dueAt: new Date("2026-05-28T00:00:00.000Z"),
+      }),
+    );
+    repository.seed(
+      deadlineRecord({
+        id: "later",
+        dueAt: new Date("2026-06-20T00:00:00.000Z"),
+      }),
+    );
     const service = createDeadlinesService(repository);
 
-    await expect(service.list({ status: "pending", alertWindowDays: 7 })).resolves.toMatchObject([
+    await expect(
+      service.list({ status: "pending", alertWindowDays: 7 }),
+    ).resolves.toMatchObject([
       { id: "overdue", alertLevel: "overdue" },
       { id: "soon", alertLevel: "due_soon" },
-      { id: "later", alertLevel: "none" }
+      { id: "later", alertLevel: "none" },
     ]);
     vi.useRealTimers();
   });
@@ -131,7 +170,7 @@ describe("deadlines service", () => {
     const item = await service.update("deadline-1", {
       title: "Conferir publicação",
       description: "Revisar teor da intimação",
-      dueAt: new Date("2026-06-02T00:00:00.000Z")
+      dueAt: new Date("2026-06-02T00:00:00.000Z"),
     });
 
     expect(item).toMatchObject({
@@ -139,19 +178,23 @@ describe("deadlines service", () => {
       description: "Revisar teor da intimação",
       dueAt: new Date("2026-06-02T00:00:00.000Z"),
       status: "done",
-      completedAt: now
+      completedAt: now,
     });
   });
 
   it("rejects status updates for missing deadlines", async () => {
     const service = createDeadlinesService(createRepository());
 
-    await expect(service.updateStatus("missing", "done")).rejects.toBeInstanceOf(DeadlineNotFoundError);
+    await expect(
+      service.updateStatus("missing", "done"),
+    ).rejects.toBeInstanceOf(DeadlineNotFoundError);
   });
 
   it("rejects field updates for missing deadlines", async () => {
     const service = createDeadlinesService(createRepository());
 
-    await expect(service.update("missing", { title: "Novo prazo" })).rejects.toBeInstanceOf(DeadlineNotFoundError);
+    await expect(
+      service.update("missing", { title: "Novo prazo" }),
+    ).rejects.toBeInstanceOf(DeadlineNotFoundError);
   });
 });

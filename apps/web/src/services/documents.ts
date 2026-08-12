@@ -2,14 +2,34 @@ import { request, requestBlob, searchParams } from "src/services/http.js";
 
 export type DocumentScope = "all" | "client" | "case";
 export type LegalDocument = {
-  id: string; clientId: string; caseId: string | null; name: string; originalName: string;
-  mimeType: string; sizeBytes: number; clientName: string | null; caseTitle: string | null;
-  createdAt: string; updatedAt: string;
+  id: string;
+  clientId: string;
+  caseId: string | null;
+  name: string;
+  originalName: string;
+  mimeType: string;
+  sizeBytes: number;
+  clientName: string | null;
+  caseTitle: string | null;
+  caseCnjNumber: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
-export type DocumentFilters = { q?: string; scope?: DocumentScope; clientId?: string; caseId?: string };
-export type DocumentFormData = { clientId: string; caseId: string; name: string; file: File | null };
+export type DocumentFilters = {
+  q?: string;
+  scope?: DocumentScope;
+  clientId?: string;
+  caseId?: string;
+};
+export type DocumentFormData = {
+  clientId: string;
+  caseId: string;
+  name: string;
+  file: File | null;
+};
 
-export const listDocuments = (filters: DocumentFilters) => request<LegalDocument[]>(`/documents${searchParams(filters)}`);
+export const listDocuments = (filters: DocumentFilters) =>
+  request<LegalDocument[]>(`/documents${searchParams(filters)}`);
 
 export const createDocument = (data: DocumentFormData) => {
   const body = new FormData();
@@ -20,7 +40,8 @@ export const createDocument = (data: DocumentFormData) => {
   return request<LegalDocument>("/documents", { method: "POST", body });
 };
 
-export const deleteDocument = (id: string) => request<void>(`/documents/${id}`, { method: "DELETE" });
+export const deleteDocument = (id: string) =>
+  request<void>(`/documents/${id}`, { method: "DELETE" });
 
 export async function openDocument(document: LegalDocument, download = false) {
   const preview = download ? null : window.open("", "_blank");

@@ -97,7 +97,7 @@ export const TimelinePage = () => {
                 <th>Tipo</th>
                 <th>Andamento</th>
                 <th>Cliente</th>
-                <th>Processo</th>
+                <th>CNJ</th>
                 <th>Data</th>
               </tr>
             </thead>
@@ -117,7 +117,7 @@ export const TimelinePage = () => {
                   <td>{event.clientName ?? "Não informado"}</td>
                   <td>
                     <Link className="table-link" to={`/cases/${event.caseId}`}>
-                      {event.caseTitle ?? "Ver processo"}
+                      {event.caseCnjNumber ?? "Ver processo"}
                     </Link>
                   </td>
                   <td>{formatDate(event.occurredAt)}</td>

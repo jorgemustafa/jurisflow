@@ -54,6 +54,7 @@ Secondary users:
 - Imported judicial cases must be manually linked to an active client before they become office cases.
 - Allow editing case details from the case detail page.
 - Track case status, CNJ number, area, responsible person, and relevant dates.
+- In tables, identify cases by CNJ rather than their title.
 - Register timeline events for important case activity, such as notes, hearings, petitions, decisions, and status changes.
 - Import public process movements into the case timeline when available from DataJud.
 - Show a general timeline so the office can scan recent activity across all cases and filter it by CNJ.

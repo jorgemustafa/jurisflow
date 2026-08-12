@@ -4,6 +4,7 @@ export type Notification = {
   id: string;
   caseId: string;
   caseTitle: string | null;
+  caseCnjNumber: string | null;
   title: string;
   body: string | null;
   newMovements: number;
@@ -14,7 +15,9 @@ export type Notification = {
 export type NotificationStatus = "all" | "unread";
 
 export const listNotifications = (status: NotificationStatus) => {
-  return request<Notification[]>(`/notifications${status === "unread" ? "?status=unread" : ""}`);
+  return request<Notification[]>(
+    `/notifications${status === "unread" ? "?status=unread" : ""}`,
+  );
 };
 
 export const getUnreadNotificationsCount = () => {
@@ -22,9 +25,13 @@ export const getUnreadNotificationsCount = () => {
 };
 
 export const markNotificationRead = (id: string) => {
-  return request<Notification>(`/notifications/${id}/read`, { method: "PATCH" });
+  return request<Notification>(`/notifications/${id}/read`, {
+    method: "PATCH",
+  });
 };
 
 export const markAllNotificationsRead = () => {
-  return request<{ updated: number }>("/notifications/read-all", { method: "POST" });
+  return request<{ updated: number }>("/notifications/read-all", {
+    method: "POST",
+  });
 };

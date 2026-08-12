@@ -2,19 +2,22 @@ import { describe, expect, it } from "vitest";
 import {
   createNotificationsService,
   NotificationNotFoundError,
-  type NotificationRecord
+  type NotificationRecord,
 } from "../../modules/notifications/notifications.service.js";
 
-const record = (overrides: Partial<NotificationRecord> = {}): NotificationRecord => ({
+const record = (
+  overrides: Partial<NotificationRecord> = {},
+): NotificationRecord => ({
   id: "notification-1",
   caseId: "case-1",
   caseTitle: "Ação trabalhista",
+  caseCnjNumber: "0000000-00.2026.8.00.0001",
   title: "Atualização em Ação trabalhista",
   body: "2 novos andamentos encontrados no DataJud.",
   newMovements: 2,
   readAt: null,
   createdAt: new Date("2026-06-20T12:00:00.000Z"),
-  ...overrides
+  ...overrides,
 });
 
 function createFakeRepository(options: { found?: boolean } = {}) {
@@ -32,7 +35,7 @@ function createFakeRepository(options: { found?: boolean } = {}) {
     },
     async markAllRead() {
       return 5;
-    }
+    },
   };
 }
 
@@ -44,7 +47,9 @@ describe("notifications service", () => {
     const items = await service.list("user-1", { status: "unread" });
 
     expect(items).toHaveLength(1);
-    expect(repository.listCalls).toEqual([{ userId: "user-1", status: "unread" }]);
+    expect(repository.listCalls).toEqual([
+      { userId: "user-1", status: "unread" },
+    ]);
   });
 
   it("returns the unread count", async () => {
@@ -59,8 +64,12 @@ describe("notifications service", () => {
   });
 
   it("throws when the notification is not owned by the user", async () => {
-    const service = createNotificationsService(createFakeRepository({ found: false }));
-    await expect(service.markRead("notification-1", "user-2")).rejects.toBeInstanceOf(NotificationNotFoundError);
+    const service = createNotificationsService(
+      createFakeRepository({ found: false }),
+    );
+    await expect(
+      service.markRead("notification-1", "user-2"),
+    ).rejects.toBeInstanceOf(NotificationNotFoundError);
   });
 
   it("marks all notifications as read", async () => {
