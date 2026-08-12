@@ -34,31 +34,31 @@ model Client {
 }
 
 model User {
-  id           String     @id @default(uuid())
-  name         String
-  email        String     @unique
-  passwordHash String?
-  role         UserRole   @default(LAWYER)
-  status       UserStatus @default(ACTIVE)
-  oabNumber    String?    @db.VarChar(20)
-  oabState     String?    @db.VarChar(2)
-  cases        Case[]
-  timelineEvents CaseTimelineEvent[]
+  id                String              @id @default(uuid())
+  name              String
+  email             String              @unique
+  passwordHash      String?
+  role              UserRole            @default(LAWYER)
+  status            UserStatus          @default(ACTIVE)
+  oabNumber         String?             @db.VarChar(20)
+  oabState          String?             @db.VarChar(2)
+  cases             Case[]
+  timelineEvents    CaseTimelineEvent[]
   syncRunsTriggered CaseSyncRun[]
-  notifications Notification[]
-  documentsUploaded Document[] @relation("DocumentUploader")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  notifications     Notification[]
+  documentsUploaded Document[]          @relation("DocumentUploader")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
 
 model Case {
-  id                  String     @id @default(uuid())
+  id                  String              @id @default(uuid())
   clientId            String
   responsibleUserId   String?
-  caseType            CaseType   @default(JUDICIAL)
+  caseType            CaseType            @default(JUDICIAL)
   title               String
-  cnjNumber           String?    @unique
-  status              CaseStatus @default(ACTIVE)
+  cnjNumber           String?             @unique
+  status              CaseStatus          @default(ACTIVE)
   stage               CaseStage?
   legalArea           LegalArea?
   opposingParty       String?
@@ -69,8 +69,8 @@ model Case {
   openedAt            DateTime?
   closedAt            DateTime?
   totalFeeAmountCents Int
-  client              Client     @relation(fields: [clientId], references: [id])
-  responsibleUser     User?      @relation(fields: [responsibleUserId], references: [id])
+  client              Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  responsibleUser     User?               @relation(fields: [responsibleUserId], references: [id])
   payments            Payment[]
   documents           Document[]
   timelineEvents      CaseTimelineEvent[]
@@ -78,8 +78,8 @@ model Case {
   syncRuns            CaseSyncRun[]
   notifications       Notification[]
   lastSyncedAt        DateTime?
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 
   @@index([clientId])
   @@index([responsibleUserId])
@@ -106,8 +106,8 @@ model Payment {
   notes             String?
   canceledAt        DateTime?
   cancelReason      String?
-  client            Client         @relation(fields: [clientId], references: [id])
-  case              Case?          @relation(fields: [caseId], references: [id])
+  client            Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  case              Case?          @relation(fields: [caseId], references: [id], onDelete: Cascade)
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
@@ -120,23 +120,23 @@ model Payment {
 }
 
 model Document {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   clientId         String
   caseId           String?
   uploadedByUserId String?
   name             String
   originalName     String
-  storageKey       String   @unique
+  storageKey       String    @unique
   mimeType         String
   sizeBytes        Int
-  checksumSha256   String   @db.VarChar(64)
+  checksumSha256   String    @db.VarChar(64)
   deletedAt        DateTime?
   purgeAfter       DateTime?
-  client           Client   @relation(fields: [clientId], references: [id])
-  case             Case?    @relation(fields: [caseId], references: [id])
-  uploadedByUser   User?    @relation("DocumentUploader", fields: [uploadedByUserId], references: [id])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  client           Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  case             Case?     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  uploadedByUser   User?     @relation("DocumentUploader", fields: [uploadedByUserId], references: [id])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([clientId])
   @@index([caseId])
@@ -154,7 +154,7 @@ model CaseDeadline {
   dueAt       DateTime
   status      CaseDeadlineStatus @default(PENDING)
   completedAt DateTime?
-  case        Case               @relation(fields: [caseId], references: [id])
+  case        Case               @relation(fields: [caseId], references: [id], onDelete: Cascade)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
@@ -173,7 +173,7 @@ model CaseTimelineEvent {
   title           String
   description     String?
   occurredAt      DateTime
-  case            Case                  @relation(fields: [caseId], references: [id])
+  case            Case                  @relation(fields: [caseId], references: [id], onDelete: Cascade)
   createdByUser   User?                 @relation(fields: [createdByUserId], references: [id])
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
@@ -228,7 +228,7 @@ model CaseSyncRun {
   errorMessage      String?
   startedAt         DateTime        @default(now())
   finishedAt        DateTime?
-  case              Case            @relation(fields: [caseId], references: [id])
+  case              Case            @relation(fields: [caseId], references: [id], onDelete: Cascade)
   triggeredByUser   User?           @relation(fields: [triggeredByUserId], references: [id])
 
   @@index([caseId, startedAt])
@@ -244,7 +244,7 @@ model Notification {
   newMovements Int       @default(0)
   readAt       DateTime?
   user         User      @relation(fields: [userId], references: [id])
-  case         Case      @relation(fields: [caseId], references: [id])
+  case         Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 

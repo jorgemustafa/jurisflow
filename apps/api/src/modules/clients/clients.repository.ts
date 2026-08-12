@@ -85,19 +85,6 @@ export const clientsRepository = {
     return client ? toClientRecord(client as DbClient) : null;
   },
 
-  async countLinks(id: string) {
-    const [cases, payments, documents] = await prisma.$transaction([
-      prisma.case.count({ where: { clientId: id } }),
-      prisma.payment.count({ where: { clientId: id } }),
-      prisma.document.count({ where: { clientId: id } })
-    ]);
-    return [
-      { label: "processos", count: cases },
-      { label: "pagamentos", count: payments },
-      { label: "documentos", count: documents }
-    ];
-  },
-
   async create(data: CreateClientInput) {
     const client = await prisma.client.create({ data: writeData(data) as Prisma.ClientUncheckedCreateInput });
     return toClientRecord(client as DbClient);

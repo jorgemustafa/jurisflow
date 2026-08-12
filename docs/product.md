@@ -41,7 +41,7 @@ Secondary users:
 - Save CPF/CNPJ and phone numbers normalized as digits only.
 - Use active/inactive for normal lifecycle changes.
 - Link clients to cases, payments, and documents.
-- Deleting a client is allowed only when it has no linked cases, payments, or documents; linked import items are deleted by cascade.
+- Deleting a client permanently deletes its cases, payments, documents, and import items.
 - Client is up to date with payment?
 
 ### Cases

@@ -134,11 +134,10 @@ export const ClientDetailsPage = () => {
           onCancel={() => setDeleteOpen(false)}
           onConfirm={() => deleteMutation.mutate()}
         >
-          <p>Esta ação exclui permanentemente o cliente abaixo se não houver vínculos.</p>
+          <p>Esta ação exclui permanentemente o cliente e todos os seus processos, pagamentos, documentos e itens de importação.</p>
           <p><strong>Cliente:</strong> {client.data.name}</p>
           <p><strong>Documento:</strong> {fieldValue(client.data.document)}</p>
           <p><strong>Status:</strong> {labelClientStatus(client.data.status)}</p>
-          <p>Se houver processos, pagamentos, documentos ou itens de importação, a exclusão será bloqueada.</p>
         </DeleteConfirmationDialog>
       ) : null}
     </>
