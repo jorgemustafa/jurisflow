@@ -9,6 +9,7 @@ import { ApiError } from "src/services/http.js";
 import { formatDate } from "src/utils/format.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { Tabs } from "src/components/ui/Tabs.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 const emptyForm: DocumentFormData = {
   clientId: "",
@@ -22,6 +23,7 @@ export const DocumentsPage = () => {
   const [filters, setFilters] = useState<DocumentFilters>({ q: "", scope: "all" });
   const [form, setForm] = useState<DocumentFormData>(emptyForm);
   const [error, setError] = useState("");
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const documents = useQuery({ queryKey: ["documents", filters], queryFn: () => listDocuments(filters) });
   const clients = useQuery({ queryKey: ["clients", "documents"], queryFn: () => listClients({ q: "", status: "all", type: "all" }) });
@@ -33,6 +35,7 @@ export const DocumentsPage = () => {
   const createMutation = useMutation({
     mutationFn: (data: DocumentFormData) => createDocument(data),
     onSuccess: async () => {
+      showToast("Documento criado.");
       setForm(emptyForm);
       setTab("list");
       setError("");
@@ -44,7 +47,10 @@ export const DocumentsPage = () => {
   });
   const deleteMutation = useMutation({
     mutationFn: deleteDocument,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["documents"] }),
+    onSuccess: () => {
+      showToast("Documento excluído.");
+      return queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
     onError: (failure) => setError(failure instanceof ApiError ? failure.message : "Não foi possível excluir o documento.")
   });
 

@@ -27,6 +27,7 @@ import { LoadingState } from "src/components/ui/LoadingState.js";
 import { Tabs } from "src/components/ui/Tabs.js";
 import { DateInput } from "src/components/ui/DateInput.js";
 import { DeleteConfirmationDialog } from "src/components/DeleteConfirmationDialog.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 const optionalDate = (value: string | null) => (value ? formatDate(value) : "Não informado");
 const optionalMoney = (value: number | null) => (value === null ? "Não informado" : formatMoney(value));
@@ -59,6 +60,7 @@ export const CaseDetailsPage = () => {
   const [deleteError, setDeleteError] = useState("");
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const legalCase = useQuery({ queryKey: ["case", id], queryFn: () => getCase(id), enabled: Boolean(id) });
   const client = useQuery({ queryKey: ["client", legalCase.data?.clientId], queryFn: () => getClient(legalCase.data!.clientId), enabled: Boolean(legalCase.data?.clientId) });
@@ -101,6 +103,7 @@ export const CaseDetailsPage = () => {
   const createTimelineMutation = useMutation({
     mutationFn: (data: CaseTimelineEventFormData) => createCaseTimelineEvent(id, data),
     onSuccess: async () => {
+      showToast("Andamento criado.");
       setTimelineForm(emptyTimelineForm());
       setTimelineError("");
       await queryClient.invalidateQueries({ queryKey: ["case-timeline", id] });
@@ -112,6 +115,7 @@ export const CaseDetailsPage = () => {
   const createDeadlineMutation = useMutation({
     mutationFn: (data: DeadlineFormData) => createDeadline(id, data),
     onSuccess: async () => {
+      showToast("Prazo criado.");
       setDeadlineForm(emptyDeadlineForm());
       setDeadlineError("");
       await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
@@ -123,6 +127,7 @@ export const CaseDetailsPage = () => {
   const deadlineStatusMutation = useMutation({
     mutationFn: ({ deadlineId, status }: { deadlineId: string; status: DeadlineStatus }) => updateDeadlineStatus(deadlineId, status),
     onSuccess: async () => {
+      showToast("Prazo atualizado.");
       setDeadlineError("");
       await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
     },
@@ -133,6 +138,7 @@ export const CaseDetailsPage = () => {
   const updateDeadlineMutation = useMutation({
     mutationFn: ({ deadlineId, data }: { deadlineId: string; data: DeadlineFormData }) => updateDeadline(deadlineId, data),
     onSuccess: async () => {
+      showToast("Prazo atualizado.");
       setDeadlineError("");
       await queryClient.invalidateQueries({ queryKey: ["deadlines"] });
     },
@@ -143,6 +149,7 @@ export const CaseDetailsPage = () => {
   const deleteMutation = useMutation({
     mutationFn: () => deleteCase(id),
     onSuccess: async () => {
+      showToast("Processo excluído.");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["cases"] }),
         queryClient.invalidateQueries({ queryKey: ["documents"] }),

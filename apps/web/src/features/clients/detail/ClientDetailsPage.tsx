@@ -14,12 +14,14 @@ import { useState } from "react";
 import { LoadingState } from "src/components/ui/LoadingState.js";
 import { Tabs } from "src/components/ui/Tabs.js";
 import { DeleteConfirmationDialog } from "src/components/DeleteConfirmationDialog.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 export const ClientDetailsPage = () => {
   const [tab, setTab] = useState<"details" | "cases" | "documents">("details");
   const [deleteText, setDeleteText] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [isDeleteOpen, setDeleteOpen] = useState(false);
+  const { showToast } = useToast();
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -37,6 +39,7 @@ export const ClientDetailsPage = () => {
   const statusMutation = useMutation({
     mutationFn: (status: ClientStatus) => updateClientStatus(id, status),
     onSuccess: (updated) => {
+      showToast("Status do cliente atualizado.");
       queryClient.setQueryData(["client", id], updated);
       queryClient.invalidateQueries({ queryKey: ["clients"] });
     }
@@ -44,6 +47,7 @@ export const ClientDetailsPage = () => {
   const deleteMutation = useMutation({
     mutationFn: () => deleteClient(id),
     onSuccess: async () => {
+      showToast("Cliente excluído.");
       await queryClient.invalidateQueries({ queryKey: ["clients"] });
       navigate("/clients");
     },

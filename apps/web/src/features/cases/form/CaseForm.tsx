@@ -30,6 +30,7 @@ import {
 } from "src/services/cases.js";
 import { ApiError } from "src/services/http.js";
 import { LoadingState } from "src/components/ui/LoadingState.js";
+import { useToast } from "src/components/ui/Toast.js";
 
 const caseFormSchema = z.object({
   clientId: z.string().uuid(),
@@ -138,6 +139,7 @@ export const CaseForm = (props: CaseFormProps) => {
   const queryClient = useQueryClient();
   const [generalError, setGeneralError] = useState("");
   const [financeForm, setFinanceForm] = useState(emptyFinanceForm);
+  const { showToast } = useToast();
   const form = useForm<CaseFormData>({
     resolver: zodResolver(caseFormSchema),
     defaultValues: emptyCaseForm(
@@ -165,6 +167,7 @@ export const CaseForm = (props: CaseFormProps) => {
         ? updateCase(props.caseId, data as CaseFormData)
         : createCase(data as CreateCaseData),
     onSuccess: (saved) => {
+      showToast(isEdit ? "Processo atualizado." : "Processo criado.");
       queryClient.invalidateQueries({ queryKey: ["cases"] });
       queryClient.setQueryData(["case", saved.id], saved);
       navigate(`/cases/${saved.id}`);

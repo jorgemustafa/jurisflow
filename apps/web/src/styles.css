@@ -1737,6 +1737,38 @@ textarea:focus {
   color: var(--color-success);
 }
 
+.toast-viewport {
+  position: fixed;
+  z-index: 100;
+  top: 20px;
+  right: 20px;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-success);
+  border-radius: 8px;
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  box-shadow: 0 8px 24px rgb(var(--shadow-primary-rgb) / 0.18);
+}
+
+.toast button {
+  display: inline-flex;
+  padding: 2px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
 .case-import-batch-form {
   display: grid;
   gap: 12px;
