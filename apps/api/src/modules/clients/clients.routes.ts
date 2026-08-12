@@ -13,7 +13,6 @@ import {
 import {
   ClientDocumentConflictError,
   ClientDocumentTypeError,
-  ClientLinkedRecordsError,
   ClientNotFoundError,
   createClientsService
 } from "./clients.service.js";
@@ -39,10 +38,6 @@ function handleClientError(error: unknown, reply: FastifyReply) {
 
   if (error instanceof ClientDocumentTypeError) {
     return reply.code(400).send({ message: error.message, field: "document" });
-  }
-
-  if (error instanceof ClientLinkedRecordsError) {
-    return reply.code(409).send({ message: error.message, linkedRecords: error.links });
   }
 
   throw error;

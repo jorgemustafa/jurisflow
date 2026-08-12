@@ -3,7 +3,6 @@ import type { ClientListFilters, ClientStatus, CreateClientInput, UpdateClientIn
 import {
   ClientDocumentConflictError,
   ClientDocumentTypeError,
-  ClientLinkedRecordsError,
   createClientsService,
   type ClientRecord
 } from "../../modules/clients/clients.service.js";
@@ -48,14 +47,6 @@ function createRepository(seed: ClientRecord[] = []) {
 
     async findByDocument(document: string, excludeId?: string) {
       return clients.find((client) => client.document === document && client.id !== excludeId) ?? null;
-    },
-
-    async countLinks(id: string) {
-      return [
-        { label: "processos", count: id === "client-linked" ? 1 : 0 },
-        { label: "pagamentos", count: 0 },
-        { label: "documentos", count: 0 }
-      ];
     },
 
     async create(data: CreateClientInput) {
@@ -180,7 +171,7 @@ describe("clients service", () => {
     expect((await service.updateStatus("client-1", "active")).status).toBe("active");
   });
 
-  it("blocks deleting clients with linked records", async () => {
+  it("deletes clients with linked records", async () => {
     const repository = createRepository([
       clientRecord({
         id: "client-linked",
@@ -188,10 +179,9 @@ describe("clients service", () => {
     ]);
     const service = createClientsService(repository);
 
-    await expect(service.delete("client-linked")).rejects.toMatchObject({
-      links: [{ label: "processos", count: 1 }]
-    });
-    await expect(service.delete("client-linked")).rejects.toBeInstanceOf(ClientLinkedRecordsError);
+    await service.delete("client-linked");
+
+    expect(repository.clients).toHaveLength(0);
   });
 
   it("deletes clients without linked records", async () => {

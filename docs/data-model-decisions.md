@@ -159,7 +159,7 @@ Approved for Client Management v1.
 - Duplicate names are allowed.
 - Inactive clients are excluded from default listing but remain viewable and editable.
 - Creating future cases for inactive clients should require reactivation.
-- Physical client deletion is blocked when the client has linked cases, payments, or documents. Linked import items are deleted by cascade and do not block deletion.
+- Physical client deletion cascades to linked cases, payments, documents, and import items. Case dependencies, including deadlines, timeline events, sync runs, and notifications, are deleted with their case.
 
 ## User
 
