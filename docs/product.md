@@ -60,6 +60,7 @@ Secondary users:
 - Import a process title from its DataJud class without appending the CNJ number.
 - Track case deadlines and surface overdue or near-due alerts.
 - Values, value of each installment, number of installment, total value
+- In each process payment plan, separate installments into pending, finalized, and overdue tabs.
 - Link documents, financial records, and client history.
 - A client can have multiple cases, but one case is linked to only one client
 - A case has statuses: resolved, in process, cancelled, etc
