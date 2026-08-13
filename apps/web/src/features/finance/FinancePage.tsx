@@ -329,7 +329,7 @@ export const FinancePage = () => {
               {(
                 [
                   ["all", `Todos (${summary.counts.all})`],
-                  ["pending", `Pendentes (${summary.counts.pending})`],
+                  ["pending", `A Receber (${summary.counts.pending})`],
                   ["paid", `Recebidos (${summary.counts.paid})`],
                   ["canceled", `Cancelados (${summary.counts.canceled})`],
                 ] as [StatusFilter, string][]
@@ -372,7 +372,7 @@ export const FinancePage = () => {
             tabs={[
               {
                 value: "pending",
-                label: `Pendentes (${planCount("pending")})`,
+                label: `A Receber (${planCount("pending")})`,
               },
               { value: "paid", label: `Finalizados (${planCount("paid")})` },
               {

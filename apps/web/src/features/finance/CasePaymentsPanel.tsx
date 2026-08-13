@@ -26,7 +26,7 @@ export const CasePaymentsPanel = ({ caseId }: { caseId: string }) => {
       <Tabs
         ariaLabel="Status das parcelas"
         tabs={[
-          { value: "pending", label: `Pendentes (${count("pending")})` },
+          { value: "pending", label: `A Receber (${count("pending")})` },
           { value: "paid", label: `Finalizados (${count("paid")})` },
           { value: "overdue", label: `Inadimplentes (${count("overdue")})` },
         ]}
