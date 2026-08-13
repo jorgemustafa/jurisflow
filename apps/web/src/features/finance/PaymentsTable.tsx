@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ban, Check, Pencil } from "lucide-react";
 import { useState } from "react";
 import { isPaymentOverdue } from "src/features/finance/utils/isPaymentOverdue.js";
+import { sortPaymentsByDueDay } from "src/features/finance/utils/sortPaymentsByDueDay.js";
 import {
   moneyInputValue,
   parseMoney,
@@ -46,6 +47,9 @@ type PaymentsTableProps = {
   month?: string;
   showClient?: boolean;
   showCase?: boolean;
+  showInstallment?: boolean;
+  showDueDate?: boolean;
+  showReceived?: boolean;
   empty?: string;
 };
 
@@ -71,6 +75,9 @@ export const PaymentsTable = ({
   month,
   showClient = true,
   showCase = true,
+  showInstallment = true,
+  showDueDate = true,
+  showReceived = true,
   empty = "Nenhum pagamento encontrado.",
 }: PaymentsTableProps) => {
   const [action, setAction] = useState<RowAction>(null);
@@ -175,7 +182,13 @@ export const PaymentsTable = ({
     });
   };
 
-  const columnCount = 6 + Number(showClient) + Number(showCase);
+  const columnCount =
+    2 +
+    Number(showClient) +
+    Number(showCase) +
+    Number(showInstallment) +
+    Number(showDueDate) +
+    Number(showReceived);
   const actionRow = (payment: Payment) => {
     if (!action || action.id !== payment.id) return null;
     return (
@@ -364,16 +377,16 @@ export const PaymentsTable = ({
             <tr>
               {showClient ? <th>Cliente</th> : null}
               {showCase ? <th>CNJ</th> : null}
-              <th>Parcela</th>
-              <th>Valor</th>
-              <th>Vencimento</th>
+              {showInstallment ? <th>Parcela</th> : null}
+              <th>Valor da parcela</th>
+              {showDueDate ? <th>Dia vencimento</th> : null}
               <th>Status</th>
-              <th>Recebimento</th>
+              {showReceived ? <th>Recebimento</th> : null}
               <th>Ações</th>
             </tr>
           </thead>
           <tbody>
-            {payments.flatMap((payment) => {
+            {sortPaymentsByDueDay(payments).flatMap((payment) => {
               const overdue = isPaymentOverdue(payment);
               const competence = competenceLabel(payment, month);
               return [
@@ -385,18 +398,20 @@ export const PaymentsTable = ({
                     <td>{payment.clientName ?? payment.clientId}</td>
                   ) : null}
                   {showCase ? <td>{payment.caseCnjNumber ?? "—"}</td> : null}
-                  <td>
-                    {installmentLabel(payment)}
-                    {competence ? (
-                      <small className="competence-badge">
-                        Referente a {competence}
-                      </small>
-                    ) : null}
-                  </td>
+                  {showInstallment ? (
+                    <td>
+                      {installmentLabel(payment)}
+                      {competence ? (
+                        <small className="competence-badge">
+                          Referente a {competence}
+                        </small>
+                      ) : null}
+                    </td>
+                  ) : null}
                   <td>
                     <strong>{formatMoney(payment.amountCents)}</strong>
                   </td>
-                  <td>{formatDate(payment.dueDate)}</td>
+                  {showDueDate ? <td>{Number(payment.dueDate.slice(8, 10))}</td> : null}
                   <td>
                     <span
                       className={`badge ${overdue ? "overdue" : payment.status === "paid" ? "active" : payment.status === "canceled" ? "inactive" : "due_soon"}`}
@@ -404,21 +419,23 @@ export const PaymentsTable = ({
                       {overdue ? "Atrasado" : statusLabels[payment.status]}
                     </span>
                   </td>
-                  <td>
-                    {payment.paidAt ? (
-                      <>
-                        {formatDate(payment.paidAt)}
-                        {payment.paymentMethod ? (
-                          <small className="muted">
-                            {" "}
-                            · {methodLabels[payment.paymentMethod]}
-                          </small>
-                        ) : null}
-                      </>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
+                  {showReceived ? (
+                    <td>
+                      {payment.paidAt ? (
+                        <>
+                          {formatDate(payment.paidAt)}
+                          {payment.paymentMethod ? (
+                            <small className="muted">
+                              {" "}
+                              · {methodLabels[payment.paymentMethod]}
+                            </small>
+                          ) : null}
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  ) : null}
                   <td>
                     <div className="row-actions">
                       {payment.status === "pending" ? (

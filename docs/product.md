@@ -76,6 +76,9 @@ Secondary users:
 - Register the configurable entry as received at creation and derive monthly installments from the remaining balance and fixed installment value.
 - Case financial schedules may start in the past when registering cases already in progress; generated due dates preserve the informed start date/day and calculate the final installment date from the number of derived installments.
 - Carry unpaid installments into later month views while preserving and showing their original competence; mark them overdue only after their due date passes.
+- Order clients alphabetically and financial installments by due day.
+- Show monthly and total receivables on the dashboard.
+- In payment-plan tabs, hide receipt data for open or overdue installments and hide installment, due-day, and receipt data for finalized installments.
 
 ### Documents
 
